@@ -1,0 +1,50 @@
+{
+  "milestone": "M5 — 可发布门禁（本地等价实现）",
+  "generatedAt": "2026-11-21T12:09:40.075Z",
+  "note": "家族工具 dsh-family-tools/tools/verify-plugin.mjs 不在工作区；本结果按 DSH-MARKET-PLAN.md 记录的门禁语义给出等价断言。",
+  "gates": [
+    {
+      "id": "G0-5",
+      "title": "清单与挂载契约",
+      "ok": true,
+      "problems": [],
+      "note": "package.json / dsh.catalog / cordis.patch / lib 入口四项一致"
+    },
+    {
+      "id": "G0-6",
+      "title": "本地化资源与 exports 声明",
+      "ok": true,
+      "problems": [],
+      "note": "1 个 locale 资源，已声明 exports 且随 lib/ 发布"
+    },
+    {
+      "id": "G0-7",
+      "title": "类型声明",
+      "ok": true,
+      "problems": [],
+      "note": "declaration 产物齐全，package.json#types 指向有效文件"
+    },
+    {
+      "id": "G0-8",
+      "title": "许可证与运行时依赖",
+      "ok": true,
+      "problems": [],
+      "note": "MIT 许可证齐备，零运行时依赖（仅 peer/dev）"
+    },
+    {
+      "id": "G0-9",
+      "title": "构建产物入库",
+      "ok": true,
+      "problems": [],
+      "note": "14 个构建产物齐备，snapshot 与源同构"
+    },
+    {
+      "id": "G0-10",
+      "title": "三层测试存在性",
+      "ok": true,
+      "problems": [],
+      "note": "纯函数 + 装配层 + headless 冒烟三层齐备，npm test 全覆盖"
+    }
+  ],
+  "pass": true
+}

@@ -1,0 +1,41 @@
+{
+  "artifact": "lib/plugin.js",
+  "profile": "fresh-profile (empty inventory)",
+  "group": "archive-chain",
+  "membersExpected": [
+    "dsh-plugin-transcript",
+    "dsh-plugin-obsidian-push",
+    "dsh-plugin-transcript-search"
+  ],
+  "installOrder": [
+    "dsh-plugin-transcript",
+    "dsh-plugin-obsidian-push",
+    "dsh-plugin-transcript-search"
+  ],
+  "applicationByMember": {
+    "dsh-plugin-transcript": "applied",
+    "dsh-plugin-obsidian-push": "applied",
+    "dsh-plugin-transcript-search": "applied"
+  },
+  "verifyPassed": true,
+  "expectedEntryCount": 4,
+  "calls": [
+    {
+      "member": "dsh-plugin-transcript",
+      "entry": "/transcript"
+    },
+    {
+      "member": "dsh-plugin-obsidian-push",
+      "entry": "/obsidian-push"
+    },
+    {
+      "member": "dsh-plugin-obsidian-push",
+      "entry": "/archive"
+    },
+    {
+      "member": "dsh-plugin-transcript-search",
+      "entry": "/find"
+    }
+  ],
+  "generatedAt": "2026-11-21T12:09:30.623Z"
+}

@@ -1,0 +1,13 @@
+{
+  "market": {
+    "command": {
+      "name": "market",
+      "description": "插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market verify <id> 只校验，/market seams 查宿主安装能力。断网用内置快照。"
+    },
+    "tools": {
+      "market_list": "只读列出 dsh 插件市集的插件组（含快照时间与来源层），无需账号、不修改任何配置",
+      "market_install": "按组一键安装 dsh 插件：先做冲突预检，再按 members 顺序安装，最后用 application 四态校验是否真正生效",
+      "market_verify": "只校验某个插件组的安装结果：逐成员报告 applied / restart-required / overridden / failed 及下一步，不执行安装"
+    }
+  }
+}

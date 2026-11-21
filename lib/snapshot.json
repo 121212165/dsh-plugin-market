@@ -1,0 +1,667 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-21T12:09:28.869Z",
+  "source": "dsh-market-data",
+  "plugins": [
+    {
+      "id": "dsh-plugin-cache-guard",
+      "repo": "121212165/dsh-plugin-cache-guard",
+      "npm": "@deepseek-ai/dsh-plugin-cache-guard",
+      "name": "缓存护栏",
+      "oneLiner": "前缀缓存健康守卫：检测前缀被改写导致的缓存失效多花钱，提醒模型住手",
+      "category": "工具与质量",
+      "entries": [
+        "/health",
+        "cache_status"
+      ],
+      "requires": [
+        "tools",
+        "llmMiddleware"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-cost-ledger",
+      "repo": "121212165/dsh-plugin-cost-ledger",
+      "npm": "@deepseek-ai/dsh-plugin-cost-ledger",
+      "name": "成本台账",
+      "oneLiner": "花费持久台账：按月 JSONL、月报、CSV 导出、环比结论",
+      "category": "钱与用量",
+      "entries": [
+        "/ledger"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-deep-scan",
+      "repo": "121212165/dsh-plugin-deep-scan",
+      "npm": "@deepseek-ai/dsh-plugin-deep-scan",
+      "name": "深度扫描",
+      "oneLiner": "GitHub 赛道深度扫描器：多词四通道搜索 + 自动挖 topic 迭代，止损规则内置",
+      "category": "扫描与研究",
+      "entries": [
+        "/deep-scan",
+        "deep_scan"
+      ],
+      "requires": [
+        "tools"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-eco-scan",
+      "repo": "121212165/dsh-plugin-eco-scan",
+      "npm": "@deepseek-ai/dsh-plugin-eco-scan",
+      "name": "生态扫描",
+      "oneLiner": "dsh 插件生态市场扫描器：topic 全仓 + npm 周下载差值 + 增长评分",
+      "category": "扫描与研究",
+      "entries": [
+        "/eco-scan",
+        "eco_scan"
+      ],
+      "requires": [
+        "tools"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-error-radar",
+      "repo": "121212165/dsh-plugin-error-radar",
+      "npm": "@deepseek-ai/dsh-plugin-error-radar",
+      "name": "错误雷达",
+      "oneLiner": "错误率/连败/p95 雷达，区分\"系统性故障\"和\"抖动\"",
+      "category": "工具与质量",
+      "entries": [
+        "/radar",
+        "/health"
+      ],
+      "requires": [
+        "tools",
+        "llmMiddleware"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-fact-vault",
+      "repo": "121212165/dsh-plugin-fact-vault",
+      "npm": "@deepseek-ai/dsh-plugin-fact-vault",
+      "name": "事实库",
+      "oneLiner": "事实便签库：登记可复用的项目事实，tag 加权检索",
+      "category": "会话与知识库",
+      "entries": [
+        "/fact",
+        "fact_find"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-family-cards",
+      "repo": "121212165/dsh-plugin-family-cards",
+      "npm": "@deepseek-ai/dsh-plugin-family-cards",
+      "name": "家族卡片",
+      "oneLiner": "家族 11 个工具的 web UI 卡片渲染器（补官方 Client 不消费 presentCall 的缺口）",
+      "category": "编排与界面",
+      "entries": [
+        "/family-cards"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-html-report",
+      "repo": "121212165/dsh-plugin-html-report",
+      "npm": "@deepseek-ai/dsh-plugin-html-report",
+      "name": "HTML 报告",
+      "oneLiner": "会话渲染成自包含 HTML 报告（深色模式、无外链），分享/归档用",
+      "category": "会话与知识库",
+      "entries": [
+        "/report"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-ide-hub",
+      "repo": "121212165/dsh-plugin-ide-hub",
+      "npm": "@deepseek-ai/dsh-plugin-ide-hub",
+      "name": "IDE 中枢",
+      "oneLiner": "一个入口管住所有编码 IDE：8 个 IDE 零 API 盘点（含 Trae / Qoder / CatPaw 国产适配）、用量统计、会话一键恢复、规则一份本体多 IDE 下发",
+      "category": "编排与界面",
+      "entries": [
+        "/ide-hub",
+        "/hub-usage",
+        "/hub-sessions",
+        "/hub-init",
+        "/today"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-local-deep-search",
+      "repo": "121212165/dsh-plugin-local-deep-search",
+      "npm": "@deepseek-ai/dsh-plugin-local-deep-search",
+      "name": "本地深搜",
+      "oneLiner": "本地文档多轮挖词深检索：带行号、可回溯引用的 Markdown 报告，全程不联网",
+      "category": "扫描与研究",
+      "entries": [
+        "/local-research",
+        "local_deep_search"
+      ],
+      "requires": [
+        "tools"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-obsidian-push",
+      "repo": "121212165/dsh-plugin-obsidian-push",
+      "npm": "@deepseek-ai/dsh-plugin-obsidian-push",
+      "name": "Obsidian 推送",
+      "oneLiner": "转录推送 Obsidian 库：frontmatter + 内容哈希幂等去重，vault 自动发现；`/archive` 一键归档链",
+      "category": "会话与知识库",
+      "entries": [
+        "/obsidian-push",
+        "/archive"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-pinboard",
+      "repo": "121212165/dsh-plugin-pinboard",
+      "npm": "@deepseek-ai/dsh-plugin-pinboard",
+      "name": "钉板",
+      "oneLiner": "置顶便签注入系统提示：中途加便签下一回合生效，不用重启",
+      "category": "会话与知识库",
+      "entries": [
+        "/pin",
+        "/pins",
+        "pin_add"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-plugin-forge",
+      "repo": "121212165/dsh-plugin-plugin-forge",
+      "npm": "@deepseek-ai/dsh-plugin-plugin-forge",
+      "name": "插件锻造",
+      "oneLiner": "插件脚手架：生成过 verify-plugin.mjs 的新插件骨架，validate 模式点名现有插件缺什么",
+      "category": "构建与开发工具",
+      "entries": [
+        "/forge",
+        "forge_new",
+        "forge_check"
+      ],
+      "requires": [
+        "tools"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-price-aware",
+      "repo": "121212165/dsh-plugin-price-aware",
+      "npm": "@deepseek-ai/dsh-plugin-price-aware",
+      "name": "价格感知",
+      "oneLiner": "价格感知注入（宿主侧参考实现风格）",
+      "category": "钱与用量",
+      "entries": [
+        "/price-aware"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-prompt-optimize",
+      "repo": "121212165/dsh-plugin-prompt-optimize",
+      "npm": "@deepseek-ai/dsh-plugin-prompt-optimize",
+      "name": "提示词优化",
+      "oneLiner": "提示词审查与改写：8 条本地规则出问题清单，模板重排生成改写稿（vault 存、本插件审）",
+      "category": "工具与质量",
+      "entries": [
+        "/opt",
+        "prompt_review",
+        "prompt_rewrite"
+      ],
+      "requires": [
+        "tools",
+        "llmMiddleware"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-prompt-vault",
+      "repo": "121212165/dsh-plugin-prompt-vault",
+      "npm": "@deepseek-ai/dsh-plugin-prompt-vault",
+      "name": "提示词库",
+      "oneLiner": "提示词弹药库：markdown 导入、标签、使用计数，自带 8 条中文种子提示词",
+      "category": "会话与知识库",
+      "entries": [
+        "/pv"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-quota",
+      "repo": "121212165/dsh-plugin-quota",
+      "npm": "@deepseek-ai/dsh-plugin-quota",
+      "name": "用量仪表",
+      "oneLiner": "实时用量仪表 + 下一步预估 + 预算刹车：每回合给模型一行实时 token/花费仪表，模型自己看得见、自己刹",
+      "category": "钱与用量",
+      "entries": [
+        "/qm",
+        "/qm-top",
+        "quota_meter"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-relay-quota",
+      "repo": "121212165/dsh-plugin-relay-quota",
+      "npm": "@deepseek-ai/dsh-plugin-relay-quota",
+      "name": "中转额度",
+      "oneLiner": "查任意 OpenAI 兼容中转的余额/用量",
+      "category": "钱与用量",
+      "entries": [
+        "/quota",
+        "quota_check"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-session-insights",
+      "repo": "121212165/dsh-plugin-session-insights",
+      "npm": "@deepseek-ai/dsh-plugin-session-insights",
+      "name": "会话洞察",
+      "oneLiner": "跨会话统计总览：会话数、token、趋势",
+      "category": "会话与知识库",
+      "entries": [
+        "/insights"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-spend-forecast",
+      "repo": "121212165/dsh-plugin-spend-forecast",
+      "npm": "@deepseek-ai/dsh-plugin-spend-forecast",
+      "name": "花费预测",
+      "oneLiner": "按日均消耗预测余量撑几天、几号烧穿",
+      "category": "钱与用量",
+      "entries": [
+        "/forecast"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-task-forge",
+      "repo": "121212165/dsh-plugin-task-forge",
+      "npm": "@deepseek-ai/dsh-plugin-task-forge",
+      "name": "任务工坊",
+      "oneLiner": "把大白话编译成任务书，跨窗口 AI 无损交接：回读握手逼出理解损耗，缺口闭环、版本号跨窗口唯一权威",
+      "category": "编排与界面",
+      "entries": [
+        "/forge",
+        "/relay",
+        "/ack",
+        "/answer",
+        "/forge-list"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-token-telemetry",
+      "repo": "121212165/dsh-plugin-token-telemetry",
+      "npm": "@deepseek-ai/dsh-plugin-token-telemetry",
+      "name": "Token 遥测",
+      "oneLiner": "token 遥测 web 面板（官方 useProjection 模式示范）",
+      "category": "钱与用量",
+      "entries": [
+        "/token-telemetry"
+      ],
+      "requires": [
+        "tools",
+        "systemPrompt",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-tool-trace",
+      "repo": "121212165/dsh-plugin-tool-trace",
+      "npm": "@deepseek-ai/dsh-plugin-tool-trace",
+      "name": "工具追踪",
+      "oneLiner": "工具调用追踪：做了什么、慢在哪，只记大小不记内容",
+      "category": "工具与质量",
+      "entries": [
+        "/tools-stats"
+      ],
+      "requires": [
+        "tools",
+        "llmMiddleware"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-transcript",
+      "repo": "121212165/dsh-plugin-transcript",
+      "npm": "@deepseek-ai/dsh-plugin-transcript",
+      "name": "会话转录",
+      "oneLiner": "会话转录归档：user/assistant/tool 全量落 JSONL → Markdown，接 Obsidian 工作流",
+      "category": "会话与知识库",
+      "entries": [
+        "/transcript"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    },
+    {
+      "id": "dsh-plugin-transcript-search",
+      "repo": "121212165/dsh-plugin-transcript-search",
+      "npm": "@deepseek-ai/dsh-plugin-transcript-search",
+      "name": "转录检索",
+      "oneLiner": "跨会话全文搜索，与 transcript 的 JSONL 契约互通",
+      "category": "会话与知识库",
+      "entries": [
+        "/find",
+        "session_search"
+      ],
+      "requires": [
+        "tools",
+        "sessionProjections"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21"
+    }
+  ],
+  "groups": [
+    {
+      "id": "archive-chain",
+      "name": "归档链",
+      "oneLiner": "一次 /archive 跑通导出 → 推送 → 检索",
+      "members": [
+        "dsh-plugin-transcript",
+        "dsh-plugin-obsidian-push",
+        "dsh-plugin-transcript-search"
+      ],
+      "why": [
+        "transcript 产出的 sessions/*.jsonl 是 obsidian-push 与 transcript-search 共同消费的契约文件",
+        "/archive 串联三家：导出 JSONL → 推送到 Obsidian → 立即可被 transcript-search 检索"
+      ],
+      "installOrder": "按 members 顺序：transcript → obsidian-push → transcript-search",
+      "conflicts": [],
+      "verify": [
+        "dump-config 含三个 id",
+        "/archive 产出一份 JSONL；/push 能在目标库看到对应笔记；/find 能搜回该会话"
+      ],
+      "curator": "editor",
+      "updatedAt": "2026-11-21"
+    },
+    {
+      "id": "starter-three",
+      "name": "开局三件套",
+      "oneLiner": "先看见钱，再看见所有 IDE，最后能跨窗口派活",
+      "members": [
+        "dsh-plugin-quota",
+        "dsh-plugin-ide-hub",
+        "dsh-plugin-task-forge"
+      ],
+      "why": [
+        "task-forge 直接读取 quota 发布的 summary.json 预算契约，派活前先卡预算",
+        "ide-hub 的 /today 聚合 quota / cost-ledger / task-forge / tool-trace 四家事实，三件套装完即可看到统一视图"
+      ],
+      "installOrder": "按 members 顺序：quota → ide-hub → task-forge",
+      "conflicts": [],
+      "verify": [
+        "dump-config 含三个 id",
+        "/qm 有输出；/ide-hub 能列出至少 1 个 IDE；/forge 只回显不落盘"
+      ],
+      "curator": "editor",
+      "updatedAt": "2026-11-21"
+    },
+    {
+      "id": "handoff-duo",
+      "name": "交接协作",
+      "oneLiner": "系统提示注入 + 跨窗口事实检索，换窗口不丢上下文",
+      "members": [
+        "dsh-plugin-task-forge",
+        "dsh-plugin-pinboard",
+        "dsh-plugin-fact-vault"
+      ],
+      "why": [
+        "task-forge 通过 systemPrompt.section 注入待编译任务，pinboard 用同一通道注入置顶事实",
+        "fact-vault 从跨会话 JSONL 检索同一批字段，并通过出处字段找回来源"
+      ],
+      "installOrder": "按 members 顺序：task-forge → pinboard → fact-vault",
+      "conflicts": [],
+      "verify": [
+        "dump-config 含三个 id",
+        "/pin 后新开会话系统提示含该条；/fact 能检索到带出处的同一事实"
+      ],
+      "curator": "editor",
+      "updatedAt": "2026-11-20"
+    },
+    {
+      "id": "saving-combo",
+      "name": "省钱组合",
+      "oneLiner": "同读一份 per-call 成本台账，拦缓存、算预测、对账",
+      "members": [
+        "dsh-plugin-cache-guard",
+        "dsh-plugin-spend-forecast",
+        "dsh-plugin-cost-ledger"
+      ],
+      "why": [
+        "三家都读 cost-ledger 维护的 per-call token / 成本台账字段，口径一致不打架",
+        "cache-guard 命中即省一次调用，spend-forecast 直接消费台账算燃烧率"
+      ],
+      "installOrder": "按 members 顺序：cost-ledger 数据先立住，再装 cache-guard 与 spend-forecast",
+      "conflicts": [],
+      "verify": [
+        "dump-config 含三个 id",
+        "/health 显示缓存命中；/ledger 有本月汇总；/forecast 与台账口径一致"
+      ],
+      "curator": "editor",
+      "updatedAt": "2026-11-20"
+    },
+    {
+      "id": "plugin-dev",
+      "name": "插件开发",
+      "oneLiner": "forge 产物过 verify-plugin，cards 负责渲染交付",
+      "members": [
+        "dsh-plugin-plugin-forge",
+        "dsh-plugin-prompt-optimize",
+        "dsh-plugin-family-cards"
+      ],
+      "why": [
+        "plugin-forge 的 forgeFiles() 产物必须过 dsh-family-tools/tools/verify-plugin.mjs 的质量门",
+        "prompt-optimize 改写 /market 入口提示词，family-cards 把结果渲染成家族统一卡片"
+      ],
+      "installOrder": "按 members 顺序：plugin-forge → prompt-optimize → family-cards",
+      "conflicts": [],
+      "verify": [
+        "dump-config 含三个 id",
+        "/forge 产出插件骨架且过 verify-plugin；/cards 渲染出卡片"
+      ],
+      "curator": "editor",
+      "updatedAt": "2026-11-19"
+    },
+    {
+      "id": "eco-radar",
+      "name": "生态雷达",
+      "oneLiner": "同一套 GitHub 搜索通道与止损规则，先扫后深挖",
+      "members": [
+        "dsh-plugin-eco-scan",
+        "dsh-plugin-deep-scan"
+      ],
+      "why": [
+        "eco-scan 与 deep-scan 共用 GitHub 搜索通道与搜索止损规则（超时/配额/去重）",
+        "eco-scan 先出候选仓清单，deep-scan 按同一 repo id 做源码级复核"
+      ],
+      "installOrder": "按 members 顺序：eco-scan → deep-scan",
+      "conflicts": [],
+      "verify": [
+        "dump-config 含两个 id",
+        "/eco-scan 产出候选清单；/deep-scan 对同一 repo id 给出结构清单"
+      ],
+      "curator": "editor",
+      "updatedAt": "2026-11-18"
+    }
+  ]
+}

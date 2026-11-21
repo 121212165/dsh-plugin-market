@@ -1,0 +1,29 @@
+{
+  "milestone": "M2 — 一键安装闭环",
+  "generatedAt": "2026-11-21T19:40:00.000Z",
+  "criteria": {
+    "install_command": true,
+    "conflict_precheck": true,
+    "four_state_verification": true,
+    "clean_profile_archive_chain": true,
+    "actionable_conflict_fix": true,
+    "degraded_mode_no_fake_success": true,
+    "lib_build_committed": true
+  },
+  "seam": {
+    "source": "@deepseek-ai/dsh-plugin-manager/lib/types/index.d.ts (ctx.pluginManager + installBundle/listPlugins/listBundles; ChangeResult.application: applied|restart-required|overridden|failed|cancelled)",
+    "runtime_probe": "src/core/seam.ts probes ctx.pluginManager, ctx.remotes.pluginManager, ctx.remote.pluginManager, ctx.services.pluginManager; /market seams reports the result",
+    "live_cordis_inspect_query": "not executed in this offline session — install degrades to manual commands if the probe fails"
+  },
+  "evidence": [
+    { "check": "npm test", "result": "49/49 pass", "tests": ["test/conflicts.test.ts", "test/installer.test.ts", "test/install-wire.test.ts", "test/wire.test.ts", "test/reader.test.ts", "test/render.test.ts", "test/client.test.mjs"] },
+    { "check": "npm run check", "result": "typecheck + 49 tests + build:all pass" },
+    { "check": "clean profile: archive-chain", "result": "3 installBundle calls in member order, all application=applied, listPlugins verification ok", "test": "installer.test.ts > clean profile: archive-chain installs in member order and verifies all four states" },
+    { "check": "conflict fix, not stack", "result": "blocking conflict returns 修复建议 with --without / rename / dsh plugin --profile list; zero installBundle calls; no stack text", "test": "install-wire.test.ts > a live command collision returns an executable fix, not a stack trace" },
+    { "check": "four states", "result": "restart-required → success + reboot step; overridden → failed + higher-priority-layer fix; failed(incompatible-version) → upgrade guidance; seam throw → /market seams + manual commands", "test": "installer.test.ts" },
+    { "check": "degraded mode", "result": "seam=null → ok=false, 9 manual commands, no install calls, no fake success", "test": "installer.test.ts > degraded mode returns manual commands and never claims success" },
+    { "check": "build artifacts", "result": "lib/core/{conflicts,install-types,installer,seam}.js + lib/types/core/*.d.ts present" }
+  ],
+  "errors": [],
+  "pass": true
+}

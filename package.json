@@ -1,0 +1,79 @@
+{
+  "name": "dsh-plugin-market",
+  "version": "0.1.0",
+  "description": "dsh plugin: plugin market with one-click group install — /market, /market group, /market install (conflict pre-check + four-state verification), /market verify and /market seams, with a four-tier offline fallback.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "types": "./lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./core": {
+      "types": "./lib/types/core/index.d.ts",
+      "default": "./lib/core/index.js"
+    },
+    "./package.json": "./package.json",
+    "../src/snapshot.json": "./src/snapshot.json",
+    "./icon.svg": "./icon.svg",
+    "./locales/*": "./lib/locales/*"
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "catalog": {
+      "category": "扫描与研究",
+      "blurb": "dsh 插件市集：选组、一键安装（冲突预检 + 四态校验）、装后验、断网用内置快照",
+      "entries": "`/market` `/market group` `/market install` `/market verify` `/market seams` `market_list` `market_install` `market_verify`"
+    }
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "make-snapshot": "node scripts/make-snapshot.mjs",
+    "build:client": "node scripts/build.mjs",
+    "build:all": "npm run build && npm run build:client",
+    "test": "node --test \"test/*.test.ts\" \"test/*.test.mjs\"",
+    "typecheck": "tsc --noEmit",
+    "verify:plugin": "node scripts/verify-plugin.mjs",
+    "verify:m5": "python verify-m5.py",
+    "check": "npm run typecheck && npm test && npm run build:all && npm run verify:plugin"
+  },
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "cordis",
+    "plugin",
+    "market",
+    "catalog"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/121212165/dsh-plugin-market.git"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.1.0",
+    "@deepseek-ai/dsh-commands": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.1",
+    "@deepseek-ai/schemastery": "3.19.0",
+    "@types/node": "26.6.2",
+    "typescript": "7.0.2"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.0"
+  }
+}

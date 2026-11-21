@@ -1,0 +1,13 @@
+# Mounts the read-only market into a dsh profile. Zero required config:
+# browsing works fully offline via the embedded snapshot.
+- insert:
+    - id: market
+      name: dsh-plugin-market
+      config:
+        enabled: true
+        # rawUrl: https://raw.githubusercontent.com/121212165/dsh-market-data/main/data/index.json
+        # mirrorUrl: https://cdn.jsdelivr.net/gh/121212165/dsh-market-data@main/data/index.json
+        # cachePath: ~/.dsh/market/index.json
+        # timeoutMs: 1500
+        # cacheTtlMs: 86400000
+        # staleAfterMs: 86400000

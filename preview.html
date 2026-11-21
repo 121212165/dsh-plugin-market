@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dsh-plugin-market · M3 面板预览（宿主 token 模拟）</title>
+<!--
+  仅用于无 dsh 环境下的视觉/几何验收：这里的字面色是「模拟宿主」提供的
+  --dsw-alias-* 变量值（浅色一套、深色一套），不是插件代码里的颜色。
+  插件本体 src/client.tsx 只引用 var(--dsw-alias-*)，零字面色。
+  页面通过一个极简 React.createElement shim 真实执行 lib/client.js，
+  所以预览与线上渲染的是同一个组件，不是另写一份假页面。
+-->
+<style>
+  :root {
+    color-scheme: light;
+    --dsw-alias-bg-base: #ffffff;
+    --dsw-alias-bg-layer-1: #f6f7f9;
+    --dsw-alias-border-l2: #d9dce2;
+    --dsw-alias-border-l3: #e7e9ed;
+    --dsw-alias-label-primary: #1d2129;
+    --dsw-alias-label-secondary: #4e5969;
+    --dsw-alias-label-tertiary: #86909c;
+    --dsw-alias-label-primary-foreground: #ffffff;
+    --dsw-alias-brand-primary: #2563eb;
+    --dsw-alias-state-success-primary: #00b42a;
+    --dsw-alias-state-warn-primary: #ff7d00;
+  }
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --dsw-alias-bg-base: #17171a;
+    --dsw-alias-bg-layer-1: #232327;
+    --dsw-alias-border-l2: #3a3a42;
+    --dsw-alias-border-l3: #303037;
+    --dsw-alias-label-primary: #e8e8ed;
+    --dsw-alias-label-secondary: #b6b6c0;
+    --dsw-alias-label-tertiary: #82828f;
+    --dsw-alias-label-primary-foreground: #ffffff;
+    --dsw-alias-brand-primary: #6ea8fe;
+    --dsw-alias-state-success-primary: #4cd263;
+    --dsw-alias-state-warn-primary: #ffb457;
+  }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--dsw-alias-bg-base);
+    color: var(--dsw-alias-label-primary);
+    font-family: system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+  }
+  /* 窄屏验收用的容器：故意不设宽度上限以外的地方，暴露任何横向溢出 */
+  #root { width: 100%; max-width: 100%; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* 极简 React.createElement shim：只实现预览所需，不碰组件之外的 DOM。 */
+function h(type, props, ...children) {
+  // 函数组件就地展开，等价于 React 的渲染行为。
+  if (typeof type === 'function') return type({ ...(props || {}) });
+  const el = document.createElement(type);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'style') Object.assign(el.style, v);
+    else if (k === 'className') el.className = v;
+    else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, String(v));
+  }
+  for (const child of children.flat()) {
+    if (child == null || child === false) continue;
+    el.appendChild(typeof child === 'object' ? child : document.createTextNode(String(child)));
+  }
+  return el;
+}
+window.__ModuleLoader__ = {
+  load(mod) { window.__marketModule = mod; },
+};
+</script>
+<script src="./lib/client.js"></script>
+<script>
+const mod = window.__marketModule;
+if (!mod || typeof mod.factory !== 'function') throw new Error('lib/client.js 未注册 ModuleLoader 模块');
+const client = mod.factory(() => ({ createElement: h }));
+let panel = null;
+client.apply({
+  market: { generatedAt: '2026-11-21T12:00:00.000Z', now: Date.parse('2026-11-21T12:00:00.000Z') },
+  slots: {
+    inject(name, factory) { panel = factory(); return panel; },
+    register(meta, component) { window.__marketSlot = meta; return component; },
+  },
+});
+document.getElementById('root').appendChild(panel());
+</script>
+</body>
+</html>
