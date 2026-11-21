@@ -15,11 +15,11 @@ export interface PrecheckInput {
   index: MarketIndex;
   inventory?: { plugins?: InstalledRow[]; bundles?: InstalledBundle[] };
   /** Command names already registered in the host, e.g. from ctx.commands. */
-  registeredCommands?: string[];
+  registeredCommands?: string[] | undefined;
   /** Group member ids the user chose to drop with `--without`. */
-  excluded?: string[];
+  excluded?: string[] | undefined;
   profile?: string;
-  reinstall?: boolean;
+  reinstall?: boolean | undefined;
 }
 
 const commandKey = (entry: string): string => entry.startsWith('/') ? `cmd:${entry}` : `tool:${entry}`;

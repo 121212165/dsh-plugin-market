@@ -5,10 +5,10 @@ export interface InstallInput {
     index: MarketIndex;
     seam: InstallSeam | null;
     profile?: string;
-    excluded?: string[];
-    reinstall?: boolean;
-    registeredCommands?: string[];
-    now?: () => number;
+    excluded?: string[] | undefined;
+    reinstall?: boolean | undefined;
+    registeredCommands?: string[] | undefined;
+    now?: (() => number) | undefined;
     onProgress?: (line: string) => void;
 }
 export interface VerifyInput {
@@ -16,9 +16,9 @@ export interface VerifyInput {
     index: MarketIndex;
     seam: InstallSeam | null;
     applicationByMember?: Record<string, ApplicationState>;
-    registeredCommands?: string[];
+    registeredCommands?: string[] | undefined;
     profile?: string;
-    now?: () => number;
+    now?: (() => number) | undefined;
 }
 /** Map a host failure code to a step the user can actually take. */
 export declare function nextStepsFor(result: ChangeResultLike, spec: string, profile: string): string[];

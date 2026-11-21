@@ -106,7 +106,10 @@ test('headless smoke: built lib mounts, fresh-profile install, 4-state verify, e
   assert.equal(host.callLog.length, expectedEntries.length);
   assert.deepEqual(new Set(host.callLog.map((call) => call.member)), new Set(group.members));
 
-  writeFileSync(new URL('../m5-smoke-evidence.json', import.meta.url), JSON.stringify({
+  // 证据含运行时间戳，默认不落盘：否则每次 npm test 都会改写受版本控制的文件，
+  // 让「构建产物与提交一致」的 git diff --exit-code 门禁永远为红。需要刷新证据时：
+  // DSH_M5_EVIDENCE=1 npm test
+  if (process.env.DSH_M5_EVIDENCE === '1') writeFileSync(new URL('../m5-smoke-evidence.json', import.meta.url), JSON.stringify({
     artifact: 'lib/plugin.js',
     profile: 'fresh-profile (empty inventory)',
     group: group.id,

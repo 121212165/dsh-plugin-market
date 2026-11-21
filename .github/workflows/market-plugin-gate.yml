@@ -1,0 +1,28 @@
+name: market-plugin-gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18"
+          cache: npm
+      - name: Install (dev deps, locked)
+        run: npm ci --include=dev
+      - name: Typecheck + tests + build + official gate
+        run: npm run check
+      - name: Family official gate (SDS-1/1b/2/3, G0-5..G0-10)
+        run: node scripts/vendor/verify-plugin.mjs .
+      - name: Build artifacts must match committed lib/
+        run: npm run build:all && git diff --exit-code

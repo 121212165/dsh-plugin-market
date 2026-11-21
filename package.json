@@ -16,7 +16,6 @@
       "default": "./lib/core/index.js"
     },
     "./package.json": "./package.json",
-    "../src/snapshot.json": "./src/snapshot.json",
     "./icon.svg": "./icon.svg",
     "./locales/*": "./lib/locales/*"
   },
@@ -42,13 +41,15 @@
     "node": ">=22.18"
   },
   "scripts": {
+    "prepare": "npm run build:all",
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
     "make-snapshot": "node scripts/make-snapshot.mjs",
     "build:client": "node scripts/build.mjs",
     "build:all": "npm run build && npm run build:client",
     "test": "node --test \"test/*.test.ts\" \"test/*.test.mjs\"",
     "typecheck": "tsc --noEmit",
-    "verify:plugin": "node scripts/verify-plugin.mjs",
+    "verify:plugin": "node scripts/vendor/verify-plugin.mjs .",
+    "verify:local": "node scripts/verify-plugin.mjs",
     "verify:m5": "python verify-m5.py",
     "check": "npm run typecheck && npm test && npm run build:all && npm run verify:plugin"
   },

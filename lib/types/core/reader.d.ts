@@ -26,7 +26,7 @@ export interface ReaderDeps {
     timeoutMs?: number;
     cacheTtlMs?: number;
     staleAfterMs?: number;
-    now?: () => number;
+    now?: (() => number) | undefined;
     log?: (message: string) => void;
 }
 /** Structural check: enough to trust the payload as a read contract. */

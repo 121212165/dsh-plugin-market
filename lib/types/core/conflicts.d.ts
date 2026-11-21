@@ -11,11 +11,11 @@ export interface PrecheckInput {
         bundles?: InstalledBundle[];
     };
     /** Command names already registered in the host, e.g. from ctx.commands. */
-    registeredCommands?: string[];
+    registeredCommands?: string[] | undefined;
     /** Group member ids the user chose to drop with `--without`. */
-    excluded?: string[];
+    excluded?: string[] | undefined;
     profile?: string;
-    reinstall?: boolean;
+    reinstall?: boolean | undefined;
 }
 /** Check collisions inside the group and against the live host inventory. */
 export declare function planGroupInstall(input: PrecheckInput): InstallPlan;

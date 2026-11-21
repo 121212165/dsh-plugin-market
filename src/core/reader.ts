@@ -28,7 +28,7 @@ export interface ReaderDeps {
   timeoutMs?: number;
   cacheTtlMs?: number;
   staleAfterMs?: number;
-  now?: () => number;
+  now?: (() => number) | undefined;
   log?: (message: string) => void;
 }
 
