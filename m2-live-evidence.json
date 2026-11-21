@@ -1,0 +1,123 @@
+{
+  "milestone": "M2 — 一键安装闭环（批次 D 真机证据）",
+  "evidenceType": "live",
+  "generatedAt": "2026-11-21T13:26:10.402Z",
+  "environment": {
+    "platform": "win32",
+    "os": "Windows",
+    "dshVersion": "0.2.0-rc.2",
+    "dshPath": "C:\\Users\\lenovo\\AppData\\Roaming\\npm\\dsh.ps1",
+    "nodeVersion": "v25.7.0",
+    "profile": "market-audit",
+    "dshHome": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home",
+    "dshHomeNote": "本机 node 进程写默认 ~/.dsh 被系统拒绝（EPERM，PowerShell 写同一路径正常），dsh 启动时重写 profile 的 cordis.yml 会失败；因此以 DSH_HOME 指向工作区内目录运行同一个真实 dsh，profile 完全独立，未触碰 ~/.dsh 下现有 profile（web）。",
+    "pluginSource": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live",
+    "gitHead": "ae26ce2aef5c24588a7cfd6e162092b9ba085882",
+    "gitBranch": "task/d-live"
+  },
+  "commands": [
+    {
+      "step": "probe-version",
+      "command": "dsh --version",
+      "exitCode": 0,
+      "stdout": "0.2.0-rc.2",
+      "stderr": ""
+    },
+    {
+      "step": "install-first-run",
+      "command": "dsh plugin --profile market-audit add ./",
+      "exitCode": 0,
+      "stdout": "dsh: initialized profile market-audit at C:\\Users\\lenovo\\.dsh\\profiles\\market-audit\n\ndependencies:\n+ dsh-plugin-market link:C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live\n\nAlready up to date\nDone in 991ms using pnpm v10.20.0",
+      "stderr": "",
+      "note": "首次在默认 DSH_HOME 下安装成功；随后因 node 无法写 ~/.dsh 的 cordis.yml，改为工作区 DSH_HOME 重装（见 install-isolated）。"
+    },
+    {
+      "step": "install-isolated",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh plugin --profile market-audit add ./",
+      "exitCode": 0,
+      "stdout": "dsh: initialized profile market-audit at C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home\\profiles\\market-audit\n\ndependencies:\n+ dsh-plugin-market link:C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live\n\nAlready up to date\nDone in 950ms using pnpm v10.20.0",
+      "stderr": ""
+    },
+    {
+      "step": "list",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh plugin --profile market-audit list",
+      "exitCode": 0,
+      "stdout": "Legend: production dependency, optional only, dev only\n\ndsh-profile-market-audit C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home\\profiles\\market-audit (PRIVATE)\n\ndependencies:\ndsh-plugin-market link:../../..",
+      "stderr": ""
+    },
+    {
+      "step": "dump-config",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile market-audit --dump-config",
+      "exitCode": 0,
+      "stdout": "# == dsh-plugin-market\n- id: market\n  name: dsh-plugin-market\n  config:\n    enabled: true",
+      "stderr": "",
+      "note": "composed 树中出现 id=market / name=dsh-plugin-market，config.enabled=true；dump-config 在 dsh 0.2.0-rc.2 不输出 application 字段。"
+    },
+    {
+      "step": "boot",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile market-audit web --no-open --port 7836",
+      "exitCode": null,
+      "stdout": "",
+      "stderr": "dsh: warning: 1 entry did not activate\nmarket (dsh-plugin-market): Error: cannot get property \"pluginManager\" without inject\n    at probeSeam (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/core/seam.js:5:36)\n    at resolveSeam (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/plugin.js:145:41)\n    at new apply (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/plugin.js:148:21)\n    at Fiber.execute (file:///C:/Users/lenovo/AppData/Roaming/npm/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis/lib/index.js:1068:24)\n    at file:///C:/Users/lenovo/AppData/Roaming/npm/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis/lib/index.js:1142:34\n    at file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/.tmp-dsh-home/profiles/market-audit/#market\n    at file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/.tmp-dsh-home/profiles/market-audit/#include",
+      "note": "进程存活约 50 秒、CPU 持续占用，但未打印 `dsh web: <url>`，7836 端口从未监听；观测后手动终止。说明 market 条目 apply 抛错，宿主无法进入就绪态。"
+    },
+    {
+      "step": "control-boot",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile web-check --no-open --port 7837",
+      "exitCode": null,
+      "stdout": "dsh web: http://127.0.0.1:7837/?token=BYyCiQz-BZhZr_ifr9E9e-9RUDJ2GE3JSWd8-ElF8h8",
+      "stderr": "",
+      "note": "对照：同一隔离 DSH_HOME 下不含 dsh-plugin-market 的 web-check profile 正常起服并打印 URL，端口 7837 处于 LISTEN。排除 DSH_HOME/凭据等环境因素。"
+    },
+    {
+      "step": "http-probe",
+      "command": "Invoke-WebRequest http://127.0.0.1:7836/ -TimeoutSec 5",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "由于目标计算机积极拒绝，无法连接。 (127.0.0.1:7836)",
+      "note": "market-audit 的 web 端口无服务。"
+    },
+    {
+      "step": "commands-not-run",
+      "command": "/market, /market group archive-chain, /market install archive-chain, /market verify archive-chain",
+      "exitCode": null,
+      "stdout": "",
+      "stderr": "",
+      "note": "宿主未起服且 market 条目未激活，任何会话都无法执行这四条命令；未执行，不伪造输出。"
+    }
+  ],
+  "application": {
+    "entryPresent": true,
+    "entryId": "market",
+    "name": "dsh-plugin-market",
+    "configEnabled": true,
+    "activated": false,
+    "activationError": "cannot get property \"pluginManager\" without inject",
+    "changeResultApplication": null,
+    "note": "dump-config 显示条目已挂载；启动时报 1 entry did not activate。因插件未激活，没有产生任何 installBundle ChangeResult，application 值不存在（null），不能标为 applied。"
+  },
+  "m3": "unverified",
+  "panel": {
+    "status": "unverified",
+    "screenshot": null,
+    "reason": "market-audit 的 web 宿主从未监听/打印 URL，无法打开面板确认 tab；不把旧截图或未出现当作已验证。"
+  },
+  "clientUi": {
+    "hostClientPackagesPresent": true,
+    "packages": [
+      "@deepseek-ai/dsh-client-ui-slots",
+      "@deepseek-ai/dsh-client-ui-plugin-manager",
+      "@deepseek-ai/dsh-client-modules"
+    ],
+    "note": "本机宿主确实带 client UI 与 slot 包，因此“没有 client UI 包”不是本次未验证的原因；真正原因是插件条目未激活、宿主未起服。"
+  },
+  "checks": {
+    "installable": "pass",
+    "configEntryVisible": "pass",
+    "activates": "fail",
+    "commands": "blocked",
+    "panel": "unverified"
+  },
+  "result": "fail",
+  "blockedReason": "插件 apply 阶段直接读取未在 inject 中声明的 ctx.pluginManager（inject=['commands','tools']），cordis 抛 “cannot get property \\\"pluginManager\\\" without inject”，market 条目未激活；带该插件的 profile 起 web 后不监听端口、不打印 URL，/market 四条命令与市集面板均无法执行或验证。安装与配置写入本身成功。"
+}
