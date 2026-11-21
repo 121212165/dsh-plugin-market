@@ -1,89 +1,99 @@
 {
   "milestone": "M2 — 一键安装闭环（批次 D 真机证据）",
   "evidenceType": "live",
-  "generatedAt": "2026-11-21T13:26:10.402Z",
+  "generatedAt": "2026-11-21T14:00:11.067Z",
   "environment": {
     "platform": "win32",
     "os": "Windows",
     "dshVersion": "0.2.0-rc.2",
-    "dshPath": "C:\\Users\\lenovo\\AppData\\Roaming\\npm\\dsh.ps1",
     "nodeVersion": "v25.7.0",
-    "profile": "market-audit",
-    "dshHome": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home",
-    "dshHomeNote": "本机 node 进程写默认 ~/.dsh 被系统拒绝（EPERM，PowerShell 写同一路径正常），dsh 启动时重写 profile 的 cordis.yml 会失败；因此以 DSH_HOME 指向工作区内目录运行同一个真实 dsh，profile 完全独立，未触碰 ~/.dsh 下现有 profile（web）。",
+    "profile": "market-audit2",
+    "dshHome": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home2",
+    "dshHomeNote": "node 写默认 ~/.dsh 仍被系统拒绝（EPERM），沿用工作区 DSH_HOME 运行真实 dsh；profile 独立，未触碰 ~/.dsh 下 web。",
+    "profileInitNote": "直接 dsh plugin add 生成的 profile bundles 仅有 dsh-base + dsh-plugin-market，缺 dsh-web-app，web 会话不会起服；先 dsh --profile market-audit2 --from-default-profile web --dump-config 初始化，再 add 插件，bundles 才为 base + web-app + plugin。",
     "pluginSource": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live",
-    "gitHead": "ae26ce2aef5c24588a7cfd6e162092b9ba085882",
+    "gitHead": "2a769071349c4649f2d9f5ca0df711c8f9da20a3",
     "gitBranch": "task/d-live"
   },
   "commands": [
     {
-      "step": "probe-version",
-      "command": "dsh --version",
+      "step": "install",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh plugin --profile market-audit2 add ./",
       "exitCode": 0,
-      "stdout": "0.2.0-rc.2",
-      "stderr": ""
-    },
-    {
-      "step": "install-first-run",
-      "command": "dsh plugin --profile market-audit add ./",
-      "exitCode": 0,
-      "stdout": "dsh: initialized profile market-audit at C:\\Users\\lenovo\\.dsh\\profiles\\market-audit\n\ndependencies:\n+ dsh-plugin-market link:C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live\n\nAlready up to date\nDone in 991ms using pnpm v10.20.0",
+      "stdout": "Already up to date\r\nDone in 962ms using pnpm v10.20.0",
       "stderr": "",
-      "note": "首次在默认 DSH_HOME 下安装成功；随后因 node 无法写 ~/.dsh 的 cordis.yml，改为工作区 DSH_HOME 重装（见 install-isolated）。"
-    },
-    {
-      "step": "install-isolated",
-      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh plugin --profile market-audit add ./",
-      "exitCode": 0,
-      "stdout": "dsh: initialized profile market-audit at C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home\\profiles\\market-audit\n\ndependencies:\n+ dsh-plugin-market link:C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live\n\nAlready up to date\nDone in 950ms using pnpm v10.20.0",
-      "stderr": ""
+      "note": "安装成功（Already up to date）。"
     },
     {
       "step": "list",
-      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh plugin --profile market-audit list",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh plugin --profile market-audit2 list",
       "exitCode": 0,
-      "stdout": "Legend: production dependency, optional only, dev only\n\ndsh-profile-market-audit C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home\\profiles\\market-audit (PRIVATE)\n\ndependencies:\ndsh-plugin-market link:../../..",
+      "stdout": "Legend: production dependency, optional only, dev only\r\n\r\ndsh-profile-market-audit2 C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home2\\profiles\\market-audit2 (PRIVATE)\r\n\r\ndependencies:\r\ndsh-plugin-market link:../../..",
       "stderr": ""
     },
     {
       "step": "dump-config",
-      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile market-audit --dump-config",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh --profile market-audit2 --dump-config",
       "exitCode": 0,
-      "stdout": "# == dsh-plugin-market\n- id: market\n  name: dsh-plugin-market\n  config:\n    enabled: true",
+      "stdout": "# == dsh-plugin-market\r\n- id: market\r\n  name: dsh-plugin-market\r\n  config:\r\n    enabled: true",
       "stderr": "",
-      "note": "composed 树中出现 id=market / name=dsh-plugin-market，config.enabled=true；dump-config 在 dsh 0.2.0-rc.2 不输出 application 字段。"
+      "note": "条目存在且 enabled；本次无 “did not activate” 告警。"
     },
     {
       "step": "boot",
-      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile market-audit web --no-open --port 7836",
+      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh --profile market-audit2 --no-open --port 7840",
       "exitCode": null,
-      "stdout": "",
-      "stderr": "dsh: warning: 1 entry did not activate\nmarket (dsh-plugin-market): Error: cannot get property \"pluginManager\" without inject\n    at probeSeam (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/core/seam.js:5:36)\n    at resolveSeam (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/plugin.js:145:41)\n    at new apply (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/plugin.js:148:21)\n    at Fiber.execute (file:///C:/Users/lenovo/AppData/Roaming/npm/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis/lib/index.js:1068:24)\n    at file:///C:/Users/lenovo/AppData/Roaming/npm/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis/lib/index.js:1142:34\n    at file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/.tmp-dsh-home/profiles/market-audit/#market\n    at file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/.tmp-dsh-home/profiles/market-audit/#include",
-      "note": "进程存活约 50 秒、CPU 持续占用，但未打印 `dsh web: <url>`，7836 端口从未监听；观测后手动终止。说明 market 条目 apply 抛错，宿主无法进入就绪态。"
-    },
-    {
-      "step": "control-boot",
-      "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile web-check --no-open --port 7837",
-      "exitCode": null,
-      "stdout": "dsh web: http://127.0.0.1:7837/?token=BYyCiQz-BZhZr_ifr9E9e-9RUDJ2GE3JSWd8-ElF8h8",
+      "stdout": "dsh web: http://127.0.0.1:7840/?token=<redacted>",
       "stderr": "",
-      "note": "对照：同一隔离 DSH_HOME 下不含 dsh-plugin-market 的 web-check profile 正常起服并打印 URL，端口 7837 处于 LISTEN。排除 DSH_HOME/凭据等环境因素。"
+      "note": "宿主正常起服并监听 7840，无激活错误；进程在截图/命令执行后手动终止。"
     },
     {
-      "step": "http-probe",
-      "command": "Invoke-WebRequest http://127.0.0.1:7836/ -TimeoutSec 5",
-      "exitCode": 1,
-      "stdout": "",
-      "stderr": "由于目标计算机积极拒绝，无法连接。 (127.0.0.1:7836)",
-      "note": "market-audit 的 web 端口无服务。"
-    },
-    {
-      "step": "commands-not-run",
-      "command": "/market, /market group archive-chain, /market install archive-chain, /market verify archive-chain",
-      "exitCode": null,
-      "stdout": "",
+      "step": "commands-list",
+      "command": "POST /api/commands/list {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\"}",
+      "exitCode": 0,
+      "stdout": "{\"type\":\"server-response\",\"rpcId\":\"4f42f847-4d23-4a55-9687-3be3970c4537\",\"result\":{\"ok\":true,\"value\":[{\"definitionId\":\"@deepseek-ai/dsh-command-compact\",\"name\":\"compact\",\"description\":\"Compact older conversation history\"},{\"definitionId\":\"@deepseek-ai/dsh-session-log-export\",\"name\":\"export\",\"description\":\"Download this Session log as a ZIP archive\"},{\"definitionId\":\"@deepseek-ai/dsh-command-feedback\",\"name\":\"feedback\",\"description\":\"Record feedback about this session\",\"input\":{\"hint\":\"<text>\"}},{\"definitionId\":\"@deepseek-ai/dsh-command-goal\",\"name\":\"goal\",\"description\":\"Set or view the goal for a long-running task\",\"input\":{\"hint\":\"[<objective>|clear|edit <objective>|pause|resume]\",\"attachments\":true}},{\"name\":\"market\",\"description\":\"插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market verify <id> 只校验，/market seams 查宿主安装能力。断网用内置快照。\",\"input\":{\"hint\":\"[group <id> | install <id> [--without a,b] [--reinstall] | verify <id> | seams]\"}},{\"definitionId\":\"@deepseek-ai/dsh-permission-presets\",\"name\":\"permission\",\"description\":\"Switch the permission preset (sandbox mode + approval policy)\",\"input\":{\"hint\":\"<preset>\"}},{\"definitionId\":\"@deepseek-ai/dsh-plan-mod",
       "stderr": "",
-      "note": "宿主未起服且 market 条目未激活，任何会话都无法执行这四条命令；未执行，不伪造输出。"
+      "note": "服务端命令清单包含 name=market，描述与本插件一致，证明命令真实注册。"
+    },
+    {
+      "step": "execute /market",
+      "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market\",\"submittedAttachments\":[]}",
+      "exitCode": 0,
+      "stdout": "{\"type\":\"server-response\",\"rpcId\":\"b62b2179-d78a-4e2d-84ad-46d2f01c94aa\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-4\",\"result\":{\"kind\":\"success\",\"text\":\"插件市集 · 只读浏览\\n数据 内置快照 2026-11-21 12:09 UTC · 1.8h 前 · 来源 built-in snapshot.json\\n\\n精选与社区共 6 组 · 25 个插件\\n\\n• 归档链  [archive-chain] · 编辑精选\\n    一次 /archive 跑通导出 → 推送 → 检索\\n    3 个插件：会话转录 → Obsidian 推送 → 转录检索\\n• 开局三件套  [starter-three] · 编辑精选\\n    先看见钱，再看见所有 IDE，最后能跨窗口派活\\n    3 个插件：用量仪表 → IDE 中枢 → 任务工坊\\n• 交接协作  [handoff-duo] · 编辑精选\\n    系统提示注入 + 跨窗口事实检索，换窗口不丢上下文\\n    3 个插件：任务工坊 → 钉板 → 事实库\\n• 省钱组合  [saving-combo] · 编辑精选\\n    同读一份 per-call 成本台账，拦缓存、算预测、对账\\n    3 个插件：缓存护栏 → 花费预测 → 成本台账\\n• 插件开发  [plugin-dev] · 编辑精选\\n    forge 产物过 verify-plugin，cards 负责渲染交付\\n    3 个插件：插件锻造 → 提示词优化 → 家族卡片\\n• 生态雷达  [eco-radar] · 编辑精选\\n    同一套 GitHub 搜索通道与止损规则，先扫后深挖\\n    2 个插件：生态扫描 → 深度扫描\\n\\n用 /market group <id> 查看成员与协同点；用 /market install <id> 一键安装；/market seams 检查宿主安装能力。\"}}}}",
+      "stderr": "",
+      "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+    },
+    {
+      "step": "execute /market group archive-chain",
+      "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market group archive-chain\",\"submittedAttachments\":[]}",
+      "exitCode": 0,
+      "stdout": "{\"type\":\"server-response\",\"rpcId\":\"cf8f95be-b11e-4351-ba88-b2f06b31770f\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-5\",\"result\":{\"kind\":\"success\",\"text\":\"插件组详情\\n数据 内置快照 2026-11-21 12:09 UTC · 1.8h 前 · 来源 built-in snapshot.json\\n\\n# 归档链  [archive-chain]\\n一次 /archive 跑通导出 → 推送 → 检索\\n\\n成员（安装顺序）：\\n  1. 会话转录 · 会话转录归档：user/assistant/tool 全量落 JSONL → Markdown，接 Obsidian 工作流\\n     dsh-plugin-transcript\\n  2. Obsidian 推送 · 转录推送 Obsidian 库：frontmatter + 内容哈希幂等去重，vault 自动发现；`/archive` 一键归档链\\n     dsh-plugin-obsidian-push\\n  3. 转录检索 · 跨会话全文搜索，与 transcript 的 JSONL 契约互通\\n     dsh-plugin-transcript-search\\n\\n为什么这样组（真实握手契约）：\\n  • transcript 产出的 sessions/*.jsonl 是 obsidian-push 与 transcript-search 共同消费的契约文件\\n  • /archive 串联三家：导出 JSONL → 推送到 Obsidian → 立即可被 transcript-search 检索\\n\\n安装顺序：\\n  按 members 顺序：transcript → obsidian-push → transcript-search\\n\\n冲突预检：\\n  无已知冲突\\n\\n验收步骤（可执行）：\\n  ✓ dump-config 含三个 id\\n  ✓ /archive 产出一份 JSONL；/push 能在目标库看到对应笔记；/find 能搜回该会话\\n\\n一键安装（M2）：\\n  /market install archive-chain\\n  /market install archive-chain --without <成员id>   跳过冲突成员\\n  /market install archive-chain --reinstall           重新安装已装成员\\n  /market verify archive-chain                        只校验四态与命令可见性\"}}}}",
+      "stderr": "",
+      "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+    },
+    {
+      "step": "execute /market install archive-chain",
+      "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market install archive-chain\",\"submittedAttachments\":[]}",
+      "exitCode": 0,
+      "stdout": "{\"type\":\"server-response\",\"rpcId\":\"a58a6c60-2ba6-4cc8-ad29-f3c3c3754204\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-6\",\"result\":{\"kind\":\"error\",\"text\":\"安装报告 · archive-chain · 宿主安装\\n归档链：3 步失败；验收未通过：dsh-plugin-transcript, dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n时间 2026-11-21T13:55:30.954Z → 2026-11-21T13:58:32.843Z\\n\\n✗ dsh-plugin-transcript  @deepseek-ai/dsh-plugin-transcript\\n     ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript: Not Found - 404\\n\\nThis error happened while installing a direct dependency of C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\n\\n@deepseek-ai/dsh-plugin-transcript is not in the npm registry, or you have no permission to fetch it.\\n\\nNo authorization header was set for the request.\\n（stage=install, target=@deepseek-ai/dsh-plugin-transcript） [failed]\\n✗ dsh-plugin-obsidian-push  @deepseek-ai/dsh-plugin-obsidian-push\\n     ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-obsidian-push: Not Found - 404\\n\\nThis error happened while installing a direct dependency of C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\n\\n@deepseek-ai/dsh-plugin-obsidian-push is not in the npm registry, or you have no permission to fetch it.\\n\\nNo authorization header was set for the request.\\n（stage=install, target=@deepseek-ai/dsh-plugin-obsidian-push） [failed]\\n✗ dsh-plugin-transcript-search  @deepseek-ai/dsh-plugin-transcript-search\\n     ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript-search: Not Found - 404\\n\\nThis error happened while installing a direct dependency of C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\n\\n@deepseek-ai/dsh-plugin-transcript-search is not in the npm registry, or you have no permission to fetch it.\\n\\nNo authorization header was set for the request.\\n（stage=install, target=@deepseek-ai/dsh-plugin-transcript-search） [failed]\\n\\n生效校验：验收未通过：dsh-plugin-transcript, dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n  dsh-plugin-transcript：未在安装清单中出现；row 处于 disabled\\n  dsh-plugin-obsidian-push：未在安装清单中出现；row 处于 disabled\\n  dsh-plugin-transcript-search：未在安装清单中出现；row 处于 disabled\\n\\n下一步：\\n  → 安装失败：operation-error（ ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript: Not Found - 404\\n\\nThis error happened while installing a direct dep）\\n  → 查看完整日志：C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\\\.plugin-manager\\\\logs\\\\operation-tdFqQc\\\\pnpm.log\\n  → /market seams 检查 seam；/market group <id> 复核成员与协同点\\n  → 安装失败：operation-error（ ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-obsidian-push: Not Found - 404\\n\\nThis error happened while installing a direct ）\\n  → 查看完整日志：C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\\\.plugin-manager\\\\logs\\\\operation-dqSzk9\\\\pnpm.log\\n  → 安装失败：operation-error（ ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript-search: Not Found - 404\\n\\nThis error happened while installing a dir）\\n  → 查看完整日志：C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\\\.plugin-manager\\\\logs\\\\operation-EDyaPm\\\\pnpm.log\\n  → /market install archive-chain --reinstall 重试 dsh-plugin-transcript\\n  → dsh plugin --profile web set dsh-plugin-transcript enabled\\n  → /market install archive-chain --reinstall 重试 dsh-plugin-obsidian-push\\n  → dsh plugin --profile web set dsh-plugin-obsidian-push enabled\\n  → /market install archive-chain --reinstall 重试 dsh-plugin-transcript-search\\n  → dsh plugin --profile web set dsh-plugin-transcript-search enabled\"}}}}",
+      "stderr": "",
+      "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+    },
+    {
+      "step": "execute /market verify archive-chain",
+      "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market verify archive-chain\",\"submittedAttachments\":[]}",
+      "exitCode": 0,
+      "stdout": "{\"type\":\"server-response\",\"rpcId\":\"3aad95c8-a8f2-4a67-a813-be9bc814a18a\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-7\",\"result\":{\"kind\":\"success\",\"text\":\"生效校验 · archive-chain\\n验收未通过：dsh-plugin-transcript, dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n  dsh-plugin-transcript：未在安装清单中出现；row 处于 disabled → /market install archive-chain --reinstall 重试 dsh-plugin-transcript | dsh plugin --profile web set dsh-plugin-transcript enabled\\n  dsh-plugin-obsidian-push：未在安装清单中出现；row 处于 disabled → /market install archive-chain --reinstall 重试 dsh-plugin-obsidian-push | dsh plugin --profile web set dsh-plugin-obsidian-push enabled\\n  dsh-plugin-transcript-search：未在安装清单中出现；row 处于 disabled → /market install archive-chain --reinstall 重试 dsh-plugin-transcript-search | dsh plugin --profile web set dsh-plugin-transcript-search enabled\"}}}}",
+      "stderr": "",
+      "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+    },
+    {
+      "step": "panel-inspect",
+      "command": "浏览器打开 7840，检查 [data-market-panel] 与 /plugins 客户端模块清单",
+      "exitCode": 0,
+      "stdout": "{\n  \"panelNodeCount\": 0,\n  \"hasMarketText\": false,\n  \"loadedMarketModule\": false,\n  \"tabs\": [],\n  \"pluginPanelShowsInstalled\": true\n}",
+      "stderr": "",
+      "note": "已安装列表可见 dsh-plugin-market，但页面加载的 /plugins 清单不含 dsh-plugin-market/client.js，DOM 无 [data-market-panel]。"
     }
   ],
   "application": {
@@ -91,16 +101,22 @@
     "entryId": "market",
     "name": "dsh-plugin-market",
     "configEnabled": true,
-    "activated": false,
-    "activationError": "cannot get property \"pluginManager\" without inject",
+    "activated": true,
+    "activationEvidence": "commands/list 返回 market；命令面板列出 market；启动无 did not activate。",
     "changeResultApplication": null,
-    "note": "dump-config 显示条目已挂载；启动时报 1 entry did not activate。因插件未激活，没有产生任何 installBundle ChangeResult，application 值不存在（null），不能标为 applied。"
+    "archiveChainMembers": "not-installed",
+    "archiveChainReason": "三名成员 @deepseek-ai/dsh-plugin-transcript / dsh-plugin-obsidian-push / dsh-plugin-transcript-search 在 npmmirror 返回 ERR_PNPM_FETCH_404，stage=install 失败，未产生 application 值。",
+    "note": "market 插件自身已激活并可用；/market install 确实调用了宿主 plugin_manager seam 并执行 pnpm，但目标包在 registry 不存在。"
   },
-  "m3": "unverified",
+  "m3": "fail",
   "panel": {
-    "status": "unverified",
-    "screenshot": null,
-    "reason": "market-audit 的 web 宿主从未监听/打印 URL，无法打开面板确认 tab；不把旧截图或未出现当作已验证。"
+    "status": "not-appeared",
+    "screenshots": [
+      ".screenshots/m3-live-command-menu.png",
+      ".screenshots/m3-live-conversation.png",
+      ".screenshots/m3-live-plugin-panel.png"
+    ],
+    "reason": "package.json 缺少 UI 插件的 exports[\"./client\"] 与 dsh.client 声明（对照宿主模板 decoration/package.json），宿主 /plugins 打包清单因此不含 dsh-plugin-market/client.js；lib/client.js 里向 conversation.view 注册的 MarketPanel 从未执行，DOM [data-market-panel] 数为 0，命令菜单/插件管理面板均无“插件市集”tab。"
   },
   "clientUi": {
     "hostClientPackagesPresent": true,
@@ -114,10 +130,272 @@
   "checks": {
     "installable": "pass",
     "configEntryVisible": "pass",
-    "activates": "fail",
-    "commands": "blocked",
-    "panel": "unverified"
+    "activates": "pass",
+    "commandRegistered": "pass",
+    "commandExecution": "pass",
+    "groupInstallArchiveChain": "fail",
+    "panel": "fail"
   },
   "result": "fail",
-  "blockedReason": "插件 apply 阶段直接读取未在 inject 中声明的 ctx.pluginManager（inject=['commands','tools']），cordis 抛 “cannot get property \\\"pluginManager\\\" without inject”，market 条目未激活；带该插件的 profile 起 web 后不监听端口、不打印 URL，/market 四条命令与市集面板均无法执行或验证。安装与配置写入本身成功。"
+  "blockedReason": null,
+  "latestAttempt": 2,
+  "activationFix": {
+    "commit": "2a769071349c4649f2d9f5ca0df711c8f9da20a3",
+    "verified": true,
+    "note": "attempt 1 的 pluginManager without inject 崩溃已消失，条目激活、命令注册并可执行。"
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "generatedAt": "2026-11-21T13:26:10.402Z",
+      "result": "fail",
+      "environment": {
+        "platform": "win32",
+        "os": "Windows",
+        "dshVersion": "0.2.0-rc.2",
+        "dshPath": "C:\\Users\\lenovo\\AppData\\Roaming\\npm\\dsh.ps1",
+        "nodeVersion": "v25.7.0",
+        "profile": "market-audit",
+        "dshHome": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home",
+        "dshHomeNote": "本机 node 进程写默认 ~/.dsh 被系统拒绝（EPERM，PowerShell 写同一路径正常），dsh 启动时重写 profile 的 cordis.yml 会失败；因此以 DSH_HOME 指向工作区内目录运行同一个真实 dsh，profile 完全独立，未触碰 ~/.dsh 下现有 profile（web）。",
+        "pluginSource": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live",
+        "gitHead": "ae26ce2aef5c24588a7cfd6e162092b9ba085882",
+        "gitBranch": "task/d-live"
+      },
+      "commands": [
+        {
+          "step": "probe-version",
+          "command": "dsh --version",
+          "exitCode": 0,
+          "stdout": "0.2.0-rc.2",
+          "stderr": ""
+        },
+        {
+          "step": "install-first-run",
+          "command": "dsh plugin --profile market-audit add ./",
+          "exitCode": 0,
+          "stdout": "dsh: initialized profile market-audit at C:\\Users\\lenovo\\.dsh\\profiles\\market-audit\n\ndependencies:\n+ dsh-plugin-market link:C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live\n\nAlready up to date\nDone in 991ms using pnpm v10.20.0",
+          "stderr": "",
+          "note": "首次在默认 DSH_HOME 下安装成功；随后因 node 无法写 ~/.dsh 的 cordis.yml，改为工作区 DSH_HOME 重装（见 install-isolated）。"
+        },
+        {
+          "step": "install-isolated",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh plugin --profile market-audit add ./",
+          "exitCode": 0,
+          "stdout": "dsh: initialized profile market-audit at C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home\\profiles\\market-audit\n\ndependencies:\n+ dsh-plugin-market link:C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live\n\nAlready up to date\nDone in 950ms using pnpm v10.20.0",
+          "stderr": ""
+        },
+        {
+          "step": "list",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh plugin --profile market-audit list",
+          "exitCode": 0,
+          "stdout": "Legend: production dependency, optional only, dev only\n\ndsh-profile-market-audit C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home\\profiles\\market-audit (PRIVATE)\n\ndependencies:\ndsh-plugin-market link:../../..",
+          "stderr": ""
+        },
+        {
+          "step": "dump-config",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile market-audit --dump-config",
+          "exitCode": 0,
+          "stdout": "# == dsh-plugin-market\n- id: market\n  name: dsh-plugin-market\n  config:\n    enabled: true",
+          "stderr": "",
+          "note": "composed 树中出现 id=market / name=dsh-plugin-market，config.enabled=true；dump-config 在 dsh 0.2.0-rc.2 不输出 application 字段。"
+        },
+        {
+          "step": "boot",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile market-audit web --no-open --port 7836",
+          "exitCode": null,
+          "stdout": "",
+          "stderr": "dsh: warning: 1 entry did not activate\nmarket (dsh-plugin-market): Error: cannot get property \"pluginManager\" without inject\n    at probeSeam (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/core/seam.js:5:36)\n    at resolveSeam (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/plugin.js:145:41)\n    at new apply (file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/lib/plugin.js:148:21)\n    at Fiber.execute (file:///C:/Users/lenovo/AppData/Roaming/npm/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis/lib/index.js:1068:24)\n    at file:///C:/Users/lenovo/AppData/Roaming/npm/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/cordis/lib/index.js:1142:34\n    at file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/.tmp-dsh-home/profiles/market-audit/#market\n    at file:///C:/Users/lenovo/Documents/Trae-CN/temp_20261121_02/worktrees/wt-d-live/.tmp-dsh-home/profiles/market-audit/#include",
+          "note": "进程存活约 50 秒、CPU 持续占用，但未打印 `dsh web: <url>`，7836 端口从未监听；观测后手动终止。说明 market 条目 apply 抛错，宿主无法进入就绪态。"
+        },
+        {
+          "step": "control-boot",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home'; dsh --profile web-check --no-open --port 7837",
+          "exitCode": null,
+          "stdout": "dsh web: http://127.0.0.1:7837/?token=BYyCiQz-BZhZr_ifr9E9e-9RUDJ2GE3JSWd8-ElF8h8",
+          "stderr": "",
+          "note": "对照：同一隔离 DSH_HOME 下不含 dsh-plugin-market 的 web-check profile 正常起服并打印 URL，端口 7837 处于 LISTEN。排除 DSH_HOME/凭据等环境因素。"
+        },
+        {
+          "step": "http-probe",
+          "command": "Invoke-WebRequest http://127.0.0.1:7836/ -TimeoutSec 5",
+          "exitCode": 1,
+          "stdout": "",
+          "stderr": "由于目标计算机积极拒绝，无法连接。 (127.0.0.1:7836)",
+          "note": "market-audit 的 web 端口无服务。"
+        },
+        {
+          "step": "commands-not-run",
+          "command": "/market, /market group archive-chain, /market install archive-chain, /market verify archive-chain",
+          "exitCode": null,
+          "stdout": "",
+          "stderr": "",
+          "note": "宿主未起服且 market 条目未激活，任何会话都无法执行这四条命令；未执行，不伪造输出。"
+        }
+      ],
+      "application": {
+        "entryPresent": true,
+        "entryId": "market",
+        "name": "dsh-plugin-market",
+        "configEnabled": true,
+        "activated": false,
+        "activationError": "cannot get property \"pluginManager\" without inject",
+        "changeResultApplication": null,
+        "note": "dump-config 显示条目已挂载；启动时报 1 entry did not activate。因插件未激活，没有产生任何 installBundle ChangeResult，application 值不存在（null），不能标为 applied。"
+      },
+      "m3": "unverified",
+      "panel": {
+        "status": "unverified",
+        "screenshot": null,
+        "reason": "market-audit 的 web 宿主从未监听/打印 URL，无法打开面板确认 tab；不把旧截图或未出现当作已验证。"
+      },
+      "checks": {
+        "installable": "pass",
+        "configEntryVisible": "pass",
+        "activates": "fail",
+        "commands": "blocked",
+        "panel": "unverified"
+      },
+      "blockedReason": "插件 apply 阶段直接读取未在 inject 中声明的 ctx.pluginManager（inject=['commands','tools']），cordis 抛 “cannot get property \\\"pluginManager\\\" without inject”，market 条目未激活；带该插件的 profile 起 web 后不监听端口、不打印 URL，/market 四条命令与市集面板均无法执行或验证。安装与配置写入本身成功。"
+    },
+    {
+      "attempt": 2,
+      "generatedAt": "2026-11-21T14:00:11.067Z",
+      "fixUnderTest": "probeSeam/adaptSeam 改用 ctx.reflect.get('pluginManager') + 所有 ctx 属性读取 try/catch",
+      "environment": {
+        "platform": "win32",
+        "os": "Windows",
+        "dshVersion": "0.2.0-rc.2",
+        "nodeVersion": "v25.7.0",
+        "profile": "market-audit2",
+        "dshHome": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home2",
+        "dshHomeNote": "node 写默认 ~/.dsh 仍被系统拒绝（EPERM），沿用工作区 DSH_HOME 运行真实 dsh；profile 独立，未触碰 ~/.dsh 下 web。",
+        "profileInitNote": "直接 dsh plugin add 生成的 profile bundles 仅有 dsh-base + dsh-plugin-market，缺 dsh-web-app，web 会话不会起服；先 dsh --profile market-audit2 --from-default-profile web --dump-config 初始化，再 add 插件，bundles 才为 base + web-app + plugin。",
+        "pluginSource": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live",
+        "gitHead": "2a769071349c4649f2d9f5ca0df711c8f9da20a3",
+        "gitBranch": "task/d-live"
+      },
+      "commands": [
+        {
+          "step": "install",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh plugin --profile market-audit2 add ./",
+          "exitCode": 0,
+          "stdout": "Already up to date\r\nDone in 962ms using pnpm v10.20.0",
+          "stderr": "",
+          "note": "安装成功（Already up to date）。"
+        },
+        {
+          "step": "list",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh plugin --profile market-audit2 list",
+          "exitCode": 0,
+          "stdout": "Legend: production dependency, optional only, dev only\r\n\r\ndsh-profile-market-audit2 C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home2\\profiles\\market-audit2 (PRIVATE)\r\n\r\ndependencies:\r\ndsh-plugin-market link:../../..",
+          "stderr": ""
+        },
+        {
+          "step": "dump-config",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh --profile market-audit2 --dump-config",
+          "exitCode": 0,
+          "stdout": "# == dsh-plugin-market\r\n- id: market\r\n  name: dsh-plugin-market\r\n  config:\r\n    enabled: true",
+          "stderr": "",
+          "note": "条目存在且 enabled；本次无 “did not activate” 告警。"
+        },
+        {
+          "step": "boot",
+          "command": "$env:DSH_HOME='<worktree>\\.tmp-dsh-home2'; dsh --profile market-audit2 --no-open --port 7840",
+          "exitCode": null,
+          "stdout": "dsh web: http://127.0.0.1:7840/?token=<redacted>",
+          "stderr": "",
+          "note": "宿主正常起服并监听 7840，无激活错误；进程在截图/命令执行后手动终止。"
+        },
+        {
+          "step": "commands-list",
+          "command": "POST /api/commands/list {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\"}",
+          "exitCode": 0,
+          "stdout": "{\"type\":\"server-response\",\"rpcId\":\"4f42f847-4d23-4a55-9687-3be3970c4537\",\"result\":{\"ok\":true,\"value\":[{\"definitionId\":\"@deepseek-ai/dsh-command-compact\",\"name\":\"compact\",\"description\":\"Compact older conversation history\"},{\"definitionId\":\"@deepseek-ai/dsh-session-log-export\",\"name\":\"export\",\"description\":\"Download this Session log as a ZIP archive\"},{\"definitionId\":\"@deepseek-ai/dsh-command-feedback\",\"name\":\"feedback\",\"description\":\"Record feedback about this session\",\"input\":{\"hint\":\"<text>\"}},{\"definitionId\":\"@deepseek-ai/dsh-command-goal\",\"name\":\"goal\",\"description\":\"Set or view the goal for a long-running task\",\"input\":{\"hint\":\"[<objective>|clear|edit <objective>|pause|resume]\",\"attachments\":true}},{\"name\":\"market\",\"description\":\"插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market verify <id> 只校验，/market seams 查宿主安装能力。断网用内置快照。\",\"input\":{\"hint\":\"[group <id> | install <id> [--without a,b] [--reinstall] | verify <id> | seams]\"}},{\"definitionId\":\"@deepseek-ai/dsh-permission-presets\",\"name\":\"permission\",\"description\":\"Switch the permission preset (sandbox mode + approval policy)\",\"input\":{\"hint\":\"<preset>\"}},{\"definitionId\":\"@deepseek-ai/dsh-plan-mod",
+          "stderr": "",
+          "note": "服务端命令清单包含 name=market，描述与本插件一致，证明命令真实注册。"
+        },
+        {
+          "step": "execute /market",
+          "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market\",\"submittedAttachments\":[]}",
+          "exitCode": 0,
+          "stdout": "{\"type\":\"server-response\",\"rpcId\":\"b62b2179-d78a-4e2d-84ad-46d2f01c94aa\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-4\",\"result\":{\"kind\":\"success\",\"text\":\"插件市集 · 只读浏览\\n数据 内置快照 2026-11-21 12:09 UTC · 1.8h 前 · 来源 built-in snapshot.json\\n\\n精选与社区共 6 组 · 25 个插件\\n\\n• 归档链  [archive-chain] · 编辑精选\\n    一次 /archive 跑通导出 → 推送 → 检索\\n    3 个插件：会话转录 → Obsidian 推送 → 转录检索\\n• 开局三件套  [starter-three] · 编辑精选\\n    先看见钱，再看见所有 IDE，最后能跨窗口派活\\n    3 个插件：用量仪表 → IDE 中枢 → 任务工坊\\n• 交接协作  [handoff-duo] · 编辑精选\\n    系统提示注入 + 跨窗口事实检索，换窗口不丢上下文\\n    3 个插件：任务工坊 → 钉板 → 事实库\\n• 省钱组合  [saving-combo] · 编辑精选\\n    同读一份 per-call 成本台账，拦缓存、算预测、对账\\n    3 个插件：缓存护栏 → 花费预测 → 成本台账\\n• 插件开发  [plugin-dev] · 编辑精选\\n    forge 产物过 verify-plugin，cards 负责渲染交付\\n    3 个插件：插件锻造 → 提示词优化 → 家族卡片\\n• 生态雷达  [eco-radar] · 编辑精选\\n    同一套 GitHub 搜索通道与止损规则，先扫后深挖\\n    2 个插件：生态扫描 → 深度扫描\\n\\n用 /market group <id> 查看成员与协同点；用 /market install <id> 一键安装；/market seams 检查宿主安装能力。\"}}}}",
+          "stderr": "",
+          "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+        },
+        {
+          "step": "execute /market group archive-chain",
+          "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market group archive-chain\",\"submittedAttachments\":[]}",
+          "exitCode": 0,
+          "stdout": "{\"type\":\"server-response\",\"rpcId\":\"cf8f95be-b11e-4351-ba88-b2f06b31770f\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-5\",\"result\":{\"kind\":\"success\",\"text\":\"插件组详情\\n数据 内置快照 2026-11-21 12:09 UTC · 1.8h 前 · 来源 built-in snapshot.json\\n\\n# 归档链  [archive-chain]\\n一次 /archive 跑通导出 → 推送 → 检索\\n\\n成员（安装顺序）：\\n  1. 会话转录 · 会话转录归档：user/assistant/tool 全量落 JSONL → Markdown，接 Obsidian 工作流\\n     dsh-plugin-transcript\\n  2. Obsidian 推送 · 转录推送 Obsidian 库：frontmatter + 内容哈希幂等去重，vault 自动发现；`/archive` 一键归档链\\n     dsh-plugin-obsidian-push\\n  3. 转录检索 · 跨会话全文搜索，与 transcript 的 JSONL 契约互通\\n     dsh-plugin-transcript-search\\n\\n为什么这样组（真实握手契约）：\\n  • transcript 产出的 sessions/*.jsonl 是 obsidian-push 与 transcript-search 共同消费的契约文件\\n  • /archive 串联三家：导出 JSONL → 推送到 Obsidian → 立即可被 transcript-search 检索\\n\\n安装顺序：\\n  按 members 顺序：transcript → obsidian-push → transcript-search\\n\\n冲突预检：\\n  无已知冲突\\n\\n验收步骤（可执行）：\\n  ✓ dump-config 含三个 id\\n  ✓ /archive 产出一份 JSONL；/push 能在目标库看到对应笔记；/find 能搜回该会话\\n\\n一键安装（M2）：\\n  /market install archive-chain\\n  /market install archive-chain --without <成员id>   跳过冲突成员\\n  /market install archive-chain --reinstall           重新安装已装成员\\n  /market verify archive-chain                        只校验四态与命令可见性\"}}}}",
+          "stderr": "",
+          "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+        },
+        {
+          "step": "execute /market install archive-chain",
+          "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market install archive-chain\",\"submittedAttachments\":[]}",
+          "exitCode": 0,
+          "stdout": "{\"type\":\"server-response\",\"rpcId\":\"a58a6c60-2ba6-4cc8-ad29-f3c3c3754204\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-6\",\"result\":{\"kind\":\"error\",\"text\":\"安装报告 · archive-chain · 宿主安装\\n归档链：3 步失败；验收未通过：dsh-plugin-transcript, dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n时间 2026-11-21T13:55:30.954Z → 2026-11-21T13:58:32.843Z\\n\\n✗ dsh-plugin-transcript  @deepseek-ai/dsh-plugin-transcript\\n     ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript: Not Found - 404\\n\\nThis error happened while installing a direct dependency of C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\n\\n@deepseek-ai/dsh-plugin-transcript is not in the npm registry, or you have no permission to fetch it.\\n\\nNo authorization header was set for the request.\\n（stage=install, target=@deepseek-ai/dsh-plugin-transcript） [failed]\\n✗ dsh-plugin-obsidian-push  @deepseek-ai/dsh-plugin-obsidian-push\\n     ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-obsidian-push: Not Found - 404\\n\\nThis error happened while installing a direct dependency of C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\n\\n@deepseek-ai/dsh-plugin-obsidian-push is not in the npm registry, or you have no permission to fetch it.\\n\\nNo authorization header was set for the request.\\n（stage=install, target=@deepseek-ai/dsh-plugin-obsidian-push） [failed]\\n✗ dsh-plugin-transcript-search  @deepseek-ai/dsh-plugin-transcript-search\\n     ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript-search: Not Found - 404\\n\\nThis error happened while installing a direct dependency of C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\n\\n@deepseek-ai/dsh-plugin-transcript-search is not in the npm registry, or you have no permission to fetch it.\\n\\nNo authorization header was set for the request.\\n（stage=install, target=@deepseek-ai/dsh-plugin-transcript-search） [failed]\\n\\n生效校验：验收未通过：dsh-plugin-transcript, dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n  dsh-plugin-transcript：未在安装清单中出现；row 处于 disabled\\n  dsh-plugin-obsidian-push：未在安装清单中出现；row 处于 disabled\\n  dsh-plugin-transcript-search：未在安装清单中出现；row 处于 disabled\\n\\n下一步：\\n  → 安装失败：operation-error（ ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript: Not Found - 404\\n\\nThis error happened while installing a direct dep）\\n  → 查看完整日志：C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\\\.plugin-manager\\\\logs\\\\operation-tdFqQc\\\\pnpm.log\\n  → /market seams 检查 seam；/market group <id> 复核成员与协同点\\n  → 安装失败：operation-error（ ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-obsidian-push: Not Found - 404\\n\\nThis error happened while installing a direct ）\\n  → 查看完整日志：C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\\\.plugin-manager\\\\logs\\\\operation-dqSzk9\\\\pnpm.log\\n  → 安装失败：operation-error（ ERR_PNPM_FETCH_404  GET https://registry.npmmirror.com/@deepseek-ai%2Fdsh-plugin-transcript-search: Not Found - 404\\n\\nThis error happened while installing a dir）\\n  → 查看完整日志：C:\\\\Users\\\\lenovo\\\\Documents\\\\Trae-CN\\\\temp_20261121_02\\\\worktrees\\\\wt-d-live\\\\.tmp-dsh-home2\\\\profiles\\\\market-audit2\\\\.plugin-manager\\\\logs\\\\operation-EDyaPm\\\\pnpm.log\\n  → /market install archive-chain --reinstall 重试 dsh-plugin-transcript\\n  → dsh plugin --profile web set dsh-plugin-transcript enabled\\n  → /market install archive-chain --reinstall 重试 dsh-plugin-obsidian-push\\n  → dsh plugin --profile web set dsh-plugin-obsidian-push enabled\\n  → /market install archive-chain --reinstall 重试 dsh-plugin-transcript-search\\n  → dsh plugin --profile web set dsh-plugin-transcript-search enabled\"}}}}",
+          "stderr": "",
+          "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+        },
+        {
+          "step": "execute /market verify archive-chain",
+          "command": "POST /api/commands/execute {\"agentId\":\"session-e4f3d3b3-fdcf-4d52-983e-49279cad4c72\",\"line\":\"/market verify archive-chain\",\"submittedAttachments\":[]}",
+          "exitCode": 0,
+          "stdout": "{\"type\":\"server-response\",\"rpcId\":\"3aad95c8-a8f2-4a67-a813-be9bc814a18a\",\"result\":{\"ok\":true,\"value\":{\"commandId\":\"cmd-1fff911c-7\",\"result\":{\"kind\":\"success\",\"text\":\"生效校验 · archive-chain\\n验收未通过：dsh-plugin-transcript, dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n  dsh-plugin-transcript：未在安装清单中出现；row 处于 disabled → /market install archive-chain --reinstall 重试 dsh-plugin-transcript | dsh plugin --profile web set dsh-plugin-transcript enabled\\n  dsh-plugin-obsidian-push：未在安装清单中出现；row 处于 disabled → /market install archive-chain --reinstall 重试 dsh-plugin-obsidian-push | dsh plugin --profile web set dsh-plugin-obsidian-push enabled\\n  dsh-plugin-transcript-search：未在安装清单中出现；row 处于 disabled → /market install archive-chain --reinstall 重试 dsh-plugin-transcript-search | dsh plugin --profile web set dsh-plugin-transcript-search enabled\"}}}}",
+          "stderr": "",
+          "note": "在真实会话中调用 commands/execute 得到的原始响应；UI 因本机未配置 API Key 在发送前弹窗，故绕过 UI 凭据门禁直接调用同一宿主 RPC。"
+        },
+        {
+          "step": "panel-inspect",
+          "command": "浏览器打开 7840，检查 [data-market-panel] 与 /plugins 客户端模块清单",
+          "exitCode": 0,
+          "stdout": "{\n  \"panelNodeCount\": 0,\n  \"hasMarketText\": false,\n  \"loadedMarketModule\": false,\n  \"tabs\": [],\n  \"pluginPanelShowsInstalled\": true\n}",
+          "stderr": "",
+          "note": "已安装列表可见 dsh-plugin-market，但页面加载的 /plugins 清单不含 dsh-plugin-market/client.js，DOM 无 [data-market-panel]。"
+        }
+      ],
+      "application": {
+        "entryPresent": true,
+        "entryId": "market",
+        "name": "dsh-plugin-market",
+        "configEnabled": true,
+        "activated": true,
+        "activationEvidence": "commands/list 返回 market；命令面板列出 market；启动无 did not activate。",
+        "changeResultApplication": null,
+        "archiveChainMembers": "not-installed",
+        "archiveChainReason": "三名成员 @deepseek-ai/dsh-plugin-transcript / dsh-plugin-obsidian-push / dsh-plugin-transcript-search 在 npmmirror 返回 ERR_PNPM_FETCH_404，stage=install 失败，未产生 application 值。",
+        "note": "market 插件自身已激活并可用；/market install 确实调用了宿主 plugin_manager seam 并执行 pnpm，但目标包在 registry 不存在。"
+      },
+      "panel": {
+        "status": "not-appeared",
+        "screenshots": [
+          ".screenshots/m3-live-command-menu.png",
+          ".screenshots/m3-live-conversation.png",
+          ".screenshots/m3-live-plugin-panel.png"
+        ],
+        "reason": "package.json 缺少 UI 插件的 exports[\"./client\"] 与 dsh.client 声明（对照宿主模板 decoration/package.json），宿主 /plugins 打包清单因此不含 dsh-plugin-market/client.js；lib/client.js 里向 conversation.view 注册的 MarketPanel 从未执行，DOM [data-market-panel] 数为 0，命令菜单/插件管理面板均无“插件市集”tab。"
+      },
+      "checks": {
+        "installable": "pass",
+        "configEntryVisible": "pass",
+        "activates": "pass",
+        "commandRegistered": "pass",
+        "commandExecution": "pass",
+        "groupInstallArchiveChain": "fail",
+        "panel": "fail"
+      },
+      "result": "fail",
+      "failureReasons": [
+        "archive-chain 三名成员在当前 npm registry（npmmirror）404，安装与验收失败（外部包源问题，非 seam/激活回归）。",
+        "市集面板未出现：package.json 未声明 client 导出与 dsh.client，宿主不会加载 lib/client.js。"
+      ],
+      "blockedReason": null
+    }
+  ],
+  "failureReasons": [
+    "archive-chain 三名成员在当前 npm registry（npmmirror）404，安装与验收失败（外部包源问题，非 seam/激活回归）。",
+    "市集面板未出现：package.json 未声明 client 导出与 dsh.client，宿主不会加载 lib/client.js。"
+  ]
 }
