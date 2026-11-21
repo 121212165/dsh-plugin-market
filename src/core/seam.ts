@@ -36,7 +36,7 @@ export function probeSeam(ctx: unknown): SeamProbe {
     source: '',
     checked,
     methods: [],
-    note: '未发现可用的 plugin_manager seam；安装已降级为“复制命令 + 装完手动校验”，不会假装成功',
+    note: '未发现可用的 plugin_manager seam；安装已降级为“复制命令 + 装完手动校验”，不会假装成功；若刚启用 plugin_manager，重启或重跑本命令',
   };
 }
 

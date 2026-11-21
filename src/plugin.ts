@@ -183,9 +183,27 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
   const read = (): Promise<MarketRead> => readMarket(readerDeps);
 
   // M2 seam: a missing plugin_manager degrades to manual commands, never to a
-  // fake "installed" report. Tests override both probe and seam deterministically.
-  const seamProbe: SeamProbe = deps.seamProbe ?? probeSeam(ctx);
-  const seam: InstallSeam | null = deps.seam ?? (config.allowInstall ? adaptSeam(seamProbe, ctx) : null);
+  // fake "installed" report. Resolution is per call, not startup-only: the host
+  // may register plugin_manager after this plugin mounts, so every install /
+  // verify / seams path re-probes and picks up late registration without a
+  // reload. Tests override both probe and seam deterministically.
+  const resolveSeam = (): { probe: SeamProbe; seam: InstallSeam | null } => {
+    if (deps.seam) {
+      return {
+        probe: deps.seamProbe ?? {
+          available: true,
+          source: deps.seam.source,
+          checked: ['deps.seam'],
+          methods: ['installBundle'],
+          note: '测试注入的安装 seam',
+        },
+        seam: deps.seam,
+      };
+    }
+    const probe = deps.seamProbe ?? probeSeam(ctx);
+    return { probe, seam: config.allowInstall ? adaptSeam(probe, ctx) : null };
+  };
+  const startup = resolveSeam();
   const registeredCommands = (): string[] => {
     if (deps.registeredCommands) return deps.registeredCommands();
     const capture = ctx as unknown as { commands?: { list?: () => unknown[] } };
@@ -193,9 +211,9 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
       ? capture.commands.list().map((command) => String((command as { name?: unknown }).name ?? ''))
       : [];
   };
-  log.info(seam
-    ? `install seam available · ${seam.source}`
-    : `install seam unavailable · ${seamProbe.note}`);
+  log.info(startup.seam
+    ? `install seam available · ${startup.seam.source}`
+    : `install seam unavailable · ${startup.probe.note}`);
 
   ctx.commands.register({
     name: 'market',
@@ -206,13 +224,14 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
       try {
         // seams is read-only and needs no snapshot; keep it available even if data is empty.
         if (args.subcommand === 'seams') {
+          const { probe, seam } = resolveSeam();
           const lines = [
             '宿主安装能力（plugin_manager seam）',
-            `  状态：${seamProbe.available ? '可用' : '不可用 → 降级为手动命令'}`,
-            `  来源：${seamProbe.source || '(无)'}`,
-            `  已检查：${seamProbe.checked.join('、')}`,
-            `  方法：${seamProbe.methods.join(', ') || '(无)'}`,
-            `  说明：${seamProbe.note}`,
+            `  状态：${probe.available ? '可用' : '不可用 → 降级为手动命令'}`,
+            `  来源：${probe.source || '(无)'}`,
+            `  已检查：${probe.checked.join('、')}`,
+            `  方法：${probe.methods.join(', ') || '(无)'}`,
+            `  说明：${probe.note}`,
           ];
           if (!seam) lines.push('', '手动安装模板：', ...manualInstallCommands('<npm 包或本地路径>', config.profile, '<groupId>').map((line) => `  ${line}`));
           return { kind: 'success' as const, text: lines.join('\n') };
@@ -234,7 +253,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
           const report = await runGroupInstall({
             groupId: args.target,
             index: result.index,
-            seam,
+            seam: resolveSeam().seam,
             profile: config.profile,
             registeredCommands: registeredCommands(),
             now: deps.now,
@@ -246,7 +265,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
           const text = await runVerify({
             groupId: args.target,
             index: result.index,
-            seam,
+            seam: resolveSeam().seam,
             profile: config.profile,
             registeredCommands: registeredCommands(),
             now: deps.now,
@@ -324,7 +343,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
         const report = await runGroupInstall({
           groupId: String(args.groupId ?? ''),
           index: result.index,
-          seam,
+          seam: resolveSeam().seam,
           profile: config.profile,
           registeredCommands: registeredCommands(),
           now: deps.now,
@@ -358,7 +377,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
         return runVerify({
           groupId: String(args.groupId ?? ''),
           index: result.index,
-          seam,
+          seam: resolveSeam().seam,
           profile: config.profile,
           registeredCommands: registeredCommands(),
           now: deps.now,
@@ -367,5 +386,5 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
     }),
   );
 
-  log.info(`mounted · ${seam ? 'install-ready' : 'read-only + manual-install guidance'} · cache=${cachePath}`);
+  log.info(`mounted · ${startup.seam ? 'install-ready' : 'read-only + manual-install guidance'} · cache=${cachePath}`);
 }
