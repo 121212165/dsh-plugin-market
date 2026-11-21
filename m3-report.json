@@ -1,4 +1,5 @@
 {
+  "evidenceType": "mock",
   "criteria": {
     "five_cards": true,
     "no_horizontal_overflow": true,

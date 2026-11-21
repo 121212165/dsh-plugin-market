@@ -1,5 +1,6 @@
 {
   "milestone": "M2 — 一键安装闭环",
+  "evidenceType": "mock",
   "generatedAt": "2026-11-21T19:40:00.000Z",
   "criteria": {
     "install_command": true,
