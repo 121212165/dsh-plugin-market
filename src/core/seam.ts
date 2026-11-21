@@ -2,25 +2,54 @@
  *
  * The authoritative check is cordis_inspect_query in a live dsh session; at
  * runtime we probe the shapes we can actually call. Missing seam => degraded
- * mode with copy-pasteable commands, never a fake success. */
+ * mode with copy-pasteable commands, never a fake success.
+ *
+ * A cordis Context is a proxy: reading a service that is not declared in
+ * `inject` throws (`pluginManager without inject`) instead of returning
+ * undefined. So every candidate read is guarded, and `ctx.reflect.get()` is
+ * tried first because it is the inject-free accessor cordis provides. */
 import type { ChangeResultLike, InstallSeam, SeamProbe } from './install-types.ts';
 
 type UnknownCtx = Record<string, any>;
 
 const REQUIRED = ['installBundle', 'listPlugins', 'listBundles'] as const;
 
+/** Read one candidate without letting a ctx proxy abort the whole probe. */
+function safeRead<T>(read: () => T): T | undefined {
+  try {
+    return read();
+  } catch {
+    return undefined;
+  }
+}
+
+/** Every shape worth checking, reflect first: it is the only inject-free read
+ * cordis guarantees not to throw. Plain-object hosts fall through to the rest. */
+function candidates(root: UnknownCtx): [string, unknown][] {
+  return [
+    [
+      "ctx.reflect.get('pluginManager')",
+      safeRead(() => {
+        const reflect = root.reflect;
+        return typeof reflect?.get === 'function' ? reflect.get('pluginManager') : undefined;
+      }),
+    ],
+    ['ctx.pluginManager', safeRead(() => root.pluginManager)],
+    ['ctx.remotes.pluginManager', safeRead(() => root.remotes?.pluginManager)],
+    ['ctx.remote.pluginManager', safeRead(() => root.remote?.pluginManager)],
+    ['ctx.services.pluginManager', safeRead(() => root.services?.pluginManager)],
+  ];
+}
+
 export function probeSeam(ctx: unknown): SeamProbe {
   const root = (ctx ?? {}) as UnknownCtx;
-  const candidates: [string, unknown][] = [
-    ['ctx.pluginManager', root.pluginManager],
-    ['ctx.remotes.pluginManager', root.remotes?.pluginManager],
-    ['ctx.remote.pluginManager', root.remote?.pluginManager],
-    ['ctx.services.pluginManager', root.services?.pluginManager],
-  ];
-  const checked = candidates.map(([name]) => name);
-  for (const [source, candidate] of candidates) {
+  const list = candidates(root);
+  const checked = list.map(([name]) => name);
+  for (const [source, candidate] of list) {
     if (!candidate || typeof candidate !== 'object') continue;
-    const methods = REQUIRED.filter((name) => typeof (candidate as UnknownCtx)[name] === 'function');
+    const methods = safeRead(() =>
+      REQUIRED.filter((name) => typeof (candidate as UnknownCtx)[name] === 'function'),
+    ) ?? [];
     if (methods.includes('installBundle')) {
       return {
         available: true,
@@ -45,8 +74,11 @@ export function probeSeam(ctx: unknown): SeamProbe {
 export function adaptSeam(probe: SeamProbe, ctx: unknown): InstallSeam | null {
   if (!probe.available) return null;
   const root = (ctx ?? {}) as UnknownCtx;
-  const service: UnknownCtx =
-    root.pluginManager ?? root.remotes?.pluginManager ?? root.remote?.pluginManager ?? root.services?.pluginManager ?? {};
+  const resolved = candidates(root).find(([, candidate]) => {
+    if (!candidate || typeof candidate !== 'object') return false;
+    return safeRead(() => typeof (candidate as UnknownCtx).installBundle === 'function') === true;
+  });
+  const service: UnknownCtx = (resolved?.[1] as UnknownCtx | undefined) ?? {};
   return {
     kind: 'live',
     source: probe.source,
