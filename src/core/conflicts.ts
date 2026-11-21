@@ -161,11 +161,16 @@ export function planGroupInstall(input: PrecheckInput): InstallPlan {
   };
 }
 
-/** Install spec: local fixture paths win (clean-profile tests), otherwise npm. */
+/** Install spec: local fixture paths win (clean-profile tests), then the GitHub
+ * repo (the `npm` names in the catalog were never published — installing them
+ * 404s), npm only as a last resort. */
 export function specFor(plugin: PluginEntry | undefined): string {
   if (!plugin) return '';
   const local = (plugin as PluginEntry & { localPath?: string }).localPath;
-  return local || plugin.npm || `github:121212165/${plugin.repo.split('/').pop() ?? plugin.id}`;
+  if (local) return local;
+  const repo = plugin.repo.trim().replace(/\.git$/, '');
+  if (repo) return `github:${repo}`;
+  return plugin.npm ?? '';
 }
 
 /** Human-readable pre-check block, reused by the command and the tool. */

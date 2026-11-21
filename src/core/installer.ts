@@ -45,7 +45,8 @@ function pluginOf(index: MarketIndex, id: string): PluginEntry | undefined {
 }
 
 function memberKeys(plugin: PluginEntry | undefined, id: string): string[] {
-  return [id, plugin?.npm ?? '', plugin?.repo.split('/').pop() ?? ''].filter(Boolean).map((value) => value.toLowerCase());
+  return [id, plugin?.npm ?? '', plugin?.repo ?? '', plugin?.repo.split('/').pop() ?? '']
+    .filter(Boolean).map((value) => value.toLowerCase());
 }
 
 function findRow(rows: InstalledRow[], plugin: PluginEntry | undefined, id: string): InstalledRow | undefined {

@@ -20,7 +20,7 @@ function freshProfileHost() {
 
   const pluginManager = {
     async installBundle(spec) {
-      const plugin = SNAPSHOT.plugins.find((p) => p.id === spec || p.npm === spec);
+      const plugin = SNAPSHOT.plugins.find((p) => p.id === spec || p.npm === spec || `github:${p.repo}` === spec);
       const id = plugin?.id ?? spec;
       rows.push({ id, enabled: true, fiberPhase: 'active' });
       for (const entry of plugin?.entries ?? []) {

@@ -19,7 +19,9 @@ export interface PrecheckInput {
 }
 /** Check collisions inside the group and against the live host inventory. */
 export declare function planGroupInstall(input: PrecheckInput): InstallPlan;
-/** Install spec: local fixture paths win (clean-profile tests), otherwise npm. */
+/** Install spec: local fixture paths win (clean-profile tests), then the GitHub
+ * repo (the `npm` names in the catalog were never published — installing them
+ * 404s), npm only as a last resort. */
 export declare function specFor(plugin: PluginEntry | undefined): string;
 /** Human-readable pre-check block, reused by the command and the tool. */
 export declare function renderConflicts(plan: InstallPlan): string;
