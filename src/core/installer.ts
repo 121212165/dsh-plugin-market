@@ -199,7 +199,7 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
   if (!group) return empty(`找不到组 ${input.groupId || '(空)'}；用 /market 查看可用组`);
   if (!input.seam) {
     return empty(
-      `plugin_manager seam 不可用（已核实 ${input.index.groups.length} 组中的 ${group.id}），未执行任何安装。请复制下面的命令手动安装，再用 /market verify 校验。`,
+      `plugin_manager seam 不可用（已核实 ${input.index.groups.length} 组中的 ${group.id}），未执行任何安装。请复制下面的命令手动安装，再用 /market verify 校验。若刚启用 plugin_manager，重启或重跑本命令。`,
     );
   }
 
