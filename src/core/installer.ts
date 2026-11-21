@@ -68,7 +68,9 @@ export function nextStepsFor(result: ChangeResultLike, spec: string, profile: st
       return [`包名/仓库地址无效${diagnostic}；先 npm view ${spec} version 确认包存在`, `修正市集数据后重试：/market install <id>`];
     case 'network':
     case 'timeout':
-      return [`网络或 registry 不可达${diagnostic}；检查代理后重试`, `重试 /market install <id>（安装失败不会写坏 profile）`];
+      return result.packageResult?.timedOut
+        ? [`宿主 pnpm 静默超时（plugin-manager.idleTimeoutMs，默认 600000）${diagnostic}；调高该配置或先手动装好依赖再重试`, `重试 /market install <id>（安装失败不会写坏 profile）`]
+        : [`网络或 registry 不可达${diagnostic}；检查代理后重试`, `重试 /market install <id>（安装失败不会写坏 profile）`];
     case 'build-blocked':
       return [`构建脚本未获批准${diagnostic}；确认可信后再传入 approvedBuilds`, `dsh plugin --profile ${profile} list 查看 pendingBuilds`];
     case 'pendingBuilds':

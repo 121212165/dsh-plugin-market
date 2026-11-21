@@ -10,7 +10,7 @@ export interface ChangeResultLike {
   enabled?: boolean;
   error?: { code?: string; diagnostic?: string };
   warnings?: string[];
-  packageResult?: { exitCode: number; output?: string; logPath?: string; kind?: string };
+  packageResult?: { exitCode: number; output?: string; logPath?: string; kind?: string; timedOut?: boolean };
   pendingBuilds?: string[];
   bundle?: string;
 }

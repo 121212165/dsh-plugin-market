@@ -16,6 +16,7 @@ export interface ChangeResultLike {
         output?: string;
         logPath?: string;
         kind?: string;
+        timedOut?: boolean;
     };
     pendingBuilds?: string[];
     bundle?: string;
