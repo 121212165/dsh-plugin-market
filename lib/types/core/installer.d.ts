@@ -16,6 +16,7 @@ export interface VerifyInput {
     index: MarketIndex;
     seam: InstallSeam | null;
     applicationByMember?: Record<string, ApplicationState>;
+    memberIds?: string[];
     registeredCommands?: string[] | undefined;
     profile?: string;
     now?: (() => number) | undefined;

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { runGroupInstall, verifyGroup } from '../src/core/index.ts';
+import { manualInstallCommands, runGroupInstall, verifyGroup } from '../src/core/index.ts';
 import type {
   ApplicationState,
   ChangeResultLike,
@@ -115,6 +115,24 @@ test('blocking conflicts prevent every installBundle call', async () => {
   assert.equal(seam.calls.length, 0);
   assert.ok(report.nextSteps.some((line) => line.includes('--without')));
   assert.ok(report.nextSteps.some((line) => line.includes('dsh plugin --profile web list')));
+});
+
+test('--without excludes a member from verification and reports the partial install clearly', async () => {
+  const seam = fakeSeam();
+  const report = await runGroupInstall({
+    groupId: 'archive-chain', index, seam, now: FIXED_NOW,
+    registeredCommands: [], excluded: ['dsh-plugin-obsidian-push'],
+  });
+  assert.equal(report.ok, true, report.summary);
+  assert.equal(report.verification?.ok, true);
+  assert.equal(report.verification?.members.length, 2);
+  assert.match(report.summary, /按要求跳过 dsh-plugin-obsidian-push/);
+});
+
+test('manual install commands shell-quote catalog values and grep literally', () => {
+  const commands = manualInstallCommands(`pkg'; touch /tmp/unexpected; echo '`, `web profile`, 'archive-chain');
+  assert.equal(commands[0], `dsh plugin --profile 'web profile' add 'pkg'"'"'; touch /tmp/unexpected; echo '"'"''`);
+  assert.equal(commands[1], `dsh --profile 'web profile' --dump-config | grep -F -- 'pkg'"'"'; touch /tmp/unexpected; echo '"'"''`);
 });
 
 test('degraded mode returns manual commands and never claims success', async () => {
