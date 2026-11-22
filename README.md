@@ -61,7 +61,7 @@ src/snapshot.json                      ← 内置快照，随包发布
 - `test/headless-smoke.test.mjs` — 第三层测试：直接加载构建产物 `lib/plugin.js`，在无 dsh 运行时/无网络/无缓存的全新 profile 上走真实 seam 探测 → 装「归档链」→ 四态校验 → 调用 3 个成员声明的全部 4 个入口；证据写 `m5-smoke-evidence.json`。
 - `verify-m5.py` — 汇总验收：build → gates → typecheck → 54 条测试 → 三层结构 → 实装实调一致性 → lib 入库，产出 `m5-report.json`。
 
-诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `mock`，门禁为 `static`，三者不混用。首次接真机仍需按 `m2-live-evidence.json` 的步骤复跑一次 `--dump-config` 活体挂载检查。
+诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `mock`，门禁为 `static`，三者不混用。当前真机进展（attempt 3，2026-11-22）：远程 `github:` 规格可装通 `dsh-plugin-transcript` 并通过四态校验；`obsidian-push` / `transcript-search` 包内构建成功，但在 pnpm 解析 `github:121212165/dsh-plugin-kit#v0.2.1` 时受本机 GitHub 网络抖动阻塞；conversation.view 面板截图尚未取得，标记 `unverified`。首次接真机仍需按 `m2-live-evidence.json` 的步骤复跑一次 `--dump-config` 活体挂载检查。
 
 ## 安装 / 卸载 / 降级
 

@@ -136,9 +136,9 @@
     "groupInstallArchiveChain": "fail",
     "panel": "fail"
   },
-  "result": "fail",
-  "blockedReason": null,
-  "latestAttempt": 2,
+  "result": "partial",
+  "blockedReason": "第 3 次真机（profile market-audit3，远程 github: 规格）已能装通 dsh-plugin-transcript 并通过四态校验；obsidian-push 与 transcript-search 的包构建本身成功，失败点统一在 pnpm 解析传递依赖 github:121212165/dsh-plugin-kit#v0.2.1 时本机到 github.com 的 HTTPS 连接被 Reset/超时。属外部网络抖动，已如实记录，未伪造成通过。",
+  "latestAttempt": 3,
   "activationFix": {
     "commit": "2a769071349c4649f2d9f5ca0df711c8f9da20a3",
     "verified": true,
@@ -392,6 +392,56 @@
         "市集面板未出现：package.json 未声明 client 导出与 dsh.client，宿主不会加载 lib/client.js。"
       ],
       "blockedReason": null
+    },
+    {
+      "attempt": 3,
+      "generatedAt": "2026-11-22T04:03:00.000Z",
+      "fixUnderTest": "安装规格改走 github:（aba0c76）、package.json 声明 client 入口（aba0c76）、pnpm 静默超时提示（b10de4a）。测试 profile 另调 idleTimeoutMs=1800000、githubConnectionTimeoutMs=30000（仅测试 profile）。",
+      "environment": {
+        "profile": "market-audit3",
+        "dshHome": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-d-live\\.tmp-dsh-home3",
+        "dshVersion": "0.2.0-rc.2",
+        "port": 7842,
+        "gitRewriteNote": "服务进程只设 GIT_CONFIG_GLOBAL 指向含 insteadOf 的 gitconfig 文件；不再用 GIT_CONFIG_COUNT/KEY_n——dsh-subprocess 的 SENSITIVE_ENV_PATTERN=/KEY|PASSWORD|SECRET|TOKEN/i 会剥掉 GIT_CONFIG_KEY_*，导致 git 报 'missing config key GIT_CONFIG_KEY_0'。"
+      },
+      "commands": [
+        {
+          "step": "execute /market install archive-chain",
+          "command": "POST /api/commands/execute {\"line\":\"/market install archive-chain\"}",
+          "exitCode": 0,
+          "stdout": "安装报告 · archive-chain · 宿主安装\\n归档链：3 步失败；验收未通过：dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n时间 2026-11-22T01:49:38.623Z → 2026-11-22T03:24:48.988Z\\n\\n✗ dsh-plugin-transcript  github:121212165/dsh-plugin-transcript\\n    Done in 34.2s using pnpm v10.20.0（stage=install） [failed]\\n✗ dsh-plugin-obsidian-push  github:121212165/dsh-plugin-obsidian-push\\n    npm install: added 364 packages, and audited 365 packages in 30m → Done\\n    ERROR  Command failed with exit code 128: git ls-remote --refs https://github.com/121212165/dsh-plugin-kit.git v0.2.1\\n    fatal: unable to access ...: Recv failure: Connection was reset\\n✗ dsh-plugin-transcript-search  github:121212165/dsh-plugin-transcript-search\\n    npm install: added 363 packages, and audited 364 packages in 21m → Done\\n    ERROR  ... git ls-remote --refs https://github.com/121212165/dsh-plugin-kit.git v0.2.1\\n    fatal: ... Failed to connect to github.com:443 after 21144 ms: Could not connect to server\\n\\n生效校验：验收未通过：dsh-plugin-obsidian-push, dsh-plugin-transcript-search\\n  dsh-plugin-transcript：已挂载、enabled、active，声明的命令均可见",
+          "stderr": "",
+          "note": "原始响应完整保存在 .tmp-dsh-home3/api-install5.json（10576B）；日志 operation-h0vWgY / Oiglzg。"
+        },
+        {
+          "step": "execute /market verify archive-chain",
+          "command": "POST /api/commands/execute {\"line\":\"/market verify archive-chain\"}",
+          "exitCode": 0,
+          "stdout": "生效校验 · archive-chain\\n  dsh-plugin-transcript：已挂载、enabled、active，声明的命令均可见\\n  dsh-plugin-obsidian-push：未在安装清单中出现；row 处于 disabled\\n  dsh-plugin-transcript-search：未在安装清单中出现；row 处于 disabled",
+          "stderr": "",
+          "note": "api-verify5.json（813B）。"
+        }
+      ],
+      "application": {
+        "dsh-plugin-transcript": "applied：已挂载、enabled、active，/transcript 等声明命令可见（远程 github: 规格真机装通）。",
+        "dsh-plugin-obsidian-push": "包内 prepare 构建成功，卡在传递依赖 github:121212165/dsh-plugin-kit#v0.2.1 的 git ls-remote。",
+        "dsh-plugin-transcript-search": "包内 prepare 构建成功，同一步 git ls-remote 超时 21144ms。"
+      },
+      "checks": {
+        "installable": "pass",
+        "configEntryVisible": "pass",
+        "activates": "pass",
+        "commandRegistered": "pass",
+        "commandExecution": "pass",
+        "groupInstallArchiveChain": "partial",
+        "panel": "unverified"
+      },
+      "result": "partial",
+      "failureReasons": [
+        "obsidian-push / transcript-search 的失败均在 pnpm 解析 github:121212165/dsh-plugin-kit#v0.2.1 时发生（Connection was reset / connect timeout 21144ms），非市集或插件代码缺陷。",
+        "重复安装已存在成员时，安装器把 pnpm 的 'Already up to date' 判成 failed/ambiguous-install；实际 verify 为 applied。这是安装器状态机的一个真实缺陷（待修）。"
+      ],
+      "blockedReason": "本机到 github.com 的 HTTPS 连接间歇性 Reset/超时；重测 git ls-remote 已恢复。面板验证因安装期间插件管理器占锁、web 客户端停在 'Loading plugins…'，尚未取得截图。"
     }
   ],
   "failureReasons": [
