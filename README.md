@@ -46,7 +46,7 @@ src/snapshot.json                      ← 内置快照，随包发布
 4. **四态校验**：`applied` 成功；`restart-required` 成功但明确提示"重启 web 后开新会话再 verify"；`overridden` 视为失败并提示更高优先级层；`failed/cancelled` 给出按错误码分类的修复建议（含 logPath）。装完再用 `listPlugins` 逐成员核对 `enabled` / `fiberPhase` 与命令可见性。
 5. **模型工具**：`market_install` / `market_verify` 与命令同一套 core 逻辑，带 generic presentCall/presentResult 卡片。
 
-测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径），共 49 条全绿（`npm run check`）。
+测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径），共 54 条全绿（`npm run check`）。
 
 ## M3 — conversation.view 卡片面板（既有实现）
 
@@ -56,22 +56,50 @@ src/snapshot.json                      ← 内置快照，随包发布
 
 ## M5 — 可发布门禁
 
-- `scripts/verify-plugin.mjs` — 家族 `verify-plugin.mjs` 的本地等价实现（原工具不在工作区），逐条断言 G0-5/6/7/8/9/10：清单与挂载契约、locale 与 exports、类型声明、MIT 与零运行时依赖、lib/ 入库、三层测试存在性。任一 fail 退出 1，结果写 `m5-gates.json`。
+- `scripts/vendor/verify-plugin.mjs` — 家族官方门禁原样 vendor（来源与 SHA 见 `m5-gates.json#gateSource`），`npm run verify:plugin` 直接跑它；`scripts/verify-plugin.mjs` 保留为本地等价快速检查（`npm run verify:local`），逐条断言 G0-5/6/7/8/9/10。
 - `src/locales/zh-CN.json` — 本地化资源，经 `package.json#exports["./locales/*"]` 声明并在构建时拷入 `lib/locales/`（G0-6）。
 - `test/headless-smoke.test.mjs` — 第三层测试：直接加载构建产物 `lib/plugin.js`，在无 dsh 运行时/无网络/无缓存的全新 profile 上走真实 seam 探测 → 装「归档链」→ 四态校验 → 调用 3 个成员声明的全部 4 个入口；证据写 `m5-smoke-evidence.json`。
-- `verify-m5.py` — 汇总验收：build → gates → typecheck → 50 条测试 → 三层结构 → 实装实调一致性 → lib 入库，产出 `m5-report.json`。
+- `verify-m5.py` — 汇总验收：build → gates → typecheck → 54 条测试 → 三层结构 → 实装实调一致性 → lib 入库，产出 `m5-report.json`。
 
-诚实声明：家族原版 `dsh-family-tools/tools/verify-plugin.mjs` 与真实 dsh 运行时均不在工作区；门禁用等价本地断言复验，「实机」用构建产物 + headless 宿主在干净 profile 上完成。首次接真机仍需跑一次原版工具与 `--dump-config` 活体挂载检查。
+诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `mock`，门禁为 `static`，三者不混用。首次接真机仍需按 `m2-live-evidence.json` 的步骤复跑一次 `--dump-config` 活体挂载检查。
+
+## 安装 / 卸载 / 降级
+
+安装（示例用独立 profile，避免污染现有环境）：
+
+```bash
+dsh plugin --profile market-audit add ./                       # 本地目录（开发）
+dsh plugin --profile market-audit add github:121212165/dsh-plugin-market
+dsh --profile market-audit --dump-config                       # 确认 id=market、enabled=true
+```
+
+卸载（参数是包名，不是插件 id）：
+
+```bash
+dsh plugin --profile market-audit remove dsh-plugin-market
+```
+
+降级：
+
+- 依赖版本记录在 `profiles/<profile>/package.json` 与 `pnpm-lock.yaml`；先 `list` 确认当前版本。
+- 回到旧版：`remove` 后用旧 tag/旧 spec 重新 `add`（如 `github:121212165/dsh-plugin-market#<tag>`），再重启 dsh。
+- 市集自己的四层读兜底与内置快照保证断网也能浏览；降级不会动已装成员插件，成员仍需 `/market verify` 复核。
+
+投稿：
+
+- 插件数据在 `dsh-market-data` 的 `scripts/catalog.source.json`（`plugins` / `groups`），改完提 PR；门禁会校验占位字段、`why`、`verify`、`UNKNOWN_MEMBER`、`DUPLICATE_ID`。
+- 插件本仓先过官方门禁 `node scripts/vendor/verify-plugin.mjs .`，再提数据 PR；组条目要写清 `why` 与可执行的 `verify`。
 
 ## 命令
 
 ```bash
 npm run typecheck    # tsc --noEmit
-npm test             # node:test：纯函数 + 装配层 + headless 冒烟（50 条）
+npm test             # node:test：纯函数 + 装配层 + headless 冒烟（54 条）
 npm run build        # tsc → lib/ + 拷贝 snapshot.json/icon.svg/locales
 npm run build:client # src/client.tsx → lib/client.js
 npm run build:all    # 全部构建
-npm run verify:plugin # G0-5/6/7/8/9/10 门禁
+npm run verify:plugin # 官方门禁（scripts/vendor/verify-plugin.mjs）
+npm run verify:local  # G0-5/6/7/8/9/10 本地等价断言
 npm run verify:m5     # 全部门禁 + 三层测试 + 实装实调 → m5-report.json
 npm run check        # typecheck + test + build:all + verify:plugin
 ```
