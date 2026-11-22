@@ -33,6 +33,7 @@ export interface VerifyInput {
   index: MarketIndex;
   seam: InstallSeam | null;
   applicationByMember?: Record<string, ApplicationState>;
+  memberIds?: string[];
   registeredCommands?: string[] | undefined;
   profile?: string;
   now?: (() => number) | undefined;
@@ -133,7 +134,9 @@ export async function verifyGroup(input: VerifyInput): Promise<VerificationRepor
     rows = [];
   }
   const liveCommands = new Set((input.registeredCommands ?? []).map((name) => name.startsWith('/') ? name : `/${name}`));
-  const members: VerificationMember[] = group.members.map((id) => {
+  const includedMembers = new Set(input.memberIds ?? group.members);
+  const checkedIds = group.members.filter((id) => includedMembers.has(id));
+  const members: VerificationMember[] = checkedIds.map((id) => {
     const plugin = pluginOf(input.index, id);
     const row = findRow(rows, plugin, id);
     const application = input.applicationByMember?.[id];
@@ -170,13 +173,14 @@ export async function verifyGroup(input: VerifyInput): Promise<VerificationRepor
     if (!detail.length) detail.push('已挂载、enabled、active，声明的命令均可见');
     return { member: id, present, active, enabled, detail: detail.join('；'), nextSteps };
   });
-  const ok = members.every((member) => member.present && member.active && member.enabled && !member.nextSteps.some((step) => step.includes('overridden')));
+  const ok = members.length > 0 && members.every((member) => member.present && member.active && member.enabled && !member.nextSteps.some((step) => step.includes('overridden')));
+  const partial = checkedIds.length < group.members.length;
   return {
     groupId: group.id,
     members,
     ok,
     summary: ok
-      ? `验收通过：${members.length} 个成员全部挂载且生效（用 /market group ${group.id} 查看业务验收步骤）`
+      ? `验收通过：${members.length}/${group.members.length} 个纳入校验的成员已挂载且生效${partial ? '（部分安装）' : ''}（用 /market group ${group.id} 查看业务验收步骤）`
       : `验收未通过：${members.filter((member) => !member.present || !member.active || !member.enabled).map((member) => member.member).join(', ') || '见各成员详情'}`,
   };
 }
@@ -254,8 +258,10 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
     }
   }
 
+  const excludedMembers = plan.steps.filter((step) => step.action === 'skip-excluded').map((step) => step.member);
   const verification = await verifyGroup({
     groupId: group.id, index: input.index, seam: input.seam,
+    memberIds: plan.steps.filter((step) => step.action !== 'skip-excluded').map((step) => step.member),
     applicationByMember, registeredCommands: input.registeredCommands, now: input.now, profile,
   });
   const failed = steps.filter((step) => step.status === 'failed');
@@ -272,8 +278,8 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
     finishedAt: stamp(input.now),
     ok,
     summary: ok
-      ? `${group.name}：${steps.filter((step) => step.status === 'done').length} 个成员安装成功，${verification.summary}`
-      : `${group.name}：${failed.length} 步失败；${verification.summary}`,
+      ? `${group.name}：${steps.filter((step) => step.status === 'done').length} 个成员安装成功，${verification.summary}${excludedMembers.length ? `；按要求跳过 ${excludedMembers.join(', ')}` : ''}`
+      : `${group.name}：${failed.length} 步失败；${verification.summary}${excludedMembers.length ? `；按要求跳过 ${excludedMembers.join(', ')}` : ''}`,
     conflicts: plan.conflicts,
     steps,
     verification,

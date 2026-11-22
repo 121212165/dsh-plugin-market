@@ -90,7 +90,7 @@ test('/market seams shows the probed seam and fallback commands', async () => {
   const offline = await wired.command('market')({ rawInput: 'seams' });
   assert.equal(offline.kind, 'success');
   assert.match(offline.text, /不可用/);
-  assert.match(offline.text, /dsh plugin --profile web add/);
+  assert.match(offline.text, /dsh plugin --profile 'web' add/);
 
   const online = makeCtx();
   const seam = seamFixture();
@@ -123,9 +123,10 @@ test('--without drops the colliding member and proceeds with the rest', async ()
     registeredCommands: () => ['/archive'],
   }));
   const result = await wired.command('market')({ rawInput: 'install archive-chain --without dsh-plugin-obsidian-push' });
-  assert.equal(result.kind, 'error'); // transcript-search command isn't registered in this harness
+  assert.equal(result.kind, 'success', result.text);
   assert.equal(seam.calls.length, 2);
-  assert.match(result.text, /dsh-plugin-transcript-search/);
+  assert.match(result.text, /按要求跳过 dsh-plugin-obsidian-push/);
+  assert.match(result.text, /验收通过：2\/3/);
 });
 
 test('degraded mode: install returns manual commands and does not pretend success', async () => {
@@ -135,7 +136,7 @@ test('degraded mode: install returns manual commands and does not pretend succes
   assert.equal(result.kind, 'error');
   assert.match(result.text, /降级模式/);
   assert.match(result.text, /未执行任何安装/);
-  assert.match(result.text, /dsh plugin --profile web add/);
+  assert.match(result.text, /dsh plugin --profile 'web' add/);
   assert.match(result.text, /\/market verify archive-chain/);
 });
 
