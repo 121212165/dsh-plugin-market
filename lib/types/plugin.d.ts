@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis';
 import Schema from '@deepseek-ai/schemastery';
-import { type InstallSeam, type ReaderDeps, type SeamProbe } from './core/index.ts';
+import { type InstallSeam, type ManifestStore, type ReaderDeps, type SeamProbe } from './core/index.ts';
 export declare const name = "market";
 export declare const inject: string[];
 export interface Config {
@@ -43,6 +43,8 @@ export interface RuntimeDeps {
     readCache?: ReaderDeps['readCache'];
     writeCache?: ReaderDeps['writeCache'];
     embedded?: string;
+    /** F6: manifest snapshot/restore hook for group uninstall/rollback. */
+    manifest?: ManifestStore;
     now?: () => number;
     /** Host install seam; tests inject a fake, production probes ctx.pluginManager. */
     seam?: InstallSeam;

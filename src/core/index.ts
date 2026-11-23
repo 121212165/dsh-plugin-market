@@ -6,3 +6,4 @@ export * from './install-types.ts';
 export * from './conflicts.ts';
 export * from './seam.ts';
 export * from './installer.ts';
+export * from './uninstall.ts';

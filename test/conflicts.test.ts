@@ -89,3 +89,62 @@ test('--without removes the excluded member from the plan', () => {
   assert.equal(plan.steps[1]!.action, 'skip-excluded');
   assert.equal(plan.blocked, false);
 });
+
+test('F6: two members both declaring /health block before install with a fix', () => {
+  const original = group('saving-combo');
+  const radar = index.plugins.find((plugin) => plugin.id === 'dsh-plugin-error-radar')!;
+  const fixture = {
+    ...index,
+    plugins: [...index.plugins, radar],
+    groups: [...index.groups, { ...original, id: 'health-clash', members: ['dsh-plugin-cache-guard', 'dsh-plugin-error-radar'] }],
+  };
+  const plan = planGroupInstall({
+    group: fixture.groups.find((candidate) => candidate.id === 'health-clash')!, index: fixture,
+  });
+  const conflict = plan.conflicts.find((item) => item.kind === 'command' && item.key === '/health');
+  assert.ok(conflict, JSON.stringify(plan.conflicts));
+  assert.equal(conflict.severity, 'blocking');
+  assert.equal(plan.blocked, true);
+  assert.deepEqual(conflict.members, ['dsh-plugin-cache-guard', 'dsh-plugin-error-radar']);
+  assert.match(conflict.detail, /都声明了 \/health/);
+  assert.match(conflict.fix, /--without dsh-plugin-error-radar/);
+  assert.match(conflict.fix, /改名/);
+  assert.match(renderConflicts(plan), /\[阻断\].*\/health/);
+});
+
+test('F6: a slot claimed by two members blocks with a slot-specific fix', () => {
+  const original = group('archive-chain');
+  const broken = { ...original, id: 'slot-clash', members: ['dsh-plugin-transcript', 'dsh-plugin-obsidian-push'] };
+  const fixture = {
+    ...index,
+    plugins: index.plugins.map((plugin) => {
+      if (plugin.id === 'dsh-plugin-transcript') return { ...plugin, slots: ['conversation.view'] };
+      if (plugin.id === 'dsh-plugin-obsidian-push') return { ...plugin, slots: ['conversation.view'] };
+      return plugin;
+    }),
+  };
+  const plan = planGroupInstall({ group: broken, index: fixture });
+  const conflict = plan.conflicts.find((item) => item.kind === 'slot');
+  assert.ok(conflict, JSON.stringify(plan.conflicts));
+  assert.equal(conflict.severity, 'blocking');
+  assert.equal(plan.blocked, true);
+  assert.match(conflict.fix, /--without dsh-plugin-obsidian-push/);
+  assert.match(conflict.fix, /slot/);
+});
+
+test('F6: a host-occupied slot blocks with guidance to remove the old layer', () => {
+  const original = group('archive-chain');
+  const fixture = {
+    ...index,
+    plugins: index.plugins.map((plugin) => plugin.id === 'dsh-plugin-transcript'
+      ? { ...plugin, slots: ['conversation.view'] }
+      : plugin),
+  };
+  const plan = planGroupInstall({
+    group: original, index: fixture, registeredSlots: ['conversation.view'],
+  });
+  const conflict = plan.conflicts.find((item) => item.kind === 'slot' && item.members.length === 1);
+  assert.ok(conflict, JSON.stringify(plan.conflicts));
+  assert.equal(conflict.severity, 'blocking');
+  assert.match(conflict.fix, /dsh plugin --profile web list/);
+});

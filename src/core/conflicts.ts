@@ -16,6 +16,8 @@ export interface PrecheckInput {
   inventory?: { plugins?: InstalledRow[]; bundles?: InstalledBundle[] };
   /** Command names already registered in the host, e.g. from ctx.commands. */
   registeredCommands?: string[] | undefined;
+  /** F6: host slots already occupied, e.g. from ctx.slots. */
+  registeredSlots?: string[] | undefined;
   /** Group member ids the user chose to drop with `--without`. */
   excluded?: string[] | undefined;
   profile?: string;
@@ -23,6 +25,19 @@ export interface PrecheckInput {
 }
 
 const commandKey = (entry: string): string => entry.startsWith('/') ? `cmd:${entry}` : `tool:${entry}`;
+
+const SLOT_ENTRY_PREFIX = 'slot:';
+const WELL_KNOWN_SLOTS = new Set(['conversation.view']);
+
+/** F6: slots a member claims. Explicit `slots` wins; slot-like `entries`
+ * (`slot:<name>` or a well-known id) keep hand-written catalogs checkable. */
+function declaredSlots(plugin: PluginEntry): string[] {
+  const explicit = (plugin as PluginEntry & { slots?: string[] }).slots ?? [];
+  const fromEntries = plugin.entries
+    .filter((entry) => entry.startsWith(SLOT_ENTRY_PREFIX) || WELL_KNOWN_SLOTS.has(entry))
+    .map((entry) => entry.startsWith(SLOT_ENTRY_PREFIX) ? entry.slice(SLOT_ENTRY_PREFIX.length) : entry);
+  return [...new Set([...explicit, ...fromEntries].filter(Boolean))];
+}
 
 function installedKey(row: InstalledRow): string[] {
   return [row.id, row.moduleName ?? '', ...String(row.id).split(':')].filter(Boolean).map((value) => value.toLowerCase());
@@ -73,6 +88,37 @@ export function planGroupInstall(input: PrecheckInput): InstallPlan {
       } else if (!owner) {
         claimed.set(key, plugin.id);
       }
+    }
+  }
+
+  // 2b. F6 slot collisions. Two members injecting the same host slot collide
+  // at startup (or silently shadow each other) — warn before install, never
+  // let it surface as "slot already registered" during host boot.
+  const claimedSlots = new Map<string, string>();
+  for (const plugin of present) {
+    for (const slot of declaredSlots(plugin)) {
+      const key = slot.toLowerCase();
+      const owner = claimedSlots.get(key);
+      if (owner && owner !== plugin.id) {
+        conflicts.push({
+          kind: 'slot', key: slot, members: [owner, plugin.id], severity: 'blocking',
+          detail: `${owner} 与 ${plugin.id} 都声明 slot ${slot}，同时装会触发 slot 注册冲突或互相覆盖`,
+          fix: `运行 /market install ${group.id} --without ${plugin.id} 只装不冲突的成员；或让其中一个插件改用不同 slot 后重新投稿`,
+        });
+      } else if (!owner) {
+        claimedSlots.set(key, plugin.id);
+      }
+    }
+  }
+  for (const slot of input.registeredSlots ?? []) {
+    const key = slot.toLowerCase();
+    const owner = claimedSlots.get(key);
+    if (owner) {
+      conflicts.push({
+        kind: 'slot', key: slot, members: [owner], severity: 'blocking',
+        detail: `${owner} 要注入的 slot ${slot} 已被当前 profile 中其他插件占用`,
+        fix: `/market seams 看当前层；dsh plugin --profile ${profile} list 找到旧插件后移除，或 /market install ${group.id} --without ${owner}`,
+      });
     }
   }
 
@@ -175,7 +221,7 @@ export function specFor(plugin: PluginEntry | undefined): string {
 
 /** Human-readable pre-check block, reused by the command and the tool. */
 export function renderConflicts(plan: InstallPlan): string {
-  if (!plan.conflicts.length) return '  冲突预检：通过（未发现命令/工具/包名撞车）';
+  if (!plan.conflicts.length) return '  冲突预检：通过（未发现命令/工具/slot/包名撞车）';
   const lines = ['  冲突预检：'];
   for (const conflict of plan.conflicts) {
     const tag = conflict.severity === 'blocking' ? '阻断' : '提示';

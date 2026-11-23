@@ -28,10 +28,14 @@ import {
   renderInstallReport,
   runGroupInstall,
   runVerify,
+  uninstallGroup,
+  renderUninstallReport,
+  createProfileManifestStore,
   probeSeam,
   adaptSeam,
   manualInstallCommands,
   type InstallSeam,
+  type ManifestStore,
   type MarketRead,
   type ReaderDeps,
   type SeamProbe,
@@ -72,6 +76,8 @@ export interface RuntimeDeps {
   readCache?: ReaderDeps['readCache'];
   writeCache?: ReaderDeps['writeCache'];
   embedded?: string;
+  /** F6: manifest snapshot/restore hook for group uninstall/rollback. */
+  manifest?: ManifestStore;
   now?: () => number;
   /** Host install seam; tests inject a fake, production probes ctx.pluginManager. */
   seam?: InstallSeam;
@@ -217,8 +223,8 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
 
   ctx.commands.register({
     name: 'market',
-    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market verify <id> 只校验，/market seams 查宿主安装能力。断网用内置快照。',
-    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | verify <id> | seams]' },
+    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market uninstall <id> 按 members 逆序卸载回滚，/market verify <id> 只校验，/market seams 查宿主安装能力。断网用内置快照。',
+    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | uninstall <id> | verify <id> | seams]' },
     handler: async ({ rawInput }: { rawInput?: string }) => {
       const args = parseMarketArgs(rawInput);
       try {
@@ -239,7 +245,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
         if (args.subcommand === 'help') {
           return {
             kind: 'success' as const,
-            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market verify <id> 校验四态 · /market seams 查安装能力',
+            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market uninstall <id> 按 members 逆序卸载回滚（幂等，失败给恢复命令）· /market verify <id> 校验四态 · /market seams 查安装能力',
           };
         }
 
@@ -260,6 +266,17 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
             ...options,
           });
           return { kind: report.ok ? ('success' as const) : ('error' as const), text: renderInstallReport(report) };
+        }
+        if (args.subcommand === 'uninstall') {
+          const report = await uninstallGroup({
+            groupId: args.target,
+            index: result.index,
+            seam: resolveSeam().seam,
+            profile: config.profile,
+            now: deps.now,
+            manifest: deps.manifest ?? createProfileManifestStore(config.profile),
+          });
+          return { kind: report.ok ? ('success' as const) : ('error' as const), text: renderUninstallReport(report) };
         }
         if (args.subcommand === 'verify') {
           const text = await runVerify({
@@ -351,6 +368,44 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
           reinstall: args.reinstall === true,
         });
         return `${renderStamp(result.meta)}\n\n${renderInstallReport(report)}`;
+      },
+    }),
+  );
+
+  ctx.tools.register(
+    defineTool({
+      name: 'market_uninstall',
+      description: '按组卸载/回滚：按 members 逆序调用宿主 plugin_manager.removeBundle，只移除当前已安装成员（幂等）。失败时恢复安装前 package.json / pnpm-lock.yaml 并给出可复制的恢复命令；报告沿用 application 四态。',
+      parameters: {
+        groupId: { type: 'string', required: true, description: '插件组 id，如 archive-chain' },
+      },
+      output: {
+        schema: { type: 'string' } as const,
+        render: (_args, value) => [{ type: 'text', text: String(value).slice(0, 6000) }],
+      },
+      presentCall: (args: { groupId: string }) => ({
+        card: 'generic' as const,
+        title: `卸载插件组 ${args.groupId}（回滚）`,
+        kind: 'execute' as const,
+        rawInput: args.groupId,
+      }),
+      presentResult: (_args: unknown, value: unknown) => ({
+        card: 'generic' as const,
+        title: '插件组卸载报告',
+        kind: 'execute' as const,
+        rawInput: String(value).slice(0, 4000),
+      }),
+      async execute(args: { groupId?: string }) {
+        const result = await read();
+        const report = await uninstallGroup({
+          groupId: String(args.groupId ?? ''),
+          index: result.index,
+          seam: resolveSeam().seam,
+          profile: config.profile,
+          now: deps.now,
+          manifest: deps.manifest ?? createProfileManifestStore(config.profile),
+        });
+        return `${renderStamp(result.meta)}\n\n${renderUninstallReport(report)}`;
       },
     }),
   );

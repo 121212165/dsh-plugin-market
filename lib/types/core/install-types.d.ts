@@ -45,6 +45,9 @@ export interface InstallSeam {
     installBundle(spec: string, options?: {
         enabled?: boolean;
     }): Promise<ChangeResultLike>;
+    /** F6: remove a bundle during group uninstall/rollback. Optional because a
+     * host may expose install only; uninstall then degrades to manual commands. */
+    removeBundle?(spec: string): Promise<ChangeResultLike>;
     listPlugins?(): Promise<InstalledRow[]>;
     listBundles?(): Promise<InstalledBundle[]>;
     inspect?(spec: string): Promise<{
@@ -117,3 +120,40 @@ export interface InstallReport {
     nextSteps: string[];
 }
 export declare const APPLICATION_LABEL: Record<ApplicationState, string>;
+/** The profile manifest files a host bundle operation mutates. Kept as raw
+ * text so a failed rollback can restore byte-for-byte. */
+export interface ManifestFiles {
+    packageJson?: string;
+    pnpmLock?: string;
+}
+/** Injectable IO for snapshotting/restoring the manifest. Pure fakes in tests;
+ * production wires it to `~/.dsh/profiles/<profile>/` (DSH_HOME respected). */
+export interface ManifestStore {
+    read(): Promise<ManifestFiles>;
+    write(files: ManifestFiles): Promise<void>;
+}
+export interface UninstallStepResult {
+    member: string;
+    spec: string;
+    status: 'removed' | 'skipped' | 'failed';
+    /** Same `application` four states as install/F5 — never a bespoke wording. */
+    application?: ApplicationState;
+    detail: string;
+    nextSteps: string[];
+}
+export interface UninstallReport {
+    groupId: string;
+    mode: 'live' | 'degraded';
+    startedAt: string;
+    finishedAt: string;
+    ok: boolean;
+    /** A second uninstall of the same group finds nothing and succeeds. */
+    idempotent: boolean;
+    /** True when the pre-install manifest was restored after a failure. */
+    manifestRestored: boolean;
+    summary: string;
+    steps: UninstallStepResult[];
+    /** Copy-pasteable commands to recover if a removal failed. */
+    recovery: string[];
+    nextSteps: string[];
+}
