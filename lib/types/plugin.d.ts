@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis';
 import Schema from '@deepseek-ai/schemastery';
-import { type InstallSeam, type ManifestStore, type ReaderDeps, type SeamProbe } from './core/index.ts';
+import { type FuseFile, type InstallSeam, type ManifestStore, type ReaderDeps, type SeamProbe } from './core/index.ts';
 export declare const name = "market";
 export declare const inject: string[];
 export interface Config {
@@ -15,6 +15,8 @@ export interface Config {
     profile: string;
     /** Kill switch for the write path (read stays available). */
     allowInstall: boolean;
+    /** Output directory for F3 fuse scaffolding (only written with --apply). */
+    fuseOutDir: string;
 }
 export declare const Config: Schema<Schemastery.ObjectS<NoInfer<{
     enabled: Schema<boolean, boolean, "defined">;
@@ -26,6 +28,7 @@ export declare const Config: Schema<Schemastery.ObjectS<NoInfer<{
     staleAfterMs: Schema<number, number, "defined">;
     profile: Schema<string, string, "defined">;
     allowInstall: Schema<boolean, boolean, "defined">;
+    fuseOutDir: Schema<string, string, "defined">;
 }>>, Schemastery.ObjectT<NoInfer<{
     enabled: Schema<boolean, boolean, "defined">;
     rawUrl: Schema<string, string, "defined">;
@@ -36,6 +39,7 @@ export declare const Config: Schema<Schemastery.ObjectS<NoInfer<{
     staleAfterMs: Schema<number, number, "defined">;
     profile: Schema<string, string, "defined">;
     allowInstall: Schema<boolean, boolean, "defined">;
+    fuseOutDir: Schema<string, string, "defined">;
 }>>, "plain">;
 /** Optional overrides; every field has a production default. */
 export interface RuntimeDeps {
@@ -55,5 +59,10 @@ export interface RuntimeDeps {
     dumpConfig?: (() => Promise<string> | string) | string;
     /** F5: single member-entry invocation hook for the live loop. */
     callEntry?: (entry: string) => Promise<string> | string;
+    /** F3: injected writer captures scaffold files in tests; production writes disk. */
+    fuseWriter?: (root: string, files: FuseFile[]) => Promise<Array<{
+        path: string;
+        action: string;
+    }>>;
 }
 export declare function apply(ctx: Context, configInput: Partial<Config> | Config, deps?: RuntimeDeps): void;

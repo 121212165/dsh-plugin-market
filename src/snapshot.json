@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-21T12:09:28.869Z",
+  "generatedAt": "2026-11-23T09:00:00.000Z",
   "source": "dsh-market-data",
   "plugins": [
     {
@@ -22,7 +22,69 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 10,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-cache-guard",
+              "detail": "data/plugins/dsh-plugin-cache-guard.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "saving-combo",
+              "detail": "省钱组合 · members[0]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            },
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-cost-ledger",
@@ -43,7 +105,74 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 14,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-cost-ledger",
+              "detail": "data/plugins/dsh-plugin-cost-ledger.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "saving-combo",
+              "detail": "省钱组合 · members[2]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 1,
+          "subtotal": 4,
+          "sources": [
+            {
+              "id": "fuse-quota-cost-ledger",
+              "detail": "用量+成本融合 · sourcePluginIds"
+            }
+          ]
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            },
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 1,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-deep-scan",
@@ -63,7 +192,69 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 10,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-deep-scan",
+              "detail": "data/plugins/dsh-plugin-deep-scan.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "eco-radar",
+              "detail": "生态雷达 · members[1]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            },
+            {
+              "id": "1005",
+              "detail": "erin · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 1,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-eco-scan",
@@ -83,7 +274,65 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 9,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-eco-scan",
+              "detail": "data/plugins/dsh-plugin-eco-scan.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "eco-radar",
+              "detail": "生态雷达 · members[0]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-error-radar",
@@ -104,7 +353,55 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 0,
+      "score": 5,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-error-radar",
+              "detail": "data/plugins/dsh-plugin-error-radar.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 2,
+            "invalid": 0
+          },
+          "recordedVotes": 0,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-fact-vault",
@@ -125,7 +422,77 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 4,
+      "score": 12,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-fact-vault",
+              "detail": "data/plugins/dsh-plugin-fact-vault.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "handoff-duo",
+              "detail": "交接协作 · members[2]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 4,
+          "subtotal": 4,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            },
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            },
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            },
+            {
+              "id": "1005",
+              "detail": "erin · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 4,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-family-cards",
@@ -145,7 +512,65 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 9,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-family-cards",
+              "detail": "data/plugins/dsh-plugin-family-cards.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "plugin-dev",
+              "detail": "插件开发 · members[2]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1007",
+              "detail": "grace · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-html-report",
@@ -165,7 +590,60 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 6,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-html-report",
+              "detail": "data/plugins/dsh-plugin-html-report.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1008",
+              "detail": "heidi · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 1,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-ide-hub",
@@ -189,27 +667,73 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
-    },
-    {
-      "id": "dsh-plugin-local-deep-search",
-      "repo": "121212165/dsh-plugin-local-deep-search",
-      "npm": "@deepseek-ai/dsh-plugin-local-deep-search",
-      "name": "本地深搜",
-      "oneLiner": "本地文档多轮挖词深检索：带行号、可回溯引用的 Markdown 报告，全程不联网",
-      "category": "扫描与研究",
-      "entries": [
-        "/local-research",
-        "local_deep_search"
-      ],
-      "requires": [
-        "tools"
-      ],
-      "dshRange": ">=0.1.2-rc.1 <0.2.0",
-      "license": "MIT",
-      "author": "121212165",
-      "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 3,
+      "score": 11,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-ide-hub",
+              "detail": "data/plugins/dsh-plugin-ide-hub.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "starter-three",
+              "detail": "开局三件套 · members[1]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 3,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            },
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            },
+            {
+              "id": "1007",
+              "detail": "grace · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 1,
+            "invalid": 0
+          },
+          "recordedVotes": 3,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-obsidian-push",
@@ -230,7 +754,69 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 10,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-obsidian-push",
+              "detail": "data/plugins/dsh-plugin-obsidian-push.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "archive-chain",
+              "detail": "归档链 · members[1]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            },
+            {
+              "id": "1005",
+              "detail": "erin · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-pinboard",
@@ -252,7 +838,65 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 9,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-pinboard",
+              "detail": "data/plugins/dsh-plugin-pinboard.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "handoff-duo",
+              "detail": "交接协作 · members[1]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-plugin-forge",
@@ -273,7 +917,69 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 10,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-plugin-forge",
+              "detail": "data/plugins/dsh-plugin-plugin-forge.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "plugin-dev",
+              "detail": "插件开发 · members[0]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1007",
+              "detail": "grace · 👍"
+            },
+            {
+              "id": "1008",
+              "detail": "heidi · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-price-aware",
@@ -294,7 +1000,64 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 7,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-price-aware",
+              "detail": "data/plugins/dsh-plugin-price-aware.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            },
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-prompt-optimize",
@@ -316,7 +1079,60 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 0,
+      "score": 8,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-prompt-optimize",
+              "detail": "data/plugins/dsh-plugin-prompt-optimize.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "plugin-dev",
+              "detail": "插件开发 · members[1]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 1,
+            "invalid": 0
+          },
+          "recordedVotes": 0,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-prompt-vault",
@@ -336,7 +1152,60 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 6,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-prompt-vault",
+              "detail": "data/plugins/dsh-plugin-prompt-vault.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1005",
+              "detail": "erin · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-quota",
@@ -359,7 +1228,89 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 5,
+      "stars": 145,
+      "weeklyDownloads": 312,
+      "lastSeenAt": "2026-11-16",
+      "score": 17,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-quota",
+              "detail": "data/plugins/dsh-plugin-quota.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "starter-three",
+              "detail": "开局三件套 · members[0]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 1,
+          "subtotal": 4,
+          "sources": [
+            {
+              "id": "fuse-quota-cost-ledger",
+              "detail": "用量+成本融合 · sourcePluginIds"
+            }
+          ]
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 5,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            },
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            },
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            },
+            {
+              "id": "1007",
+              "detail": "grace · 👍"
+            },
+            {
+              "id": "1008",
+              "detail": "heidi · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 1,
+            "underAge": 1,
+            "invalid": 0
+          },
+          "recordedVotes": 5,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-relay-quota",
@@ -381,7 +1332,60 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 6,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-relay-quota",
+              "detail": "data/plugins/dsh-plugin-relay-quota.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1008",
+              "detail": "heidi · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-session-insights",
@@ -401,7 +1405,60 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 6,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-session-insights",
+              "detail": "data/plugins/dsh-plugin-session-insights.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-spend-forecast",
@@ -422,7 +1479,69 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 10,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-spend-forecast",
+              "detail": "data/plugins/dsh-plugin-spend-forecast.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "saving-combo",
+              "detail": "省钱组合 · members[1]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            },
+            {
+              "id": "1007",
+              "detail": "grace · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-task-forge",
@@ -446,7 +1565,73 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 13,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-task-forge",
+              "detail": "data/plugins/dsh-plugin-task-forge.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 2,
+          "subtotal": 6,
+          "sources": [
+            {
+              "id": "starter-three",
+              "detail": "开局三件套 · members[2]"
+            },
+            {
+              "id": "handoff-duo",
+              "detail": "交接协作 · members[0]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            },
+            {
+              "id": "1005",
+              "detail": "erin · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 1,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-token-telemetry",
@@ -467,7 +1652,60 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 6,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-token-telemetry",
+              "detail": "data/plugins/dsh-plugin-token-telemetry.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1007",
+              "detail": "grace · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-tool-trace",
@@ -487,7 +1725,60 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 6,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-tool-trace",
+              "detail": "data/plugins/dsh-plugin-tool-trace.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1008",
+              "detail": "heidi · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-transcript",
@@ -507,7 +1798,69 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 2,
+      "score": 10,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-transcript",
+              "detail": "data/plugins/dsh-plugin-transcript.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "archive-chain",
+              "detail": "归档链 · members[0]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 2,
+          "subtotal": 2,
+          "sources": [
+            {
+              "id": "1001",
+              "detail": "alice · 👍"
+            },
+            {
+              "id": "1003",
+              "detail": "carol · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 2,
+          "rawReactions": null
+        }
+      ]
     },
     {
       "id": "dsh-plugin-transcript-search",
@@ -528,7 +1881,141 @@
       "license": "MIT",
       "author": "121212165",
       "borrowedFrom": [],
-      "verifiedAt": "2026-11-21"
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "score": 9,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-transcript-search",
+              "detail": "data/plugins/dsh-plugin-transcript-search.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 1,
+          "subtotal": 3,
+          "sources": [
+            {
+              "id": "archive-chain",
+              "detail": "归档链 · members[2]"
+            }
+          ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
+    },
+    {
+      "id": "dsh-plugin-local-deep-search",
+      "repo": "121212165/dsh-plugin-local-deep-search",
+      "npm": "@deepseek-ai/dsh-plugin-local-deep-search",
+      "name": "本地深搜",
+      "oneLiner": "本地文档多轮挖词深检索：带行号、可回溯引用的 Markdown 报告，全程不联网",
+      "category": "扫描与研究",
+      "entries": [
+        "/local-research",
+        "local_deep_search"
+      ],
+      "requires": [
+        "tools"
+      ],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [],
+      "verifiedAt": "2026-11-21",
+      "votes": 1,
+      "stars": 12,
+      "deadSince": "2026-11-09",
+      "demotionReason": "仓库 404 已持续 7 天（自 2026-11-09）",
+      "score": 6,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-local-deep-search",
+              "detail": "data/plugins/dsh-plugin-local-deep-search.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 1,
+          "subtotal": 1,
+          "sources": [
+            {
+              "id": "1002",
+              "detail": "bob · 👍"
+            }
+          ],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 1,
+          "rawReactions": null
+        }
+      ]
     }
   ],
   "groups": [

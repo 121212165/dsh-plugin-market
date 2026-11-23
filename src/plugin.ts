@@ -1,8 +1,9 @@
 /**
  * dsh wiring for the market (M1 read + M2 one-click install).
- * `/market` dispatches group / install / verify / seams; every IO path is
- * behind RuntimeDeps so assembly tests can block hosts, swap the host seam
- * and assert the four application states deterministically.
+ * `/market` dispatches group / install / uninstall / verify / seams / fuse;
+ * every IO path is behind RuntimeDeps so assembly tests can block hosts, swap
+ * the host seam and assert the four application states deterministically. Fuse
+ * is two-step: the task book is never written; only `--apply` writes scaffolding.
  */
 import { readFileSync } from 'node:fs';
 import { readFile, stat, writeFile, mkdir } from 'node:fs/promises';
@@ -34,6 +35,10 @@ import {
   probeSeam,
   adaptSeam,
   manualInstallCommands,
+  runFuse,
+  renderFuseRejection,
+  FuseValidationError,
+  type FuseFile,
   type InstallSeam,
   type ManifestStore,
   type MarketRead,
@@ -56,6 +61,8 @@ export interface Config {
   profile: string;
   /** Kill switch for the write path (read stays available). */
   allowInstall: boolean;
+  /** Output directory for F3 fuse scaffolding (only written with --apply). */
+  fuseOutDir: string;
 }
 
 export const Config = Schema.object({
@@ -68,6 +75,7 @@ export const Config = Schema.object({
   staleAfterMs: Schema.natural().default(DEFAULT_STALE_AFTER_MS),
   profile: Schema.string().default('web'),
   allowInstall: Schema.boolean().default(true),
+  fuseOutDir: Schema.string().default('./fused-plugin'),
 });
 
 /** Optional overrides; every field has a production default. */
@@ -88,6 +96,8 @@ export interface RuntimeDeps {
   dumpConfig?: (() => Promise<string> | string) | string;
   /** F5: single member-entry invocation hook for the live loop. */
   callEntry?: (entry: string) => Promise<string> | string;
+  /** F3: injected writer captures scaffold files in tests; production writes disk. */
+  fuseWriter?: (root: string, files: FuseFile[]) => Promise<Array<{ path: string; action: string }>>;
 }
 
 function expandHome(value: string): string {
@@ -132,7 +142,20 @@ function normalizeConfig(input: Partial<Config> | Config): Config {
     staleAfterMs: input.staleAfterMs ?? DEFAULT_STALE_AFTER_MS,
     profile: input.profile ?? 'web',
     allowInstall: input.allowInstall ?? true,
+    fuseOutDir: input.fuseOutDir ?? './fused-plugin',
   };
+}
+
+/** F3 default scaffold writer: relative file paths under the configured dir. */
+async function defaultFuseWriter(root: string, files: FuseFile[]): Promise<Array<{ path: string; action: string }>> {
+  const written: Array<{ path: string; action: string }> = [];
+  for (const file of files) {
+    const target = join(root, file.path);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, file.content, 'utf8');
+    written.push({ path: file.path, action: 'written' });
+  }
+  return written;
 }
 
 /** Parse `--without a,b` / `--reinstall` from the rest of the install args. */
@@ -154,6 +177,13 @@ function parseInstallOptions(rest: string[]): { excluded: string[]; reinstall: b
     }
   }
   return { excluded: [...new Set(excluded)], reinstall };
+}
+
+/** F3 args: `/market fuse a,b [--apply]`. Flags stay out of the id list. */
+function parseFuseArgs(target: string, rest: string[]): { ids: string; apply: boolean } {
+  const apply = rest.includes('--apply');
+  const ids = [target, ...rest.filter((token) => !token.startsWith('--'))].join(' ').trim();
+  return { ids, apply };
 }
 
 export function apply(ctx: Context, configInput: Partial<Config> | Config, deps: RuntimeDeps = {}): void {
@@ -227,8 +257,8 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
 
   ctx.commands.register({
     name: 'market',
-    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market uninstall <id> 按 members 逆序卸载回滚，/market verify <id> 只校验，/market seams 查宿主安装能力。断网用内置快照。',
-    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | uninstall <id> | verify <id> | seams]' },
+    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market uninstall <id> 按 members 逆序卸载回滚，/market verify <id> 只校验，/market fuse <ids> 出融合任务书（--apply 才落盘脚手架），/market seams 查宿主安装能力。断网用内置快照。',
+    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | uninstall <id> | verify <id> | fuse <a,b> [--apply] | seams]' },
     handler: async ({ rawInput }: { rawInput?: string }) => {
       const args = parseMarketArgs(rawInput);
       try {
@@ -249,7 +279,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
         if (args.subcommand === 'help') {
           return {
             kind: 'success' as const,
-            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market uninstall <id> 按 members 逆序卸载回滚（幂等，失败给恢复命令）· /market verify <id> 校验四态 · /market seams 查安装能力',
+            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market uninstall <id> 按 members 逆序卸载回滚（幂等，失败给恢复命令）· /market verify <id> 校验四态 · /market fuse <a,b,c> 出融合任务书（不落盘），加 --apply 才写脚手架 · /market seams 查安装能力',
           };
         }
 
@@ -295,6 +325,24 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
             now: deps.now,
           });
           return { kind: 'success' as const, text };
+        }
+        if (args.subcommand === 'fuse') {
+          const options = parseFuseArgs(args.target, args.rest);
+          try {
+            const fused = runFuse(result.index, options.ids, options.apply);
+            if (!options.apply) return { kind: 'success' as const, text: fused.text };
+            const outDir = expandHome(config.fuseOutDir);
+            const written = await (deps.fuseWriter ?? defaultFuseWriter)(outDir, fused.files);
+            return {
+              kind: 'success' as const,
+              text: `${fused.text}\n\n输出目录：${outDir}\n${written.map((entry) => `  - ${entry.path} (${entry.action})`).join('\n')}`,
+            };
+          } catch (error) {
+            if (error instanceof FuseValidationError) {
+              return { kind: 'error' as const, text: renderFuseRejection(error) };
+            }
+            throw error;
+          }
         }
         return { kind: 'success' as const, text: renderList(result) };
       } catch (error) {
@@ -447,6 +495,46 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
           registeredCommands: registeredCommands(),
           now: deps.now,
         });
+      },
+    }),
+  );
+
+  ctx.tools.register(
+    defineTool({
+      name: 'market_fuse',
+      description: '融合 2–5 个插件（仅 MIT/Apache-2.0）：第一步只输出融合任务书（能力矩阵、重叠冲突、复用不重写清单、借鉴来源与差异表），不落盘；apply=true 才写脚手架。GPL 等传染性许可一律拒绝。',
+      parameters: {
+        ids: { type: 'string', required: true, description: '逗号分隔的 2–5 个插件 id，如 dsh-plugin-quota,dsh-plugin-cost-ledger' },
+        apply: { type: 'boolean', description: '可选，true 时把脚手架落盘（默认只出任务书，不落盘）' },
+      },
+      output: {
+        schema: { type: 'string' } as const,
+        render: (_args, value) => [{ type: 'text', text: String(value).slice(0, 12000) }],
+      },
+      presentCall: (args: { ids: string; apply?: boolean }) => ({
+        card: 'generic' as const,
+        title: args.apply ? `落盘融合脚手架：${args.ids}` : `融合任务书：${args.ids}`,
+        kind: args.apply ? ('execute' as const) : ('fetch' as const),
+        ...(args.apply ? { rawInput: args.ids } : {}),
+      }),
+      presentResult: (args: { apply?: boolean }, value: unknown) => ({
+        card: 'generic' as const,
+        title: args.apply ? '融合脚手架落盘报告' : '融合任务书',
+        kind: args.apply ? ('execute' as const) : ('fetch' as const),
+        rawInput: String(value).slice(0, 4000),
+      }),
+      async execute(args: { ids?: string; apply?: boolean }) {
+        const result = await read();
+        try {
+          const fused = runFuse(result.index, String(args.ids ?? ''), args.apply === true);
+          if (!args.apply) return fused.text;
+          const outDir = expandHome(config.fuseOutDir);
+          const written = await (deps.fuseWriter ?? defaultFuseWriter)(outDir, fused.files);
+          return `${fused.text}\n\n输出目录：${outDir}\n${written.map((entry) => `  - ${entry.path} (${entry.action})`).join('\n')}`;
+        } catch (error) {
+          if (error instanceof FuseValidationError) return renderFuseRejection(error);
+          throw error;
+        }
       },
     }),
   );

@@ -7,3 +7,4 @@ export * from './conflicts.ts';
 export * from './seam.ts';
 export * from './installer.ts';
 export * from './uninstall.ts';
+export * from './fuse.ts';

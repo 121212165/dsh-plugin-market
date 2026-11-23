@@ -1,6 +1,6 @@
 # dsh-plugin-market
 
-dsh 插件市集插件。已实现 **M1（只读市场）+ M2（一键安装闭环）+ M3（conversation.view 卡片面板）+ M5（可发布门禁）**，四者共用 `src/snapshot.json` 数据契约。M4 的数据站/门禁在 `../dsh-market-data/`。
+dsh 插件市集插件。已实现 **M1（只读市场）+ M2（一键安装闭环）+ M3（conversation.view 卡片面板）+ M5（可发布门禁）+ F6（组卸载回滚）+ F3（融合任务书/脚手架）**，共用 `src/snapshot.json` 数据契约。M4 的数据站/门禁在 `../dsh-market-data/`。
 
 ## M1 — 只读市场
 
@@ -19,10 +19,10 @@ src/snapshot.json                      ← 内置快照，随包发布
 - 每次展示都带 `generatedAt`；超过 24h 标"快照"，不拿旧数据冒充实时。
 - 网络与文件系统通过 `RuntimeDeps` 注入，测试可屏蔽主机、删除缓存。
 - 读路径永不抛错；空/坏数据降级为空市集并给出友好提示。
-- 投票/投稿/融合属于 F1–F3，尚未开放。
+- 投稿/投票属于 F1/F2，尚未开放；融合（F3）已开放，见下文。
 
 源码：
-- `src/core/` — 纯函数：types / reader（兜底链）/ render（含快照时间、空数据安全）/ parse / install-types（四态与报告）/ conflicts（冲突预检）/ seam（宿主能力探测与降级）/ installer（安装状态机与生效校验）
+- `src/core/` — 纯函数：types / reader（兜底链）/ render（含快照时间、空数据安全）/ parse / install-types（四态与报告）/ conflicts（冲突预检）/ seam（宿主能力探测与降级）/ installer（安装状态机与生效校验）/ uninstall（组回滚）/ fuse（能力矩阵、重叠、复用清单、来源表）
 - `src/plugin.ts` — dsh 装配层，命令与工具注册；`apply(ctx, config, deps?)` 的 `deps` 是测试缝
 - `src/snapshot.json` — 由 `dsh-market-data` 的 `build-index` 生成，与 `data/index.json` 同构
 
@@ -54,7 +54,24 @@ F6 组安装冲突矩阵 / 组卸载回滚：
 4. **四态校验**：`applied` 成功；`restart-required` 成功但明确提示"重启 web 后开新会话再 verify"；`overridden` 视为失败并提示更高优先级层；`failed/cancelled` 给出按错误码分类的修复建议（含 logPath）。装完再用 `listPlugins` 逐成员核对 `enabled` / `fiberPhase` 与命令可见性。
 5. **模型工具**：`market_install` / `market_verify` 与命令同一套 core 逻辑，带 generic presentCall/presentResult 卡片。
 
-测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径），共 61 条全绿（`npm run check`）。
+测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径）、`test/fuse.test.ts`（F3 融合），共 69 条全绿（`npm run check`）。
+
+## F3 — 融合（任务书先行，脚手架两步落盘）
+
+入口（命令与模型工具共用 `src/core/fuse.ts` 同一套纯逻辑）：
+
+```
+/market fuse <id1,id2[,...]>           # 第一步：输出 # 融合任务书，不落盘
+/market fuse <id1,id2[,...]> --apply   # 第二步：确认后写脚手架到配置目录
+market_fuse { ids, apply }              # 模型工具，present 卡片沿用 install 风格
+```
+
+规则：
+
+- 选 2–5 个插件；License 白名单仅 MIT / Apache-2.0，GPL / AGPL / 复合或未知许可一律拒绝（拒绝时零产物、零落盘）。
+- 任务书含：能力矩阵、重叠字段（宿主 `requires`、`category`、`oneLiner` 数据域、同名入口冲突）、**复用不重写**清单、强制的**借鉴来源与差异**表（§8）。
+- 脚手架是一份可被家族门禁验收的插件骨架（`package.json` / `src` / `lib` / `test` / `tsconfig` / `BORROWED.md` 等），落盘后需自行 `npm run check` + `node scripts/vendor/verify-plugin.mjs <产物目录>`。
+- 实样证据：选 `dsh-plugin-quota` + `dsh-plugin-cost-ledger` 指出 6 个重叠字段（含 `data:cost`）与 6 条复用项；`f3-fuse-evidence.md` 为现场生成的任务书/重叠清单/来源表/门禁结果；由 `node scripts/make-fuse-evidence.mjs` 复现。
 
 ## M3 — conversation.view 卡片面板（既有实现）
 
