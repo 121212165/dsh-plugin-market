@@ -12,6 +12,8 @@ export interface PrecheckInput {
     };
     /** Command names already registered in the host, e.g. from ctx.commands. */
     registeredCommands?: string[] | undefined;
+    /** F6: host slots already occupied, e.g. from ctx.slots. */
+    registeredSlots?: string[] | undefined;
     /** Group member ids the user chose to drop with `--without`. */
     excluded?: string[] | undefined;
     profile?: string;

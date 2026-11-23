@@ -8,6 +8,10 @@ export interface PluginEntry {
   oneLiner: string;
   category: string;
   entries: string[];
+  /** F6: host slots this plugin injects into (e.g. `conversation.view`).
+   * Optional — older catalog entries predate slot declarations. Slot-like
+   * entries (`slot:<name>` or well-known slot ids) are also recognized. */
+  slots?: string[];
   requires: string[];
   dshRange: string;
   license: string;

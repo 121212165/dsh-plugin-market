@@ -13,6 +13,8 @@ import type { ChangeResultLike, InstallSeam, SeamProbe } from './install-types.t
 type UnknownCtx = Record<string, any>;
 
 const REQUIRED = ['installBundle', 'listPlugins', 'listBundles'] as const;
+/** F6: optional host method — uninstall degrades to manual commands without it. */
+const OPTIONAL = ['removeBundle'] as const;
 
 /** Read one candidate without letting a ctx proxy abort the whole probe. */
 function safeRead<T>(read: () => T): T | undefined {
@@ -50,13 +52,18 @@ export function probeSeam(ctx: unknown): SeamProbe {
     const methods = safeRead(() =>
       REQUIRED.filter((name) => typeof (candidate as UnknownCtx)[name] === 'function'),
     ) ?? [];
+    const optional = safeRead(() =>
+      OPTIONAL.filter((name) => typeof (candidate as UnknownCtx)[name] === 'function'),
+    ) ?? [];
     if (methods.includes('installBundle')) {
       return {
         available: true,
         source,
         checked,
-        methods: [...methods],
-        note: '宿主 plugin_manager 可用，使用 installBundle 一键安装',
+        methods: [...methods, ...optional],
+        note: optional.includes('removeBundle')
+          ? '宿主 plugin_manager 可用，支持 installBundle 一键安装与 removeBundle 组卸载'
+          : '宿主 plugin_manager 可用，使用 installBundle 一键安装（无 removeBundle，卸载仅给手动命令）',
       };
     }
   }
@@ -84,6 +91,15 @@ export function adaptSeam(probe: SeamProbe, ctx: unknown): InstallSeam | null {
     source: probe.source,
     async installBundle(spec: string, options?: { enabled?: boolean }): Promise<ChangeResultLike> {
       return await service.installBundle(spec, { enabled: options?.enabled ?? true });
+    },
+    async removeBundle(spec: string): Promise<ChangeResultLike> {
+      if (typeof service.removeBundle !== 'function') {
+        return {
+          changed: false, application: 'failed', stage: 'remove', target: spec,
+          error: { code: 'unsupported', diagnostic: '宿主 plugin_manager 未提供 removeBundle' },
+        };
+      }
+      return await service.removeBundle(spec);
     },
     async listPlugins() {
       return typeof service.listPlugins === 'function' ? await service.listPlugins() : [];
