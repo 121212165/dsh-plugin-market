@@ -1,5 +1,5 @@
 /** Parse `/market` raw input. Pure and tolerant of empty/odd input. */
-export type MarketSubcommand = 'list' | 'group' | 'install' | 'uninstall' | 'verify' | 'seams' | 'vote' | 'submit' | 'fuse' | 'help';
+export type MarketSubcommand = 'list' | 'group' | 'install' | 'uninstall' | 'verify' | 'seams' | 'doctor' | 'vote' | 'submit' | 'fuse' | 'help';
 
 export interface MarketArgs {
   subcommand: MarketSubcommand;
@@ -8,7 +8,7 @@ export interface MarketArgs {
   rest: string[];
 }
 
-const KNOWN = new Set<MarketSubcommand>(['list', 'group', 'install', 'uninstall', 'verify', 'seams', 'vote', 'submit', 'fuse', 'help']);
+const KNOWN = new Set<MarketSubcommand>(['list', 'group', 'install', 'uninstall', 'verify', 'seams', 'doctor', 'vote', 'submit', 'fuse', 'help']);
 
 export function parseMarketArgs(rawInput: string | undefined): MarketArgs {
   const tokens = String(rawInput ?? '').trim().split(/\s+/).filter(Boolean);

@@ -39,6 +39,9 @@ import {
   renderFuseRejection,
   FuseValidationError,
   type FuseFile,
+  runDoctor,
+  renderDoctorReport,
+  type DoctorRunner,
   type InstallSeam,
   type ManifestStore,
   type MarketRead,
@@ -90,6 +93,8 @@ export interface RuntimeDeps {
   /** Host install seam; tests inject a fake, production probes ctx.pluginManager. */
   seam?: InstallSeam;
   seamProbe?: SeamProbe;
+  /** F4 doctor runner; tests inject a deterministic report instead of spawning the gate. */
+  doctor?: DoctorRunner;
   /** Current host command names, for live command-collision pre-checks. */
   registeredCommands?: () => string[];
   /** F5: raw dump-config text or provider for the post-install live loop. */
@@ -130,6 +135,8 @@ function readEmbeddedSnapshot(): string {
   }
   return '';
 }
+
+const defaultDoctorRunner: DoctorRunner = (target) => runDoctor({ target });
 
 function normalizeConfig(input: Partial<Config> | Config): Config {
   return {
@@ -257,8 +264,8 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
 
   ctx.commands.register({
     name: 'market',
-    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market uninstall <id> 按 members 逆序卸载回滚，/market verify <id> 只校验，/market fuse <ids> 出融合任务书（--apply 才落盘脚手架），/market seams 查宿主安装能力。断网用内置快照。',
-    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | uninstall <id> | verify <id> | fuse <a,b> [--apply] | seams]' },
+    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market uninstall <id> 按 members 逆序卸载回滚，/market verify <id> 只校验，/market fuse <ids> 出融合任务书（--apply 才落盘脚手架），/market doctor <path> 给本地插件仓出 P0/P1/P2 体检清单，/market seams 查宿主安装能力。断网用内置快照。',
+    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | uninstall <id> | verify <id> | fuse <a,b> [--apply] | doctor <path> | seams]' },
     handler: async ({ rawInput }: { rawInput?: string }) => {
       const args = parseMarketArgs(rawInput);
       try {
@@ -279,8 +286,28 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
         if (args.subcommand === 'help') {
           return {
             kind: 'success' as const,
-            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market uninstall <id> 按 members 逆序卸载回滚（幂等，失败给恢复命令）· /market verify <id> 校验四态 · /market fuse <a,b,c> 出融合任务书（不落盘），加 --apply 才写脚手架 · /market seams 查安装能力',
+            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market uninstall <id> 按 members 逆序卸载回滚（幂等，失败给恢复命令）· /market verify <id> 校验四态 · /market fuse <a,b,c> 出融合任务书（不落盘），加 --apply 才写脚手架 · /market doctor <path> 本地插件体检 · /market seams 查安装能力',
           };
+        }
+        if (args.subcommand === 'doctor') {
+          if (!args.target) {
+            return {
+              kind: 'error' as const,
+              text: '用法：/market doctor <本地插件仓路径>\n示例：/market doctor C:\\work\\dsh-plugin-foo\n报告按 P0（发布阻断）/P1（应修）/P2（建议）分组，每条给出修改位置与建议代码；只读，不改目标仓。',
+            };
+          }
+          try {
+            const report = await (deps.doctor ?? defaultDoctorRunner)(args.target);
+            return {
+              kind: report.ok ? ('success' as const) : ('error' as const),
+              text: renderDoctorReport(report),
+            };
+          } catch (error) {
+            return {
+              kind: 'error' as const,
+              text: `体检失败：${error instanceof Error ? error.message : String(error)}\n下一步：确认 <path> 是插件仓根目录（含 package.json），或手动运行 node scripts/vendor/verify-plugin.mjs <path>。`,
+            };
+          }
         }
 
         const result = await read();
@@ -535,6 +562,38 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
           if (error instanceof FuseValidationError) return renderFuseRejection(error);
           throw error;
         }
+      },
+    }),
+  );
+
+  ctx.tools.register(
+    defineTool({
+      name: 'market_doctor',
+      description: '体检本地 dsh 插件仓（只读）：复用官方 verify-plugin 门禁判定 + G0-6 locale/exports 断言，按 P0（发布阻断）/P1（应修）/P2（建议）列出每条问题的修改位置与建议代码。',
+      parameters: {
+        path: { type: 'string', required: true, description: '本地插件仓根目录路径，例如 C:\\work\\dsh-plugin-foo' },
+      },
+      output: {
+        schema: { type: 'string' } as const,
+        render: (_args, value) => [{ type: 'text', text: String(value).slice(0, 8000) }],
+      },
+      presentCall: (args: { path: string }) => ({
+        card: 'generic' as const,
+        title: `插件体检：${args.path}`,
+        kind: 'execute' as const,
+        rawInput: args.path,
+      }),
+      presentResult: (_args: unknown, value: unknown) => ({
+        card: 'generic' as const,
+        title: '插件体检报告（P0/P1/P2）',
+        kind: 'execute' as const,
+        rawInput: String(value).slice(0, 4000),
+      }),
+      async execute(args: { path?: string }) {
+        const target = String(args.path ?? '').trim();
+        if (!target) return '用法：market_doctor { "path": "<本地插件仓路径>" }，例：market_doctor { "path": "C:\\\\work\\\\dsh-plugin-foo" }';
+        const report = await (deps.doctor ?? defaultDoctorRunner)(target);
+        return renderDoctorReport(report);
       },
     }),
   );

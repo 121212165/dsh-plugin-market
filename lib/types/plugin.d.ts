@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis';
 import Schema from '@deepseek-ai/schemastery';
-import { type FuseFile, type InstallSeam, type ManifestStore, type ReaderDeps, type SeamProbe } from './core/index.ts';
+import { type FuseFile, type DoctorRunner, type InstallSeam, type ManifestStore, type ReaderDeps, type SeamProbe } from './core/index.ts';
 export declare const name = "market";
 export declare const inject: string[];
 export interface Config {
@@ -53,6 +53,8 @@ export interface RuntimeDeps {
     /** Host install seam; tests inject a fake, production probes ctx.pluginManager. */
     seam?: InstallSeam;
     seamProbe?: SeamProbe;
+    /** F4 doctor runner; tests inject a deterministic report instead of spawning the gate. */
+    doctor?: DoctorRunner;
     /** Current host command names, for live command-collision pre-checks. */
     registeredCommands?: () => string[];
     /** F5: raw dump-config text or provider for the post-install live loop. */

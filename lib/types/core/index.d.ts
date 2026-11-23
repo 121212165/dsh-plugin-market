@@ -1,4 +1,5 @@
 export * from './types.ts';
+export * from './doctor.ts';
 export * from './reader.ts';
 export * from './render.ts';
 export * from './parse.ts';
