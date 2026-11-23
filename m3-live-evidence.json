@@ -27,7 +27,7 @@
     "consoleErrors": 0
   },
   "screenshots": [
-    "dsh-live-out/panel-final/market-panel-live.png"
+    ".screenshots/m3-live-market-panel.png"
   ],
   "note": "首次点击 dsh-market-groups 时 client 面板崩溃：cannot get property \"market\" without inject（stampText 直接读 ctx.market）。已改为 reflect.get + try/catch 并重建 lib/client.js；修复后 `[data-market-panel]` 节点数=1，5 张精选卡渲染，零控制台错误。"
 }

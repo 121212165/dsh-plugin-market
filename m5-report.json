@@ -1,8 +1,6 @@
 {
   "milestone": "M5 — 可发布",
-  "evidenceType": "static",
-  "gateSource": "121212165/dsh-family-tools@0915c5e099bc212f259ea7e791c10ef9d241ce5e",
-  "generatedAt": "2026-11-21T12:01:44.934790+00:00",
+  "generatedAt": "2026-11-23T10:38:15.425678+00:00",
   "criteria": {
     "verify_plugin_gates_all_green": true,
     "lib_committed": true,
@@ -55,9 +53,9 @@
       "note": "纯函数 + 装配层 + headless 冒烟三层齐备，npm test 全覆盖"
     }
   ],
-  "gateNote": "官方门禁 scripts/vendor/verify-plugin.mjs（来源见 gateSource）实跑通过（0 FAIL / 0 WARN）；gates 数组为同一轮本地等价断言明细。",
+  "gateNote": "家族工具 dsh-family-tools/tools/verify-plugin.mjs 不在工作区；本结果按 DSH-MARKET-PLAN.md 记录的门禁语义给出等价断言。",
   "tests": {
-    "pass": 50,
+    "pass": 86,
     "fail": 0
   },
   "layers": {
@@ -113,7 +111,7 @@
         "entry": "/find"
       }
     ],
-    "generatedAt": "2026-11-21T12:01:44.411Z"
+    "generatedAt": "2026-11-21T12:09:30.623Z"
   },
   "steps": {
     "build_all": {

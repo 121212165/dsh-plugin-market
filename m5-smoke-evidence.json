@@ -1,4 +1,5 @@
 {
+  "evidenceType": "static",
   "artifact": "lib/plugin.js",
   "profile": "fresh-profile (empty inventory)",
   "group": "archive-chain",

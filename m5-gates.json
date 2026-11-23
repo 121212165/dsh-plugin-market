@@ -1,13 +1,7 @@
 {
-  "milestone": "M5 — 可发布门禁（官方门禁实跑）",
-  "evidenceType": "static",
-  "gateSource": "121212165/dsh-family-tools@0915c5e099bc212f259ea7e791c10ef9d241ce5e",
-  "gateCommand": "node scripts/vendor/verify-plugin.mjs .",
-  "generatedAt": "2026-11-21T14:45:00.000Z",
-  "pluginCount": 1,
-  "fail": 0,
-  "warn": 0,
-  "pass": true,
+  "milestone": "M5 — 可发布门禁（本地等价实现）",
+  "generatedAt": "2026-11-23T10:38:04.786Z",
+  "note": "家族工具 dsh-family-tools/tools/verify-plugin.mjs 不在工作区；本结果按 DSH-MARKET-PLAN.md 记录的门禁语义给出等价断言。",
   "gates": [
     {
       "id": "G0-5",
@@ -52,5 +46,5 @@
       "note": "纯函数 + 装配层 + headless 冒烟三层齐备，npm test 全覆盖"
     }
   ],
-  "note": "官方门禁已 vendor 到 scripts/vendor/verify-plugin.mjs 并实跑通过（0 FAIL / 0 WARN）；上方 G0-5…G0-10 为本地等价断言（scripts/verify-plugin.mjs），仅作明细参考。"
+  "pass": true
 }

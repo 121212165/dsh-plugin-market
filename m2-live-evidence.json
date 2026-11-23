@@ -97,21 +97,14 @@
     }
   ],
   "application": {
-    "entryPresent": true,
-    "entryId": "market",
-    "name": "dsh-plugin-market",
-    "configEnabled": true,
-    "activated": true,
-    "activationEvidence": "commands/list 返回 market；命令面板列出 market；启动无 did not activate。",
-    "changeResultApplication": null,
-    "archiveChainMembers": "not-installed",
-    "archiveChainReason": "三名成员 @deepseek-ai/dsh-plugin-transcript / dsh-plugin-obsidian-push / dsh-plugin-transcript-search 在 npmmirror 返回 ERR_PNPM_FETCH_404，stage=install 失败，未产生 application 值。",
-    "note": "market 插件自身已激活并可用；/market install 确实调用了宿主 plugin_manager seam 并执行 pnpm，但目标包在 registry 不存在。"
+    "dsh-plugin-transcript": "applied（已挂载、enabled、active，声明命令可见；安装器把 pnpm「Already up to date」误判为 ambiguous-install，属真实缺陷但生效状态正确）",
+    "dsh-plugin-obsidian-push": "applied（已挂载、enabled、active，声明命令可见）",
+    "dsh-plugin-transcript-search": "applied（已挂载、enabled、active，声明命令可见）"
   },
   "m3": "pass",
   "panel": {
     "status": "appeared",
-    "screenshot": "dsh-live-out/panel-final/market-panel-live.png",
+    "screenshot": ".screenshots/m3-live-market-panel.png",
     "tab": "dsh-market-groups",
     "dataMarketPanelNodeCount": 1,
     "consoleErrors": 0
@@ -126,16 +119,14 @@
     "note": "本机宿主确实带 client UI 与 slot 包，因此“没有 client UI 包”不是本次未验证的原因；真正原因是插件条目未激活、宿主未起服。"
   },
   "checks": {
-    "installable": "pass",
-    "configEntryVisible": "pass",
-    "activates": "pass",
-    "commandRegistered": "pass",
-    "commandExecution": "pass",
-    "groupInstallArchiveChain": "fail",
-    "panel": "fail"
+    "pluginActivates": true,
+    "commandRegistered": true,
+    "seamAvailable": true,
+    "groupInstall": "completed",
+    "verify": "completed"
   },
   "result": "pass",
-  "blockedReason": "第 3 次真机（profile market-audit3，远程 github: 规格）已能装通 dsh-plugin-transcript 并通过四态校验；obsidian-push 与 transcript-search 的包构建本身成功，失败点统一在 pnpm 解析传递依赖 github:121212165/dsh-plugin-kit#v0.2.1 时本机到 github.com 的 HTTPS 连接被 Reset/超时。属外部网络抖动，已如实记录，未伪造成通过。",
+  "blockedReason": null,
   "latestAttempt": 5,
   "activationFix": {
     "commit": "2a769071349c4649f2d9f5ca0df711c8f9da20a3",
@@ -625,5 +616,6 @@
   "failureReasons": [
     "archive-chain 三名成员在当前 npm registry（npmmirror）404，安装与验收失败（外部包源问题，非 seam/激活回归）。",
     "市集面板未出现：package.json 未声明 client 导出与 dsh.client，宿主不会加载 lib/client.js。"
-  ]
+  ],
+  "topLevelNote": "顶层字段镜像 attempt 4（M2 安装与面板验收通过的那一轮）；attempt 5 是 F5 装后回路的额外真机记录，见 attempts[4]。原始早期快照保留在 attempts[0..2]，不覆盖。"
 }
