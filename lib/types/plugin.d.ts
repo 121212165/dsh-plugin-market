@@ -49,5 +49,9 @@ export interface RuntimeDeps {
     seamProbe?: SeamProbe;
     /** Current host command names, for live command-collision pre-checks. */
     registeredCommands?: () => string[];
+    /** F5: raw dump-config text or provider for the post-install live loop. */
+    dumpConfig?: (() => Promise<string> | string) | string;
+    /** F5: single member-entry invocation hook for the live loop. */
+    callEntry?: (entry: string) => Promise<string> | string;
 }
 export declare function apply(ctx: Context, configInput: Partial<Config> | Config, deps?: RuntimeDeps): void;

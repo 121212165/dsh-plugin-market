@@ -15,3 +15,13 @@ export declare function probeSeam(ctx: unknown): SeamProbe;
 export declare function adaptSeam(probe: SeamProbe, ctx: unknown): InstallSeam | null;
 /** Manual fallback text. Shown in degraded mode and in every failure's nextSteps. */
 export declare function manualInstallCommands(spec: string, profile: string, groupId: string): string[];
+/** F5: in-process equivalent of `dsh --dump-config`. The authoritative CLI
+ * output is captured on the real machine; inside a session the only safe read
+ * of "what is actually mounted" is the host seam's own inventory. We render
+ * it as raw text so the live loop can report it verbatim. Never throws. */
+export declare function dumpConfigView(seam: InstallSeam | null): Promise<string>;
+/** F5: best-effort invocation of one declared member entry through the host
+ * command service. Cordis/command-service shapes differ, so every access is
+ * guarded; when the host does not expose an executor we say so instead of
+ * pretending the entry was called. */
+export declare function callEntryViaContext(ctx: unknown, entry: string): Promise<string>;

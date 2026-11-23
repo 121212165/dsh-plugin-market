@@ -78,6 +78,10 @@ export interface RuntimeDeps {
   seamProbe?: SeamProbe;
   /** Current host command names, for live command-collision pre-checks. */
   registeredCommands?: () => string[];
+  /** F5: raw dump-config text or provider for the post-install live loop. */
+  dumpConfig?: (() => Promise<string> | string) | string;
+  /** F5: single member-entry invocation hook for the live loop. */
+  callEntry?: (entry: string) => Promise<string> | string;
 }
 
 function expandHome(value: string): string {
@@ -257,6 +261,9 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
             profile: config.profile,
             registeredCommands: registeredCommands(),
             now: deps.now,
+            dumpConfig: deps.dumpConfig,
+            callEntry: deps.callEntry,
+            ctx,
             ...options,
           });
           return { kind: report.ok ? ('success' as const) : ('error' as const), text: renderInstallReport(report) };
@@ -347,6 +354,9 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
           profile: config.profile,
           registeredCommands: registeredCommands(),
           now: deps.now,
+          dumpConfig: deps.dumpConfig,
+          callEntry: deps.callEntry,
+          ctx,
           excluded: String(args.without ?? '').split(',').map((part) => part.trim()).filter(Boolean),
           reinstall: args.reinstall === true,
         });

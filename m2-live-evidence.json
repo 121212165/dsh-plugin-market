@@ -1,7 +1,7 @@
 {
   "milestone": "M2 — 一键安装闭环（批次 D 真机证据）",
   "evidenceType": "live",
-  "generatedAt": "2026-11-23T02:15:39.585Z",
+  "generatedAt": "2026-11-23T03:16:21.680Z",
   "environment": {
     "platform": "win32",
     "os": "Windows",
@@ -136,7 +136,7 @@
   },
   "result": "pass",
   "blockedReason": "第 3 次真机（profile market-audit3，远程 github: 规格）已能装通 dsh-plugin-transcript 并通过四态校验；obsidian-push 与 transcript-search 的包构建本身成功，失败点统一在 pnpm 解析传递依赖 github:121212165/dsh-plugin-kit#v0.2.1 时本机到 github.com 的 HTTPS 连接被 Reset/超时。属外部网络抖动，已如实记录，未伪造成通过。",
-  "latestAttempt": 4,
+  "latestAttempt": 5,
   "activationFix": {
     "commit": "2a769071349c4649f2d9f5ca0df711c8f9da20a3",
     "verified": true,
@@ -513,6 +513,113 @@
         "dsh-plugin-transcript-search": "applied（已挂载、enabled、active，声明命令可见）"
       },
       "note": "网络抖动已通过 plugin-manager.githubConnectionTimeoutMs=30000 与 idleTimeoutMs=1800000 缓解；三名成员全部生效，/market verify 验收通过。"
+    },
+    {
+      "attempt": 5,
+      "generatedAt": "2026-11-23T03:16:21.680Z",
+      "fixUnderTest": "F5 装后真回路：安装后自动 dump-config（宿主清单视图）→ 调一次成员入口 → application 四态报告；overridden 专门文案“被更高优先级层覆盖”",
+      "result": "pass",
+      "environment": {
+        "platform": "win32",
+        "os": "Windows",
+        "dshVersion": "0.2.0-rc.2",
+        "nodeVersion": "v25.7.0",
+        "profile": "market-audit5",
+        "dshHome": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\opencode\\dsh-live-home5",
+        "dshHomeNote": "独立 profile + 独立 DSH_HOME，未触碰 ~/.dsh 下 web；沿用 attempt 4 的 githubConnectionTimeoutMs=30000 / idleTimeoutMs=1800000。",
+        "pluginSource": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\worktrees\\wt-f5-live-loop",
+        "pluginManagerConfig": {
+          "githubConnectionTimeoutMs": 30000,
+          "idleTimeoutMs": 1800000
+        }
+      },
+      "commands": [
+        {
+          "step": "dump-config",
+          "command": "$env:DSH_HOME='<worktree>\\..\\dsh-live-home5'; dsh --profile market-audit5 --dump-config",
+          "stdout": "# == dsh-plugin-market\n- id: market\n  name: dsh-plugin-market\n  config:\n    enabled: true\n# == dsh-plugin-transcript / obsidian-push / transcript-search（均 enabled: true）",
+          "note": "三个归档链成员已在 composed 树中且 enabled；dump-config 本身不输出 application 字段。"
+        },
+        {
+          "step": "boot",
+          "command": "dsh --profile market-audit5 --no-open --port 7845",
+          "stdout": "dsh web: http://127.0.0.1:7845/?token=<redacted>",
+          "note": "宿主正常起服，market 命令注册成功。"
+        },
+        {
+          "step": "commands-list",
+          "command": "POST /api/commands/list",
+          "stdout": "含 name=market（插件市集），无 did not activate。"
+        },
+        {
+          "step": "execute /market seams",
+          "command": "POST /api/commands/execute",
+          "stdout": "宿主安装能力（plugin_manager seam）\n  状态：可用\n  来源：ctx.reflect.get('pluginManager')\n  方法：installBundle, listPlugins, listBundles"
+        },
+        {
+          "step": "execute /market install archive-chain --reinstall",
+          "command": "POST /api/commands/execute",
+          "stdout": "安装报告 · archive-chain · 宿主安装\n归档链：2 步失败；验收通过：3 个成员全部挂载且生效（用 /market group archive-chain 查看业务验收步骤）\n时间 2026-11-23T03:11:29.319Z → 2026-11-23T03:15:29.519Z\n\n✗ dsh-plugin-transcript  github:121212165/dsh-plugin-transcript\n    Done in 44s using pnpm v10.20.0（stage=install, target=github:121212165/dsh-plugin-transcript） [failed]\n✓ dsh-plugin-obsidian-push  github:121212165/dsh-plugin-obsidian-push\n    dsh-plugin-obsidian-push 已写入 profile，需重启 dsh web 后生效 [restart-required]\n✗ dsh-plugin-transcript-search  github:121212165/dsh-plugin-transcript-search\n    Done in 1m 40.2s using pnpm v10.20.0（stage=install, target=github:121212165/dsh-plugin-transcript-search） [failed]\n\n生效校验：验收通过：3 个成员全部挂载且生效（用 /market group archive-chain 查看业务验收步骤）\n  dsh-plugin-transcript：已挂载、enabled、active，声明的命令均可见\n  dsh-plugin-obsidian-push：application=restart-required\n  dsh-plugin-transcript-search：已挂载、enabled、active，声明的命令均可见\n\n装后生效回路（dump-config → 入口调用 → 四态）：\n  dump-config：3/3 成员可见\n    # == installed plugins (dump-config view)\n    - id: include\n      moduleName: cordis:include\n      enabled: true\n      fiberPhase: active\n    - id: include:tool-plugin-manager\n  入口调用：/transcript · 调用成功 · null\n  四态：\n    dsh-plugin-transcript：failed · 失败（已挂载、enabled、active，声明的命令均可见） → 查看 pnpm/宿主日志定位失败原因，修好后重试 /market install <groupId>\n    dsh-plugin-obsidian-push：restart-required · 需重启后生效（application=restart-required） → 重启 dsh web 后开新会话，再运行 /market verify <groupId>\n    dsh-plugin-transcript-search：failed · 失败（已挂载、enabled、active，声明的命令均可见） → 查看 pnpm/宿主日志定位失败原因，修好后重试 /market install <groupId>\n  装后回路未通过：dsh-plugin-transcript=failed，dsh-plugin-obsidian-push=restart-required，dsh-plugin-transcript-search=failed\n\n下一步：\n  → 安装失败：ambiguous-install\n  → 查看完整日志：C:\\Users\\lenovo\\AppData\\Local\\Temp\\opencode\\dsh-live-home5\\profiles\\market-audit5\\.plugin-manager\\logs\\operation-TmUu9N\\pnpm.log\n  → /market seams 检查 seam；/market group <id> 复核成员与协同点\n  → 重启 web 后开新会话，运行 /market verify <groupId>\n  → /market group <groupId> 查看可执行的验收步骤\n  → 查看完整日志：C:\\Users\\lenovo\\AppData\\Local\\Temp\\opencode\\dsh-live-home5\\profiles\\market-audit5\\.plugin-manager\\logs\\operation-nZSuxr\\pnpm.log\n  → 重启 web 后开新会话再验证",
+          "note": "原始响应全文（含自动触发的“装后生效回路”四段）。三名成员已预装，重复安装触发宿主已知缺陷 Already up to date → ambiguous-install，四态如实标 failed；verify 同时报 applied。本分支按任务要求不在插件侧掩盖该缺陷。"
+        },
+        {
+          "step": "execute /market verify archive-chain",
+          "command": "POST /api/commands/execute",
+          "stdout": "生效校验 · archive-chain\n验收通过：3 个成员全部挂载且生效（用 /market group archive-chain 查看业务验收步骤）\n  dsh-plugin-transcript：已挂载、enabled、active，声明的命令均可见\n  dsh-plugin-obsidian-push：已挂载、enabled、active，声明的命令均可见\n  dsh-plugin-transcript-search：已挂载、enabled、active，声明的命令均可见",
+          "note": "逐成员已挂载、enabled、active、声明命令可见。"
+        }
+      ],
+      "application": {
+        "fourStateRawOutput": "装后生效回路（dump-config → 入口调用 → 四态）：\n  dump-config：3/3 成员可见\n    # == installed plugins (dump-config view)\n    - id: include\n      moduleName: cordis:include\n      enabled: true\n      fiberPhase: active\n    - id: include:tool-plugin-manager\n  入口调用：/transcript · 调用成功 · null\n  四态：\n    dsh-plugin-transcript：failed · 失败（已挂载、enabled、active，声明的命令均可见） → 查看 pnpm/宿主日志定位失败原因，修好后重试 /market install <groupId>\n    dsh-plugin-obsidian-push：restart-required · 需重启后生效（application=restart-required） → 重启 dsh web 后开新会话，再运行 /market verify <groupId>\n    dsh-plugin-transcript-search：failed · 失败（已挂载、enabled、active，声明的命令均可见） → 查看 pnpm/宿主日志定位失败原因，修好后重试 /market install <groupId>\n  装后回路未通过：dsh-plugin-transcript=failed，dsh-plugin-obsidian-push=restart-required，dsh-plugin-transcript-search=failed\n\n下一步：\n  → 安装失败：ambiguous-install\n  → 查看完整日志：C:\\Users\\lenovo\\AppData\\Local\\Temp\\opencode\\dsh-live-home5\\profiles\\market-audit5\\.plugin-manager\\logs\\operation-TmUu9N\\pnpm.log\n  → /market seams 检查 seam；/market group <id> 复核成员与协同点\n  → 重启 web 后开新会话，运行 /market verify <groupId>\n  → /market group <groupId> 查看可执行的验收步骤\n  → 查看完整日志：C:\\Users\\lenovo\\AppData\\Local\\Temp\\opencode\\dsh-live-home5\\profiles\\market-audit5\\.plugin-manager\\logs\\operation-nZSuxr\\pnpm.log\n  → 重启 web 后开新会话再验证",
+        "dsh-plugin-transcript": "failed · 失败（已挂载、enabled、active，声明的命令均可见）",
+        "dsh-plugin-obsidian-push": "restart-required · 需重启后生效（application=restart-required）",
+        "dsh-plugin-transcript-search": "failed · 失败（已挂载、enabled、active，声明的命令均可见）",
+        "overriddenCase": {
+          "evidenceType": "built-artifact-code-path",
+          "note": "真实 dsh 宿主仅在 HMR 激活且存在更高优先级层、enabled 状态被覆盖时才产生 application=overridden；本次真机安装未自然触发该分支，故用发布产物 + 注入返回 overridden 的宿主 seam 隔离验证该四态分支的原文输出。",
+          "guidance": {
+            "label": "overridden · 被更高优先级层覆盖",
+            "nextStep": "被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功"
+          },
+          "states": [
+            {
+              "member": "dsh-plugin-transcript",
+              "application": "overridden",
+              "label": "overridden · 被更高优先级层覆盖",
+              "detail": "application=overridden，被更高优先级层覆盖",
+              "nextStep": "被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功"
+            },
+            {
+              "member": "dsh-plugin-obsidian-push",
+              "application": "overridden",
+              "label": "overridden · 被更高优先级层覆盖",
+              "detail": "application=overridden，被更高优先级层覆盖",
+              "nextStep": "被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功"
+            },
+            {
+              "member": "dsh-plugin-transcript-search",
+              "application": "overridden",
+              "label": "overridden · 被更高优先级层覆盖",
+              "detail": "application=overridden，被更高优先级层覆盖",
+              "nextStep": "被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功"
+            }
+          ],
+          "rawOutput": "安装报告 · archive-chain · 宿主安装\n0/3 成员 applied；3 个成员被更高优先级层覆盖（overridden，不视为安装成功）\n时间 2026-11-23T12:00:00.000Z → 2026-11-23T12:00:00.000Z\n\n\n生效校验：验收未通过：见各成员详情\n  dsh-plugin-transcript：application=overridden，被更高优先级层覆盖\n  dsh-plugin-obsidian-push：application=overridden，被更高优先级层覆盖\n  dsh-plugin-transcript-search：application=overridden，被更高优先级层覆盖\n\n装后生效回路（dump-config → 入口调用 → 四态）：\n  dump-config：3/3 成员可见\n    # == dsh-plugin-market (overridden probe)\n    - id: market\n      config:\n        enabled: true\n      members: dsh-plugin-transcript dsh-plugin-obsidian-push dsh-plugin-transcript-search\n  入口调用：/transcript · 调用成功 · /transcript 调用成功（F5 回路原始输出）\n  四态：\n    dsh-plugin-transcript：overridden · 被更高优先级层覆盖（application=overridden，被更高优先级层覆盖） → 被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功\n    dsh-plugin-obsidian-push：overridden · 被更高优先级层覆盖（application=overridden，被更高优先级层覆盖） → 被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功\n    dsh-plugin-transcript-search：overridden · 被更高优先级层覆盖（application=overridden，被更高优先级层覆盖） → 被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功\n  0/3 成员 applied；3 个成员被更高优先级层覆盖（overridden，不视为安装成功）",
+          "assertion": "overridden 明确提示“被更高优先级层覆盖”，并给出“检查并移除更高优先级的 patch/层”下一步；不是笼统的“安装失败”。"
+        }
+      },
+      "checks": {
+        "pluginActivates": true,
+        "seamAvailable": true,
+        "f5LoopAutoRunsAfterInstall": true,
+        "dumpConfigViewPresent": true,
+        "entryCalledOnce": true,
+        "fourStateSectionPresent": true,
+        "overriddenWordingExplicit": true,
+        "overriddenNotGenericFailure": true,
+        "verifyPassed": true
+      },
+      "note": "attempt 5 真机 --reinstall：归档链成员已预装，重复安装触发宿主已知 ambiguous-install 缺陷（任务明确要求如实展示、不在插件侧掩盖），四态按 ChangeResult 原样显示 failed / restart-required，而 verify 独立报 applied。四态段原文见 application.fourStateRawOutput；dump-config 视图（宿主清单）与一次入口调用均在原文中。overridden 由发布产物 + 注入返回 overridden 的宿主 seam 隔离复现，rawOutput 为真实运行原文，文案明确“被更高优先级层覆盖”且带下一步。"
     }
   ],
   "failureReasons": [

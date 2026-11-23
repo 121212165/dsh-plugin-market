@@ -105,3 +105,37 @@ export function manualInstallCommands(spec: string, profile: string, groupId: st
     `/market verify ${groupId}`,
   ];
 }
+
+/** F5: in-process equivalent of `dsh --dump-config`. The authoritative CLI
+ * output is captured on the real machine; inside a session the only safe read
+ * of "what is actually mounted" is the host seam's own inventory. We render
+ * it as raw text so the live loop can report it verbatim. Never throws. */
+export async function dumpConfigView(seam: InstallSeam | null): Promise<string> {
+  if (!seam) return '(seam 不可用：无法读取宿主安装清单)';
+  const [rows, bundles] = await Promise.all([
+    (seam.listPlugins?.() ?? Promise.resolve([])).catch(() => []),
+    (seam.listBundles?.() ?? Promise.resolve([])).catch(() => []),
+  ]);
+  const lines = ['# == installed plugins (dump-config view)'];
+  for (const row of rows) {
+    const id = row.id || row.entryId || row.moduleName || '?';
+    lines.push(`- id: ${id}`, `  moduleName: ${row.moduleName ?? ''}`, `  enabled: ${row.enabled}`, `  fiberPhase: ${row.fiberPhase ?? 'unknown'}`);
+  }
+  lines.push('# == installed bundles');
+  for (const bundle of bundles) lines.push(`- name: ${bundle.name}  enabled: ${bundle.enabled}`);
+  if (!rows.length && !bundles.length) lines.push('(清单为空)');
+  return lines.join('\n');
+}
+
+/** F5: best-effort invocation of one declared member entry through the host
+ * command service. Cordis/command-service shapes differ, so every access is
+ * guarded; when the host does not expose an executor we say so instead of
+ * pretending the entry was called. */
+export async function callEntryViaContext(ctx: unknown, entry: string): Promise<string> {
+  const commands = (ctx as UnknownCtx | null)?.commands as UnknownCtx | undefined;
+  if (!commands || typeof commands.execute !== 'function') {
+    throw new Error('宿主未暴露 commands.execute：入口仅完成可见性探测，未实际调用');
+  }
+  const value = await commands.execute(entry);
+  return typeof value === 'string' ? value : JSON.stringify(value ?? null);
+}

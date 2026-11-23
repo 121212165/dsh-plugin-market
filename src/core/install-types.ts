@@ -17,6 +17,8 @@ export interface ChangeResultLike {
 
 export interface InstalledRow {
   id: string;
+  /** Real dsh hosts identify loader rows by `entryId`, not `id`. */
+  entryId?: string;
   moduleName?: string;
   enabled: boolean;
   fiberPhase?: 'active' | 'failed' | 'pending' | 'loading' | 'unloading' | null;
@@ -116,6 +118,45 @@ export interface InstallReport {
   steps: InstallStepResult[];
   verification: VerificationReport | null;
   nextSteps: string[];
+  /** F5: the post-install live loop (dump-config → one entry call → four-state report). */
+  liveLoop?: LiveLoopReport | null;
+}
+
+/** One line of the F5 four-state report: state name + explicit next step. */
+export interface FourStateLine {
+  member: string;
+  application: ApplicationState;
+  /** State name plus wording; `overridden` always says "被更高优先级层覆盖". */
+  label: string;
+  detail: string;
+  nextStep: string;
+}
+
+/** Result of invoking one declared member entry during the live loop. */
+export interface EntryProbeResult {
+  entry: string;
+  ok: boolean;
+  /** Raw output from the host command, or the reason it could not be called. */
+  output: string;
+}
+
+/** F5: what actually took effect after install, as observed through the host. */
+export interface LiveLoopReport {
+  groupId: string;
+  /** Raw `dsh --dump-config` output, or the in-process seam view when unavailable. */
+  dumpConfig: string;
+  /** Member ids whose declaration appears in the dump-config output. */
+  membersInDump: string[];
+  /** The single member entry invoked once; null when no entry could be probed. */
+  entry: EntryProbeResult | null;
+  /** One line per member with the four-state label and its next step. */
+  states: FourStateLine[];
+  /** Reused from `verifyGroup` — F5 never re-implements four-state semantics. */
+  verification: VerificationReport;
+  ok: boolean;
+  summary: string;
+  startedAt: string;
+  finishedAt: string;
 }
 
 export const APPLICATION_LABEL: Record<ApplicationState, string> = {

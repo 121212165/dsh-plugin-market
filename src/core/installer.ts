@@ -2,15 +2,18 @@
  * The orchestrator never throws: every failure becomes a visible report with
  * an executable next step. */
 import { planGroupInstall, renderConflicts, specFor } from './conflicts.ts';
-import { manualInstallCommands } from './seam.ts';
+import { callEntryViaContext, dumpConfigView, manualInstallCommands } from './seam.ts';
 import type {
   ApplicationState,
   ChangeResultLike,
   Conflict,
+  EntryProbeResult,
+  FourStateLine,
   InstallReport,
   InstallSeam,
   InstallStepResult,
   InstalledRow,
+  LiveLoopReport,
   VerificationMember,
   VerificationReport,
 } from './install-types.ts';
@@ -26,6 +29,10 @@ export interface InstallInput {
   registeredCommands?: string[] | undefined;
   now?: (() => number) | undefined;
   onProgress?: (line: string) => void;
+  /** F5: hooks for the automatic post-install live loop. */
+  dumpConfig?: (() => Promise<string> | string) | string | undefined;
+  callEntry?: ((entry: string) => Promise<string> | string) | undefined;
+  ctx?: unknown;
 }
 
 export interface VerifyInput {
@@ -38,7 +45,66 @@ export interface VerifyInput {
   now?: (() => number) | undefined;
 }
 
+/** F5: inputs for the automatic post-install live loop. Both IO hooks are
+ * optional so tests can inject deterministic raw output; in production they
+ * default to the seam view and ctx.commands.execute via seam.ts. */
+export interface LiveLoopInput {
+  groupId: string;
+  index: MarketIndex;
+  seam: InstallSeam | null;
+  /** `application` from each member's ChangeResult during install. */
+  applicationByMember: Record<string, ApplicationState>;
+  profile?: string;
+  registeredCommands?: string[] | undefined;
+  /** Raw dump-config text (or a provider); defaults to dumpConfigView(seam). */
+  dumpConfig?: (() => Promise<string> | string) | string | undefined;
+  /** Invoke a declared entry once; defaults to callEntryViaContext. */
+  callEntry?: ((entry: string) => Promise<string> | string) | undefined;
+  /** Host context, used only by the default callEntry hook. */
+  ctx?: unknown;
+  now?: (() => number) | undefined;
+}
+
 const stamp = (now?: () => number): string => new Date((now ?? Date.now)()).toISOString();
+const messageOf = (error: unknown): string => error instanceof Error ? error.message : String(error);
+
+/** F5: one wording table for all four application states. `overridden` is
+ * deliberately explicit ("被更高优先级层覆盖") so it can never be confused
+ * with a generic failure. Every state carries a concrete next step. */
+export const FOUR_STATE_GUIDANCE: Record<ApplicationState, { label: string; nextStep: string }> = {
+  applied: {
+    label: 'applied · 已生效',
+    nextStep: '无需重启；运行 /market verify <groupId> 复核四态与命令可见性',
+  },
+  'restart-required': {
+    label: 'restart-required · 需重启后生效',
+    nextStep: '重启 dsh web 后开新会话，再运行 /market verify <groupId>',
+  },
+  overridden: {
+    label: 'overridden · 被更高优先级层覆盖',
+    nextStep: '被更高优先级层覆盖：检查并移除更高优先级的 patch/层（dsh plugin --profile <profile> list），不要当作安装成功',
+  },
+  failed: {
+    label: 'failed · 失败',
+    nextStep: '查看 pnpm/宿主日志定位失败原因，修好后重试 /market install <groupId>',
+  },
+  cancelled: {
+    label: 'cancelled · 已取消',
+    nextStep: 'profile 已回滚；确认后重新运行 /market install <groupId>',
+  },
+};
+
+/** Render a single four-state line with its next step. */
+export function renderFourStateLine(state: ApplicationState, member: string, detail?: string): FourStateLine {
+  const guidance = FOUR_STATE_GUIDANCE[state];
+  return {
+    member,
+    application: state,
+    label: guidance.label,
+    detail: detail ?? guidance.label,
+    nextStep: guidance.nextStep,
+  };
+}
 
 function pluginOf(index: MarketIndex, id: string): PluginEntry | undefined {
   return index.plugins.find((plugin) => plugin.id === id);
@@ -51,7 +117,7 @@ function memberKeys(plugin: PluginEntry | undefined, id: string): string[] {
 
 function findRow(rows: InstalledRow[], plugin: PluginEntry | undefined, id: string): InstalledRow | undefined {
   const keys = new Set(memberKeys(plugin, id));
-  return rows.find((row) => [row.id, row.moduleName ?? '', ...String(row.id).split(':')]
+  return rows.find((row) => [row.id, row.entryId ?? '', row.moduleName ?? '', ...String(row.id).split(':')]
     .filter(Boolean).some((value) => keys.has(String(value).toLowerCase())));
 }
 
@@ -170,7 +236,12 @@ export async function verifyGroup(input: VerifyInput): Promise<VerificationRepor
     if (!detail.length) detail.push('已挂载、enabled、active，声明的命令均可见');
     return { member: id, present, active, enabled, detail: detail.join('；'), nextSteps };
   });
-  const ok = members.every((member) => member.present && member.active && member.enabled && !member.nextSteps.some((step) => step.includes('overridden')));
+  // `overridden` is a failure even when the row is present/enabled/active:
+  // a higher-priority layer shadowed it. Check the source state, not the
+  // wording of a next step (which previously let this slip through).
+  const ok = members.every((member) =>
+    member.present && member.active && member.enabled
+    && input.applicationByMember?.[member.member] !== 'overridden');
   return {
     groupId: group.id,
     members,
@@ -258,6 +329,15 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
     groupId: group.id, index: input.index, seam: input.seam,
     applicationByMember, registeredCommands: input.registeredCommands, now: input.now, profile,
   });
+  // F5: automatically run the live loop once after install. The four states
+  // come from the same ChangeResult.application values used above, so no
+  // semantics are re-implemented here.
+  const liveLoop = await runPostInstallLoop({
+    groupId: group.id, index: input.index, seam: input.seam,
+    applicationByMember, registeredCommands: input.registeredCommands,
+    profile, dumpConfig: input.dumpConfig, callEntry: input.callEntry,
+    ctx: input.ctx, now: input.now,
+  });
   const failed = steps.filter((step) => step.status === 'failed');
   const nextSteps = [...new Set([
     ...steps.flatMap((step) => step.nextSteps),
@@ -278,6 +358,7 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
     steps,
     verification,
     nextSteps,
+    liveLoop,
   };
 }
 
@@ -299,6 +380,18 @@ export function renderInstallReport(report: InstallReport): string {
     lines.push('', `生效校验：${report.verification.summary}`);
     for (const member of report.verification.members) lines.push(`  ${member.member}：${member.detail}`);
   }
+  if (report.liveLoop) {
+    const loop = report.liveLoop;
+    lines.push('', '装后生效回路（dump-config → 入口调用 → 四态）：');
+    lines.push(`  dump-config：${loop.membersInDump.length}/${loop.states.length} 成员可见`);
+    for (const line of loop.dumpConfig.split('\n').slice(0, 6)) lines.push(`    ${line}`);
+    lines.push(`  入口调用：${loop.entry ? `${loop.entry.entry} · ${loop.entry.ok ? '调用成功' : '未实际调用'} · ${loop.entry.output}` : '无可探测入口'}`);
+    lines.push('  四态：');
+    for (const state of loop.states) {
+      lines.push(`    ${state.member}：${state.label}（${state.detail}） → ${state.nextStep}`);
+    }
+    lines.push(`  ${loop.summary}`);
+  }
   if (report.nextSteps.length) {
     lines.push('', '下一步：');
     for (const step of report.nextSteps) lines.push(`  → ${step}`);
@@ -314,4 +407,81 @@ export async function runVerify(input: VerifyInput & { profile?: string }): Prom
     probe.summary,
     ...probe.members.map((member) => `  ${member.member}：${member.detail}${member.nextSteps.length ? ` → ${member.nextSteps.join(' | ')}` : ''}`),
   ].join('\n');
+}
+
+/** F5: the automatic post-install live loop — dump-config → one entry call →
+ * four-state report. Four-state semantics are reused: `verifyGroup` supplies
+ * the verification and `FOUR_STATE_GUIDANCE` only adds explicit wording. */
+export async function runPostInstallLoop(input: LiveLoopInput): Promise<LiveLoopReport> {
+  const startedAt = stamp(input.now);
+  const group = input.index.groups.find((candidate) => candidate.id === input.groupId);
+  const profile = input.profile ?? 'web';
+
+  // 1. dump-config (authoritative CLI output when injected, seam view otherwise)
+  let dumpConfig: string;
+  try {
+    const source = input.dumpConfig;
+    dumpConfig = typeof source === 'function'
+      ? String(await source())
+      : String(source ?? await dumpConfigView(input.seam));
+  } catch (error) {
+    dumpConfig = `dump-config 读取失败：${messageOf(error)}`;
+  }
+  const dumpLower = dumpConfig.toLowerCase();
+  const membersInDump = (group?.members ?? []).filter((id) => dumpLower.includes(id.toLowerCase()));
+
+  // 2. one member entry call (only entries the host actually reports as visible)
+  const live = new Set((input.registeredCommands ?? []).map((name) => name.startsWith('/') ? name : `/${name}`));
+  const chosenEntry = (group?.members ?? [])
+    .flatMap((id) => (pluginOf(input.index, id)?.entries ?? []).filter((entry) => entry.startsWith('/')))
+    .find((entry) => live.size === 0 || live.has(entry));
+  let entry: EntryProbeResult | null = null;
+  if (chosenEntry) {
+    const call = input.callEntry ?? ((name: string) => callEntryViaContext(input.ctx, name));
+    try {
+      entry = { entry: chosenEntry, ok: true, output: String(await call(chosenEntry)) };
+    } catch (error) {
+      entry = { entry: chosenEntry, ok: false, output: messageOf(error) };
+    }
+  }
+
+  // 3. four-state report via the existing verifier — never re-implemented
+  const verification = await verifyGroup({
+    groupId: input.groupId,
+    index: input.index,
+    seam: input.seam,
+    applicationByMember: input.applicationByMember,
+    registeredCommands: input.registeredCommands,
+    profile,
+    now: input.now,
+  });
+  const states: FourStateLine[] = (group?.members ?? []).map((id) => {
+    const application = input.applicationByMember[id] ?? 'failed';
+    const detail = verification.members.find((member) => member.member === id)?.detail;
+    return renderFourStateLine(application, id, detail);
+  });
+
+  const overriddenCount = states.filter((state) => state.application === 'overridden').length;
+  const appliedCount = states.filter((state) => state.application === 'applied').length;
+  const ok = states.length > 0
+    && states.every((state) => state.application === 'applied' || state.application === 'restart-required')
+    && verification.ok;
+  const summary = overriddenCount
+    ? `${appliedCount}/${states.length} 成员 applied；${overriddenCount} 个成员被更高优先级层覆盖（overridden，不视为安装成功）`
+    : ok
+      ? `装后回路通过：${states.length} 个成员生效，dump-config 可见 ${membersInDump.length}/${states.length}，入口 ${entry?.entry ?? '无'} ${entry?.ok ? '调用成功' : '未实际调用'}`
+      : `装后回路未通过：${states.map((state) => `${state.member}=${state.application}`).join('，')}`;
+
+  return {
+    groupId: input.groupId,
+    dumpConfig,
+    membersInDump,
+    entry,
+    states,
+    verification,
+    ok,
+    summary,
+    startedAt,
+    finishedAt: stamp(input.now),
+  };
 }
