@@ -1,6 +1,8 @@
 {
   "milestone": "M5 — 可发布",
-  "generatedAt": "2026-11-23T10:38:15.425678+00:00",
+  "evidenceType": "static",
+  "gateSource": "121212165/dsh-family-tools@0915c5e099bc212f259ea7e791c10ef9d241ce5e",
+  "generatedAt": "2026-11-23T10:45:52.085782+00:00",
   "criteria": {
     "verify_plugin_gates_all_green": true,
     "lib_committed": true,
@@ -73,6 +75,7 @@
     ]
   },
   "smoke": {
+    "evidenceType": "static",
     "artifact": "lib/plugin.js",
     "profile": "fresh-profile (empty inventory)",
     "group": "archive-chain",

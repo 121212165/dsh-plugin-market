@@ -97,8 +97,19 @@ criteria = {
     "headless_fresh_profile_install_and_call": smoke_ok,
 }
 
+# Evidence discipline (E1): the report is a static summary and must name the
+# exact vendored gate revision it was verified against. Derive it from the
+# vendored file header so a future refresh cannot silently drop the SHA.
+vendor_header = (HERE / "scripts" / "vendor" / "verify-plugin.mjs").read_text(
+    encoding="utf-8", errors="replace"
+).splitlines()[:3]
+sha_match = re.search(r"@\s*([0-9a-f]{40})", " ".join(vendor_header))
+gate_source = f"121212165/dsh-family-tools@{sha_match.group(1)}" if sha_match else "unknown"
+
 report = {
     "milestone": "M5 — 可发布",
+    "evidenceType": "static",
+    "gateSource": gate_source,
     "generatedAt": None,
     "criteria": criteria,
     "gates": gates.get("gates", []),

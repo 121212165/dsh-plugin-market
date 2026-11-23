@@ -1,6 +1,6 @@
 {
   "milestone": "M5 — 可发布门禁（本地等价实现）",
-  "generatedAt": "2026-11-23T10:38:04.786Z",
+  "generatedAt": "2026-11-23T10:45:44.660Z",
   "note": "家族工具 dsh-family-tools/tools/verify-plugin.mjs 不在工作区；本结果按 DSH-MARKET-PLAN.md 记录的门禁语义给出等价断言。",
   "gates": [
     {
