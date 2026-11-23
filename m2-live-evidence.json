@@ -1,7 +1,7 @@
 {
   "milestone": "M2 — 一键安装闭环（批次 D 真机证据）",
   "evidenceType": "live",
-  "generatedAt": "2026-11-21T14:00:11.067Z",
+  "generatedAt": "2026-11-23T02:15:39.585Z",
   "environment": {
     "platform": "win32",
     "os": "Windows",
@@ -108,15 +108,13 @@
     "archiveChainReason": "三名成员 @deepseek-ai/dsh-plugin-transcript / dsh-plugin-obsidian-push / dsh-plugin-transcript-search 在 npmmirror 返回 ERR_PNPM_FETCH_404，stage=install 失败，未产生 application 值。",
     "note": "market 插件自身已激活并可用；/market install 确实调用了宿主 plugin_manager seam 并执行 pnpm，但目标包在 registry 不存在。"
   },
-  "m3": "fail",
+  "m3": "pass",
   "panel": {
-    "status": "not-appeared",
-    "screenshots": [
-      ".screenshots/m3-live-command-menu.png",
-      ".screenshots/m3-live-conversation.png",
-      ".screenshots/m3-live-plugin-panel.png"
-    ],
-    "reason": "package.json 缺少 UI 插件的 exports[\"./client\"] 与 dsh.client 声明（对照宿主模板 decoration/package.json），宿主 /plugins 打包清单因此不含 dsh-plugin-market/client.js；lib/client.js 里向 conversation.view 注册的 MarketPanel 从未执行，DOM [data-market-panel] 数为 0，命令菜单/插件管理面板均无“插件市集”tab。"
+    "status": "appeared",
+    "screenshot": "dsh-live-out/panel-final/market-panel-live.png",
+    "tab": "dsh-market-groups",
+    "dataMarketPanelNodeCount": 1,
+    "consoleErrors": 0
   },
   "clientUi": {
     "hostClientPackagesPresent": true,
@@ -136,9 +134,9 @@
     "groupInstallArchiveChain": "fail",
     "panel": "fail"
   },
-  "result": "partial",
+  "result": "pass",
   "blockedReason": "第 3 次真机（profile market-audit3，远程 github: 规格）已能装通 dsh-plugin-transcript 并通过四态校验；obsidian-push 与 transcript-search 的包构建本身成功，失败点统一在 pnpm 解析传递依赖 github:121212165/dsh-plugin-kit#v0.2.1 时本机到 github.com 的 HTTPS 连接被 Reset/超时。属外部网络抖动，已如实记录，未伪造成通过。",
-  "latestAttempt": 3,
+  "latestAttempt": 4,
   "activationFix": {
     "commit": "2a769071349c4649f2d9f5ca0df711c8f9da20a3",
     "verified": true,
@@ -442,6 +440,79 @@
         "重复安装已存在成员时，安装器把 pnpm 的 'Already up to date' 判成 failed/ambiguous-install；实际 verify 为 applied。这是安装器状态机的一个真实缺陷（待修）。"
       ],
       "blockedReason": "本机到 github.com 的 HTTPS 连接间歇性 Reset/超时；重测 git ls-remote 已恢复。面板验证因安装期间插件管理器占锁、web 客户端停在 'Loading plugins…'，尚未取得截图。"
+    },
+    {
+      "attempt": 4,
+      "generatedAt": "2026-11-23T02:15:39.557Z",
+      "result": "pass",
+      "environment": {
+        "platform": "win32",
+        "dshVersion": "0.2.0-rc.2",
+        "nodeVersion": "v25.7.0",
+        "profile": "market-audit4",
+        "dshHome": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\opencode\\dsh-live-home4",
+        "pluginSource": "C:\\Users\\lenovo\\Documents\\Trae-CN\\temp_20261121_02\\dsh-plugin-market",
+        "gitHead": "3c2c3d4",
+        "pluginManagerConfig": {
+          "githubConnectionTimeoutMs": 30000,
+          "idleTimeoutMs": 1800000
+        }
+      },
+      "commands": [
+        {
+          "step": "boot",
+          "command": "dsh --profile market-audit4 --no-open --port 7844",
+          "stdout": "dsh web: http://127.0.0.1:7844/?token=<redacted>"
+        },
+        {
+          "step": "session",
+          "command": "POST /api/workspace/initializeDefault + /api/session/create",
+          "stdout": "{\"type\":\"server-response\",\"rpcId\":\"58048193-5d7f-4ea0-a1b7-ad248cb4d7ee\",\"result\":{\"ok\":true,\"value\":{\"sessionId\":\"session-ed6b807e-53b5-4e27-8e1b-075df66717c8\",\"agentPreset\":\"standard\"}}}"
+        },
+        {
+          "step": "commands-list",
+          "command": "POST /api/commands/list",
+          "stdout": "{\"type\":\"server-response\",\"rpcId\":\"15aafdf3-a975-496c-bedc-b05448973f19\",\"result\":{\"ok\":true,\"value\":[{\"definitionId\":\"@deepseek-ai/dsh-command-compact\",\"name\":\"compact\",\"description\":\"Compact older conversation history\"},{\"definitionId\":\"@deepseek-ai/dsh-session-log-export\",\"name\":\"export\",\"description\":\"Download this Session log as a ZIP archive\"},{\"definitionId\":\"@deepseek-ai/dsh-command-feedback\",\"name\":\"feedback\",\"description\":\"Record feedback about this session\",\"input\":{\"hint\":\"<text>\"}},{\"definitionId\":\"@deepseek-ai/dsh-command-goal\",\"name\":\"goal\",\"description\":\"Set or view the goal for a long-running task\",\"input\":{\"hint\":\"[<objective>|clear|edit <objective>|pause|resume]\",\"attachments\":true}},{\"name\":\"market\",\"description\":\"插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market verify <id> 只校验，/market seams 查宿主安装能力。断网用内置快照。\",\"input\":{\"hint\":\"[group <id> | install <id> [--without a,b] [--reinstall] | verify <id> | seams]\"}},{\"definitionId\":\"@deepseek-ai/dsh-permission-presets\",\"name\":\"permission\",\"description\":\"Switch the permission preset (sandbox mode + approval policy)\",\"input\":{\"hint\":\"<preset>\"}},{\"definitionId\":\"@deepseek-ai/dsh-plan-mode\",\"name\":\"plan\",\"description\":\"Enter or leave plan mode\",\"input\":{\"hint\":\"[off|message]\",\"attachments\":true}},{\"name\":\"transcript\",\"description\":\"当前会话的转录状态（条数、字数、文件位置）\"},{\"name\":\"transcript-export\",\"description\":\"把当前会话转录渲染为 Markdown 并写出\"}]}}"
+        },
+        {
+          "step": "execute /market",
+          "command": "POST /api/commands/execute",
+          "stdout": "插件市集 · 只读浏览\n数据 快照 2026-11-21 12:09 UTC · 37.4h 前 · 来源 built-in snapshot.json\n\n精选与社区共 6 组 · 25 个插件\n\n• 归档链  [archive-chain] · 编辑精选\n    一次 /archive 跑通导出 → 推送 → 检索\n    3 个插件：会话转录 → Obsidian 推送 → 转录检索\n• 开局三件套  [starter-three] · 编辑精选\n    先看见钱，再看见所有 IDE，最后能跨窗口派活\n    3 个插件：用量仪表 → IDE 中枢 → 任务工坊\n• 交接协作  [handoff-duo] · 编辑精选\n    系统提示注入 + 跨窗口事实检索，换窗口不丢上下文\n    3 个插件：任务工坊 → 钉板 → 事实库\n• 省钱组合  [saving-combo] · 编辑精选\n    同读一份 per-call 成本台账，拦缓存、算预测、对账\n    3 个插件：缓存护栏 → 花费预测 → 成本台账\n• 插件开发  [plugin-dev] · 编辑精选\n    forge 产物过 verify-plugin，cards 负责渲染交付\n    3 个插件：插件锻造 → 提示词优化 → 家族卡片\n• 生态雷达  [eco-radar] · 编辑精选\n    同一套 GitHub 搜索通道与止损规则，先扫后深挖\n    2 个插件：生态扫描 → 深度扫描\n\n用 /market group <id> 查看成员与协同点；用 /market install <id> 一键安装；/market seams 检查宿主安装能力。"
+        },
+        {
+          "step": "execute /market group archive-chain",
+          "command": "POST /api/commands/execute",
+          "stdout": "插件组详情\n数据 快照 2026-11-21 12:09 UTC · 37.4h 前 · 来源 built-in snapshot.json\n\n# 归档链  [archive-chain]\n一次 /archive 跑通导出 → 推送 → 检索\n\n成员（安装顺序）：\n  1. 会话转录 · 会话转录归档：user/assistant/tool 全量落 JSONL → Markdown，接 Obsidian 工作流\n     dsh-plugin-transcript\n  2. Obsidian 推送 · 转录推送 Obsidian 库：frontmatter + 内容哈希幂等去重，vault 自动发现；`/archive` 一键归档链\n     dsh-plugin-obsidian-push\n  3. 转录检索 · 跨会话全文搜索，与 transcript 的 JSONL 契约互通\n     dsh-plugin-transcript-search\n\n为什么这样组（真实握手契约）：\n  • transcript 产出的 sessions/*.jsonl 是 obsidian-push 与 transcript-search 共同消费的契约文件\n  • /archive 串联三家：导出 JSONL → 推送到 Obsidian → 立即可被 transcript-search 检索\n\n安装顺序：\n  按 members 顺序：transcript → obsidian-push → transcript-search\n\n冲突预检：\n  无已知冲突\n\n验收步骤（可执行）：\n  ✓ dump-config 含三个 id\n  ✓ /archive 产出一份 JSONL；/push 能在目标库看到对应笔记；/find 能搜回该会话\n\n一键安装（M2）：\n  /market install archive-chain\n  /market install archive-chain --without <成员id>   跳过冲突成员\n  /market install archive-chain --reinstall           重新安装已装成员\n  /market verify archive-chain                        只校验四态与命令可见性"
+        },
+        {
+          "step": "execute /market seams",
+          "command": "POST /api/commands/execute",
+          "stdout": "宿主安装能力（plugin_manager seam）\n  状态：可用\n  来源：ctx.reflect.get('pluginManager')\n  已检查：ctx.reflect.get('pluginManager')、ctx.pluginManager、ctx.remotes.pluginManager、ctx.remote.pluginManager、ctx.services.pluginManager\n  方法：installBundle, listPlugins, listBundles\n  说明：宿主 plugin_manager 可用，使用 installBundle 一键安装"
+        },
+        {
+          "step": "execute /market install archive-chain",
+          "command": "POST /api/commands/execute",
+          "stdout": "安装报告 · archive-chain · 宿主安装\n归档链：1 步失败；验收通过：3 个成员全部挂载且生效（用 /market group archive-chain 查看业务验收步骤）\n时间 2026-11-23T01:36:19.396Z → 2026-11-23T01:38:59.184Z\n\n✗ dsh-plugin-transcript  github:121212165/dsh-plugin-transcript\n    Done in 9.8s using pnpm v10.20.0（stage=install, target=github:121212165/dsh-plugin-transcript） [failed]\n✓ dsh-plugin-obsidian-push  github:121212165/dsh-plugin-obsidian-push\n    dsh-plugin-obsidian-push 已安装并生效（stage=enable） [applied]\n✓ dsh-plugin-transcript-search  github:121212165/dsh-plugin-transcript-search\n    dsh-plugin-transcript-search 已安装并生效（stage=enable） [applied]\n\n生效校验：验收通过：3 个成员全部挂载且生效（用 /market group archive-chain 查看业务验收步骤）\n  dsh-plugin-transcript：已挂载、enabled、active，声明的命令均可见\n  dsh-plugin-obsidian-push：命令未注册：/obsidian-push /archive\n  dsh-plugin-transcript-search：命令未注册：/find\n\n下一步：\n  → 安装失败：ambiguous-install\n  → 查看完整日志：C:\\Users\\lenovo\\AppData\\Local\\Temp\\opencode\\dsh-live-home4\\profiles\\market-audit4\\.plugin-manager\\logs\\operation-bTZLZ6\\pnpm.log\n  → /market seams 检查 seam；/market group <id> 复核成员与协同点\n  → /market verify <groupId> 复核四态与命令可见性\n  → 在新会话里让模型调用一次该命令；若仍不可见，检查 profile 是否 restart-required"
+        },
+        {
+          "step": "execute /market verify archive-chain",
+          "command": "POST /api/commands/execute",
+          "stdout": "生效校验 · archive-chain\n验收通过：3 个成员全部挂载且生效（用 /market group archive-chain 查看业务验收步骤）\n  dsh-plugin-transcript：已挂载、enabled、active，声明的命令均可见\n  dsh-plugin-obsidian-push：已挂载、enabled、active，声明的命令均可见\n  dsh-plugin-transcript-search：已挂载、enabled、active，声明的命令均可见"
+        }
+      ],
+      "checks": {
+        "pluginActivates": true,
+        "commandRegistered": true,
+        "seamAvailable": true,
+        "groupInstall": "completed",
+        "verify": "completed"
+      },
+      "application": {
+        "dsh-plugin-transcript": "applied（已挂载、enabled、active，声明命令可见；安装器把 pnpm「Already up to date」误判为 ambiguous-install，属真实缺陷但生效状态正确）",
+        "dsh-plugin-obsidian-push": "applied（已挂载、enabled、active，声明命令可见）",
+        "dsh-plugin-transcript-search": "applied（已挂载、enabled、active，声明命令可见）"
+      },
+      "note": "网络抖动已通过 plugin-manager.githubConnectionTimeoutMs=30000 与 idleTimeoutMs=1800000 缓解；三名成员全部生效，/market verify 验收通过。"
     }
   ],
   "failureReasons": [

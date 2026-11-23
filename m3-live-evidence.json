@@ -1,0 +1,33 @@
+{
+  "milestone": "M3 — conversation.view 面板（真机）",
+  "evidenceType": "live",
+  "attempt": 4,
+  "generatedAt": "2026-11-23T02:15:39.584Z",
+  "result": "pass",
+  "environment": {
+    "dshVersion": "0.2.0-rc.2",
+    "profile": "market-audit4",
+    "port": 7844
+  },
+  "steps": [
+    "浏览器带 token 打开 dsh web，关闭「预览版说明」与「API Key」弹窗",
+    "在会话输入框发一条消息，使会话从 blank 变为非 blank（conversation.view 槽位才会渲染）",
+    "切换到 dsh-market-groups 标签"
+  ],
+  "checks": {
+    "tabs": [
+      "对话",
+      "轨迹",
+      "dsh-market-groups"
+    ],
+    "clickedTab": true,
+    "panelNodeCount": 1,
+    "hasMarketTitle": true,
+    "hasGroupName": true,
+    "consoleErrors": 0
+  },
+  "screenshots": [
+    "dsh-live-out/panel-final/market-panel-live.png"
+  ],
+  "note": "首次点击 dsh-market-groups 时 client 面板崩溃：cannot get property \"market\" without inject（stampText 直接读 ctx.market）。已改为 reflect.get + try/catch 并重建 lib/client.js；修复后 `[data-market-panel]` 节点数=1，5 张精选卡渲染，零控制台错误。"
+}

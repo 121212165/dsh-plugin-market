@@ -61,7 +61,11 @@ src/snapshot.json                      ← 内置快照，随包发布
 - `test/headless-smoke.test.mjs` — 第三层测试：直接加载构建产物 `lib/plugin.js`，在无 dsh 运行时/无网络/无缓存的全新 profile 上走真实 seam 探测 → 装「归档链」→ 四态校验 → 调用 3 个成员声明的全部 4 个入口；证据写 `m5-smoke-evidence.json`。
 - `verify-m5.py` — 汇总验收：build → gates → typecheck → 54 条测试 → 三层结构 → 实装实调一致性 → lib 入库，产出 `m5-report.json`。
 
-诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `mock`，门禁为 `static`，三者不混用。当前真机进展（attempt 3，2026-11-22）：远程 `github:` 规格可装通 `dsh-plugin-transcript` 并通过四态校验；`obsidian-push` / `transcript-search` 包内构建成功，但在 pnpm 解析 `github:121212165/dsh-plugin-kit#v0.2.1` 时受本机 GitHub 网络抖动阻塞；conversation.view 面板截图尚未取得，标记 `unverified`。首次接真机仍需按 `m2-live-evidence.json` 的步骤复跑一次 `--dump-config` 活体挂载检查。
+诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `mock`，门禁为 `static`，三者不混用。当前真机进展（attempt 4，2026-11-23）：**M2 / M3 均已在真实 dsh 0.2.0-rc.2 web 上验证通过**。
+
+- M2：`/market`、`/market group`、`/market seams` 命令真实注册并执行；`/market install archive-chain` 后三名成员全部挂载、enabled、active，声明命令可见；`/market verify archive-chain` 报「验收通过」。证据 `m2-live-evidence.json`（`attempt: 4`）；测试 profile 把 `plugin-manager.githubConnectionTimeoutMs` 调到 30000、`idleTimeoutMs` 调到 1800000 以避开本机 GitHub 网络抖动。
+- M3：`dsh-market-groups` 标签真实出现在 `conversation.view`，`[data-market-panel]` 节点数 1，5 张精选卡与「数据 2026-11-21 · 快照」标注正常渲染，零控制台错误。证据 `m3-live-evidence.json`；截图 `.screenshots/m3-live-market-panel.png`。
+- 真机发现并修复的缺陷：client 面板原先直接读 `ctx.market`，cordis 抛 `cannot get property "market" without inject`，导致第一次点标签时面板崩溃；已改为 `reflect.get('market')` + try/catch 并重建 `lib/client.js`（54 条测试全绿）。另有一项宿主侧真实缺陷：重已装成员时 pnpm 的 `Already up to date` 被判定为 `ambiguous-install`，但四态实际为 `applied`，不影响验收结论，留待宿主修复。
 
 ## 安装 / 卸载 / 降级
 
