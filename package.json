@@ -35,7 +35,7 @@
     "catalog": {
       "category": "扫描与研究",
       "blurb": "dsh 插件市集：选组、一键安装（冲突预检 + 四态校验）、装后验、断网用内置快照",
-      "entries": "`/market` `/market group` `/market install` `/market uninstall` `/market verify` `/market seams` `market_list` `market_install` `market_uninstall` `market_verify`"
+      "entries": "`/market` `/market group` `/market install` `/market uninstall` `/market verify` `/market fuse` `/market seams` `market_list` `market_install` `market_uninstall` `market_verify` `market_fuse`"
     },
     "client": {
       "platform": "web",

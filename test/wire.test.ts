@@ -72,15 +72,16 @@ test('disabled config mounts nothing', () => {
   assert.ok(wired.logs.some((line) => line.includes('disabled by config')));
 });
 
-test('mount registers the market command and the read/install/uninstall/verify tools', () => {
+test('mount registers the market command and the read/install/uninstall/verify/fuse tools', () => {
   const wired = makeCtx();
   apply(wired.ctx as never, config, offlineDeps);
   assert.deepEqual(wired.commands.map((candidate) => candidate.name), ['market']);
-  assert.deepEqual(wired.tools.map((candidate) => candidate.name), ['market_list', 'market_install', 'market_uninstall', 'market_verify']);
+  assert.deepEqual(wired.tools.map((candidate) => candidate.name), ['market_list', 'market_install', 'market_uninstall', 'market_verify', 'market_fuse']);
   assert.equal(typeof wired.tool('market_list').presentCall, 'function');
   assert.equal(typeof wired.tool('market_install').presentCall, 'function');
   assert.equal(typeof wired.tool('market_uninstall').presentCall, 'function');
   assert.equal(typeof wired.tool('market_verify').execute, 'function');
+  assert.equal(typeof wired.tool('market_fuse').presentCall, 'function');
   assert.ok(wired.logs.some((line) => line.includes('install seam unavailable')), wired.logs.join('\n'));
 });
 
