@@ -1,6 +1,6 @@
 # dsh-plugin-market
 
-dsh 插件市集插件。已实现 **M1（只读市场）+ M2（一键安装闭环）+ M3（conversation.view 卡片面板）+ M5（可发布门禁）+ F6（组卸载回滚）+ F3（融合任务书/脚手架）**，共用 `src/snapshot.json` 数据契约。M4 的数据站/门禁在 `../dsh-market-data/`。
+dsh 插件市集插件。已实现 **M1（只读市场）+ M2（一键安装闭环）+ M3（conversation.view 卡片面板）+ M5（可发布门禁）+ F2（插件侧投票）+ F3（融合任务书/脚手架）+ F4（本地插件体检）+ F5（装后真回路）+ F6（组卸载回滚）**，共用 `src/snapshot.json` 数据契约。M4 与 F1/F7/F8 的数据站/门禁在 `../dsh-market-data/`。所有 F 分支已合并进本仓 `main`。
 
 ## M1 — 只读市场
 
@@ -19,10 +19,10 @@ src/snapshot.json                      ← 内置快照，随包发布
 - 每次展示都带 `generatedAt`；超过 24h 标"快照"，不拿旧数据冒充实时。
 - 网络与文件系统通过 `RuntimeDeps` 注入，测试可屏蔽主机、删除缓存。
 - 读路径永不抛错；空/坏数据降级为空市集并给出友好提示。
-- 投稿/投票属于 F1/F2，尚未开放；融合（F3）已开放，见下文。
+- 投稿走 `dsh-market-data` 的 Issue Form（F1）；投票（F2）已开放，见下文；融合（F3）已开放，见下文。
 
 源码：
-- `src/core/` — 纯函数：types / reader（兜底链）/ render（含快照时间、空数据安全）/ parse / install-types（四态与报告）/ conflicts（冲突预检）/ seam（宿主能力探测与降级）/ installer（安装状态机与生效校验）/ uninstall（组回滚）/ fuse（能力矩阵、重叠、复用清单、来源表）
+- `src/core/` — 纯函数：types / reader（兜底链）/ render（含快照时间、空数据安全）/ parse / install-types（四态与报告）/ conflicts（冲突预检）/ seam（宿主能力探测与降级）/ installer（安装状态机与生效校验）/ uninstall（组回滚）/ fuse（能力矩阵、重叠、复用清单、来源表）/ vote（GitHub 身份探测与 👍 reaction）/ doctor（P0/P1/P2 体检）
 - `src/plugin.ts` — dsh 装配层，命令与工具注册；`apply(ctx, config, deps?)` 的 `deps` 是测试缝
 - `src/snapshot.json` — 由 `dsh-market-data` 的 `build-index` 生成，与 `data/index.json` 同构
 
@@ -36,6 +36,9 @@ src/snapshot.json                      ← 内置快照，随包发布
 /market install <groupId> --reinstall          # 重装已存在成员
 /market uninstall <groupId>                   # 按 members 逆序卸载回滚（幂等）
 /market verify <groupId>                      # 只校验，不安装
+/market vote <plugin-id>                      # 投票（未登录只读 + gh auth login 指引）
+/market fuse <a,b> [--apply]                  # 融合任务书 / 脚手架
+/market doctor <本地插件仓路径>               # 本地插件体检（P0/P1/P2，只读）
 /market seams                                 # 查看 plugin_manager seam 与降级说明
 ```
 
@@ -54,7 +57,7 @@ F6 组安装冲突矩阵 / 组卸载回滚：
 4. **四态校验**：`applied` 成功；`restart-required` 成功但明确提示"重启 web 后开新会话再 verify"；`overridden` 视为失败并提示更高优先级层；`failed/cancelled` 给出按错误码分类的修复建议（含 logPath）。装完再用 `listPlugins` 逐成员核对 `enabled` / `fiberPhase` 与命令可见性。
 5. **模型工具**：`market_install` / `market_verify` 与命令同一套 core 逻辑，带 generic presentCall/presentResult 卡片。
 
-测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径）、`test/fuse.test.ts`（F3 融合），共 69 条全绿（`npm run check`）。
+测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径）、`test/fuse.test.ts`（F3 融合）、`test/vote.test.ts`（F2 投票）、`test/doctor.test.ts`（F4 体检）、`test/live-loop.test.ts`（F5 装后回路），共 86 条全绿（`npm run check`）。
 
 ## F3 — 融合（任务书先行，脚手架两步落盘）
 
@@ -72,6 +75,23 @@ market_fuse { ids, apply }              # 模型工具，present 卡片沿用 in
 - 任务书含：能力矩阵、重叠字段（宿主 `requires`、`category`、`oneLiner` 数据域、同名入口冲突）、**复用不重写**清单、强制的**借鉴来源与差异**表（§8）。
 - 脚手架是一份可被家族门禁验收的插件骨架（`package.json` / `src` / `lib` / `test` / `tsconfig` / `BORROWED.md` 等），落盘后需自行 `npm run check` + `node scripts/vendor/verify-plugin.mjs <产物目录>`。
 - 实样证据：选 `dsh-plugin-quota` + `dsh-plugin-cost-ledger` 指出 6 个重叠字段（含 `data:cost`）与 6 条复用项；`f3-fuse-evidence.md` 为现场生成的任务书/重叠清单/来源表/门禁结果；由 `node scripts/make-fuse-evidence.mjs` 复现。
+- 该真实融合事件（`fuse-quota-cost-ledger`）已同步到 `dsh-market-data/data/fusions.json`，供 F8 贡献分的「被融合」分项消费，不再用 fixture 占位。
+
+## F2 — 插件侧投票
+
+入口：`/market vote <plugin-id>` 与模型工具 `market_vote`（同一套 `src/core/vote.ts` 逻辑）。
+
+- 写操作前先查 `gh auth status`。**未登录只读**：显示快照票数 + `gh auth login` 指引，不调用任何写 hook，绝不记本地假票。
+- 已登录：定位 `Vote: <plugin-id>` 且带 `<!-- dsh-market-plugin-id: <id> -->` 稳定标记的 Discussion，写入真实的 👍 reaction。一人一票与账号龄 30 天门槛由数据仓 F2 快照判定，不在此处重复。
+- 票数与 `generatedAt` 来自市集数据；投票后快照需等数据仓定时任务刷新，输出会明确说明该延迟。
+- 身份探测、Discussion 定位与 reaction 写入均为 `RuntimeDeps` 注入缝，测试用假实现，不触碰真实 `~/.config/gh`。
+
+## F4 — 本地插件体检
+
+入口：`/market doctor <本地插件仓路径>` 与模型工具 `market_doctor`。
+
+- 只读：复用 vendored 家族门禁输出，按 P0（发布阻断）/P1（应修）/P2（建议）分组，每条给出修改位置与建议代码。
+- 额外断言 G0-6：家族门禁检查 `locale/` 布局，但家族插件发布链是 `src/locales` → `exports["./locales/*"]` → `lib/locales`；缺链时门禁静默通过，体检会点名 G0-6 并给出 `package.json#exports` 的编辑位置。
 
 ## M3 — conversation.view 卡片面板（既有实现）
 
@@ -84,13 +104,13 @@ market_fuse { ids, apply }              # 模型工具，present 卡片沿用 in
 - `scripts/vendor/verify-plugin.mjs` — 家族官方门禁原样 vendor（来源与 SHA 见 `m5-gates.json#gateSource`），`npm run verify:plugin` 直接跑它；`scripts/verify-plugin.mjs` 保留为本地等价快速检查（`npm run verify:local`），逐条断言 G0-5/6/7/8/9/10。
 - `src/locales/zh-CN.json` — 本地化资源，经 `package.json#exports["./locales/*"]` 声明并在构建时拷入 `lib/locales/`（G0-6）。
 - `test/headless-smoke.test.mjs` — 第三层测试：直接加载构建产物 `lib/plugin.js`，在无 dsh 运行时/无网络/无缓存的全新 profile 上走真实 seam 探测 → 装「归档链」→ 四态校验 → 调用 3 个成员声明的全部 4 个入口；证据写 `m5-smoke-evidence.json`。
-- `verify-m5.py` — 汇总验收：build → gates → typecheck → 61 条测试 → 三层结构 → 实装实调一致性 → lib 入库，产出 `m5-report.json`。
+- `verify-m5.py` — 汇总验收：build → gates → typecheck → 86 条测试 → 三层结构 → 实装实调一致性 → lib 入库，产出 `m5-report.json`；测试数由 `npm test` 输出解析，不再写死。
 
-诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `mock`，门禁为 `static`，三者不混用。当前真机进展（attempt 4，2026-11-23）：**M2 / M3 均已在真实 dsh 0.2.0-rc.2 web 上验证通过**。
+诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `static`，门禁为 `static`，三者不混用。当前真机进展（attempt 4，2026-11-23；attempt 5 补 F5 装后回路）：**M2 / M3 均已在真实 dsh 0.2.0-rc.2 web 上验证通过**。F4 / F6 / 投票目前只有分支级单测与构建证据，未重跑覆盖全部 F 变更的真机。
 
 - M2：`/market`、`/market group`、`/market seams` 命令真实注册并执行；`/market install archive-chain` 后三名成员全部挂载、enabled、active，声明命令可见；`/market verify archive-chain` 报「验收通过」。证据 `m2-live-evidence.json`（`attempt: 4`）；测试 profile 把 `plugin-manager.githubConnectionTimeoutMs` 调到 30000、`idleTimeoutMs` 调到 1800000 以避开本机 GitHub 网络抖动。
 - M3：`dsh-market-groups` 标签真实出现在 `conversation.view`，`[data-market-panel]` 节点数 1，5 张精选卡与「数据 2026-11-21 · 快照」标注正常渲染，零控制台错误。证据 `m3-live-evidence.json`；截图 `.screenshots/m3-live-market-panel.png`。
-- 真机发现并修复的缺陷：client 面板原先直接读 `ctx.market`，cordis 抛 `cannot get property "market" without inject`，导致第一次点标签时面板崩溃；已改为 `reflect.get('market')` + try/catch 并重建 `lib/client.js`（61 条测试全绿）。另有一项宿主侧真实缺陷：重已装成员时 pnpm 的 `Already up to date` 被判定为 `ambiguous-install`，但四态实际为 `applied`，不影响验收结论，留待宿主修复。
+- 真机发现并修复的缺陷：client 面板原先直接读 `ctx.market`，cordis 抛 `cannot get property "market" without inject`，导致第一次点标签时面板崩溃；已改为 `reflect.get('market')` + try/catch 并重建 `lib/client.js`（86 条测试全绿）。另有一项宿主侧真实缺陷：重已装成员时 pnpm 的 `Already up to date` 被判定为 `ambiguous-install`，但四态实际为 `applied`，不影响验收结论，留待宿主修复。F5 attempt 5 的真实输出把已挂载 enabled active 的成员报为 `failed`，`overridden` 分支未自然触发而用发布产物注入验证（证据中标注 `evidenceType: built-artifact-code-path`）；两者均如实展示，未掩盖。
 
 ## 安装 / 卸载 / 降级
 
@@ -116,14 +136,15 @@ dsh plugin --profile market-audit remove dsh-plugin-market
 
 投稿：
 
-- 插件数据在 `dsh-market-data` 的 `scripts/catalog.source.json`（`plugins` / `groups`），改完提 PR；门禁会校验占位字段、`why`、`verify`、`UNKNOWN_MEMBER`、`DUPLICATE_ID`。
-- 插件本仓先过官方门禁 `node scripts/vendor/verify-plugin.mjs .`，再提数据 PR；组条目要写清 `why` 与可执行的 `verify`。
+- 走 `dsh-market-data` 的 Issue Form（`.github/ISSUE_TEMPLATE/plugin-submission.yml`），三个必填字段：`repo`、`license`、**借鉴来源表**；Action 校验后自动开 PR。
+- 也可直接给数据仓提 PR：新插件加 `data/plugins/dsh-plugin-<id>.json`，新组合加 `data/groups/<id>.json`。**不改 `scripts/catalog.source.json`**：它是 `seed.mjs` 的种子输入，CI 不跑 seed，改它不会进 index。
+- 门禁校验占位字段、`why`、`verify`、`UNKNOWN_MEMBER`、`DUPLICATE_ID`、`DUPLICATE_MEMBER` 等；插件本仓先过官方门禁 `node scripts/vendor/verify-plugin.mjs .`，再提数据 PR。
 
 ## 命令
 
 ```bash
 npm run typecheck    # tsc --noEmit
-npm test             # node:test：纯函数 + 装配层 + headless 冒烟（61 条）
+npm test             # node:test：纯函数 + 装配层 + headless 冒烟（86 条）
 npm run build        # tsc → lib/ + 拷贝 snapshot.json/icon.svg/locales
 npm run build:client # src/client.tsx → lib/client.js
 npm run build:all    # 全部构建
