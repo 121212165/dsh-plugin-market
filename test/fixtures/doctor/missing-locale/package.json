@@ -1,0 +1,25 @@
+{
+  "name": "dsh-plugin-doctor-fixture",
+  "version": "0.1.0",
+  "description": "F4 doctor fixture: a minimal family plugin repository",
+  "type": "module",
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" },
+    "./package.json": "./package.json"
+  },
+  "files": ["lib", "src", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=22.18" },
+  "repository": { "type": "git", "url": "https://github.com/121212165/dsh-plugin-doctor-fixture.git" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": { "@types/node": "26.6.2", "typescript": "7.0.2" },
+  "peerDependencies": { "@deepseek-ai/cordis": ">=4.0.0" }
+}

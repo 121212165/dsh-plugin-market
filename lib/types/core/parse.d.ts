@@ -1,5 +1,5 @@
 /** Parse `/market` raw input. Pure and tolerant of empty/odd input. */
-export type MarketSubcommand = 'list' | 'group' | 'install' | 'verify' | 'seams' | 'vote' | 'submit' | 'fuse' | 'help';
+export type MarketSubcommand = 'list' | 'group' | 'install' | 'verify' | 'seams' | 'doctor' | 'vote' | 'submit' | 'fuse' | 'help';
 export interface MarketArgs {
     subcommand: MarketSubcommand;
     /** For `group` this is the group id; for `list` it is an optional filter. */
