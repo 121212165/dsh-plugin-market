@@ -1,6 +1,6 @@
 import type { Context } from '@deepseek-ai/cordis';
 import Schema from '@deepseek-ai/schemastery';
-import { type FuseFile, type DoctorRunner, type InstallSeam, type ManifestStore, type ReaderDeps, type SeamProbe } from './core/index.ts';
+import { type FuseFile, type DoctorRunner, type GhAuthStatus, type VoteCastResult, type VoteDiscussion, type InstallSeam, type ManifestStore, type ReaderDeps, type SeamProbe } from './core/index.ts';
 export declare const name = "market";
 export declare const inject: string[];
 export interface Config {
@@ -66,5 +66,11 @@ export interface RuntimeDeps {
         path: string;
         action: string;
     }>>;
+    /** F2: GitHub identity probe; tests inject a deterministic status. */
+    ghAuthProbe?: () => Promise<GhAuthStatus> | GhAuthStatus;
+    /** F2: locate the canonical vote Discussion; tests inject a fixture. */
+    voteFinder?: (pluginId: string) => Promise<VoteDiscussion | null>;
+    /** F2: cast the real 👍 reaction; tests inject a recorder. */
+    voteWriter?: (discussionId: string, pluginId: string) => Promise<VoteCastResult>;
 }
 export declare function apply(ctx: Context, configInput: Partial<Config> | Config, deps?: RuntimeDeps): void;

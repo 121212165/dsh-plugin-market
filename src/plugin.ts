@@ -42,6 +42,12 @@ import {
   runDoctor,
   renderDoctorReport,
   type DoctorRunner,
+  defaultVoteDeps,
+  renderVoteReadOnly,
+  renderVoteResult,
+  type GhAuthStatus,
+  type VoteCastResult,
+  type VoteDiscussion,
   type InstallSeam,
   type ManifestStore,
   type MarketRead,
@@ -103,6 +109,12 @@ export interface RuntimeDeps {
   callEntry?: (entry: string) => Promise<string> | string;
   /** F3: injected writer captures scaffold files in tests; production writes disk. */
   fuseWriter?: (root: string, files: FuseFile[]) => Promise<Array<{ path: string; action: string }>>;
+  /** F2: GitHub identity probe; tests inject a deterministic status. */
+  ghAuthProbe?: () => Promise<GhAuthStatus> | GhAuthStatus;
+  /** F2: locate the canonical vote Discussion; tests inject a fixture. */
+  voteFinder?: (pluginId: string) => Promise<VoteDiscussion | null>;
+  /** F2: cast the real 👍 reaction; tests inject a recorder. */
+  voteWriter?: (discussionId: string, pluginId: string) => Promise<VoteCastResult>;
 }
 
 function expandHome(value: string): string {
@@ -137,6 +149,38 @@ function readEmbeddedSnapshot(): string {
 }
 
 const defaultDoctorRunner: DoctorRunner = (target) => runDoctor({ target });
+const voteDefaults = defaultVoteDeps();
+
+/** Shared by `/market vote` and `market_vote` so both paths use the same rules. */
+async function runVote(
+  pluginId: string,
+  read: () => Promise<MarketRead>,
+  deps: RuntimeDeps,
+): Promise<{ ok: boolean; text: string }> {
+  const result = await read();
+  const plugin = result.index.plugins.find((candidate) => candidate.id === pluginId);
+  if (!plugin) {
+    const ids = result.index.plugins.map((candidate) => candidate.id).join(', ');
+    return { ok: false, text: `未知插件 ${pluginId || '(空)'}。可用 id：${ids || '(内置快照为空)'}` };
+  }
+  const stamp = renderStamp(result.meta);
+  const auth = await (deps.ghAuthProbe ?? voteDefaults.authProbe)();
+  if (!auth.authenticated) {
+    return { ok: true, text: renderVoteReadOnly(plugin.id, plugin.votes, auth.note, stamp) };
+  }
+  const discussion = await (deps.voteFinder ?? voteDefaults.findDiscussion)(plugin.id);
+  if (!discussion) {
+    return {
+      ok: false,
+      text: `${stamp}\n\n未找到插件 ${plugin.id} 的投票 Discussion（标题 \`Vote: ${plugin.id}\` 且带稳定标记 \`<!-- dsh-market-plugin-id: ${plugin.id} -->\`）。请先在 dsh-market-data 建对应 Discussion 后重试。`,
+    };
+  }
+  const cast = await (deps.voteWriter ?? voteDefaults.addReaction)(discussion.id, plugin.id);
+  return {
+    ok: cast.ok,
+    text: renderVoteResult(plugin.id, plugin.votes, { ...cast, discussionUrl: cast.discussionUrl ?? discussion.url }, stamp),
+  };
+}
 
 function normalizeConfig(input: Partial<Config> | Config): Config {
   return {
@@ -264,8 +308,8 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
 
   ctx.commands.register({
     name: 'market',
-    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market uninstall <id> 按 members 逆序卸载回滚，/market verify <id> 只校验，/market fuse <ids> 出融合任务书（--apply 才落盘脚手架），/market doctor <path> 给本地插件仓出 P0/P1/P2 体检清单，/market seams 查宿主安装能力。断网用内置快照。',
-    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | uninstall <id> | verify <id> | fuse <a,b> [--apply] | doctor <path> | seams]' },
+    description: '插件市集：/market 列组，/market group <id> 看详情，/market install <id> 一键安装（含冲突预检与四态校验），/market uninstall <id> 按 members 逆序卸载回滚，/market verify <id> 只校验，/market vote <id> 投票（未登录只读并给 gh auth login 指引），/market fuse <ids> 出融合任务书（--apply 才落盘脚手架），/market doctor <path> 给本地插件仓出 P0/P1/P2 体检清单，/market seams 查宿主安装能力。断网用内置快照。',
+    input: { hint: '[group <id> | install <id> [--without a,b] [--reinstall] | uninstall <id> | verify <id> | vote <id> | fuse <a,b> [--apply] | doctor <path> | seams]' },
     handler: async ({ rawInput }: { rawInput?: string }) => {
       const args = parseMarketArgs(rawInput);
       try {
@@ -286,7 +330,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
         if (args.subcommand === 'help') {
           return {
             kind: 'success' as const,
-            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market uninstall <id> 按 members 逆序卸载回滚（幂等，失败给恢复命令）· /market verify <id> 校验四态 · /market fuse <a,b,c> 出融合任务书（不落盘），加 --apply 才写脚手架 · /market doctor <path> 本地插件体检 · /market seams 查安装能力',
+            text: '用法：/market 列组 · /market group <id> 详情 · /market install <id> 一键安装 · /market install <id> --without a,b 跳过冲突成员 · /market uninstall <id> 按 members 逆序卸载回滚（幂等，失败给恢复命令）· /market verify <id> 校验四态 · /market vote <id> 投票（未登录只读 + gh auth login 指引）· /market fuse <a,b,c> 出融合任务书（不落盘），加 --apply 才写脚手架 · /market doctor <path> 本地插件体检 · /market seams 查安装能力',
           };
         }
         if (args.subcommand === 'doctor') {
@@ -352,6 +396,10 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
             now: deps.now,
           });
           return { kind: 'success' as const, text };
+        }
+        if (args.subcommand === 'vote') {
+          const report = await runVote(args.target, read, deps);
+          return { kind: report.ok ? ('success' as const) : ('error' as const), text: report.text };
         }
         if (args.subcommand === 'fuse') {
           const options = parseFuseArgs(args.target, args.rest);
@@ -522,6 +570,36 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
           registeredCommands: registeredCommands(),
           now: deps.now,
         });
+      },
+    }),
+  );
+
+  ctx.tools.register(
+    defineTool({
+      name: 'market_vote',
+      description: '给插件投票：用现有 gh 身份在 dsh-market-data 的 Vote Discussion 写 👍 reaction；未登录时只读票数并给出 gh auth login 指引，绝不记本地假票。一人一票与账号龄门槛由数据仓快照判定。',
+      parameters: {
+        pluginId: { type: 'string', required: true, description: '插件 id，如 dsh-plugin-quota' },
+      },
+      output: {
+        schema: { type: 'string' } as const,
+        render: (_args, value) => [{ type: 'text', text: String(value).slice(0, 6000) }],
+      },
+      presentCall: (args: { pluginId: string }) => ({
+        card: 'generic' as const,
+        title: `为插件投票：${args.pluginId}`,
+        kind: 'execute' as const,
+        rawInput: args.pluginId,
+      }),
+      presentResult: (_args: unknown, value: unknown) => ({
+        card: 'generic' as const,
+        title: '插件投票结果',
+        kind: 'execute' as const,
+        rawInput: String(value).slice(0, 4000),
+      }),
+      async execute(args: { pluginId?: string }) {
+        const report = await runVote(String(args.pluginId ?? ''), read, deps);
+        return report.text;
       },
     }),
   );

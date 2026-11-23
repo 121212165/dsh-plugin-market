@@ -9,3 +9,4 @@ export * from './seam.ts';
 export * from './installer.ts';
 export * from './uninstall.ts';
 export * from './fuse.ts';
+export * from './vote.ts';

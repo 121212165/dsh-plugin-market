@@ -71,7 +71,7 @@ test('headless smoke: built lib mounts, fresh-profile install, 4-state verify, e
   built.apply(host.ctx, { enabled: true, allowInstall: true, profile: 'fresh-profile' }, deps);
   const market = host.commands.find((command) => command.name === 'market');
   assert.ok(market, 'built apply() must register the market command');
-  assert.deepEqual(host.tools.map((tool) => tool.name).sort(), ['market_doctor', 'market_fuse', 'market_install', 'market_list', 'market_uninstall', 'market_verify']);
+  assert.deepEqual(host.tools.map((tool) => tool.name).sort(), ['market_doctor', 'market_fuse', 'market_install', 'market_list', 'market_uninstall', 'market_verify', 'market_vote']);
 
   // 2. 只读路径：断网 + 无缓存 → 内置快照列出 6 组
   const listed = await market.handler({ rawInput: '' });
