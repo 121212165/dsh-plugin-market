@@ -322,6 +322,46 @@ test('market_uninstall tool shares the same rollback flow as the command', async
   ]);
 });
 
+test('uninstall matches the installed GitHub package manifest name when it differs from catalog npm', async () => {
+  const wired = makeCtx();
+  const index = snapshotIndex();
+  const rows = installedRowsFor(index, 'archive-chain');
+  const bundles = installedBundlesFor(index, 'archive-chain').map((bundle) => {
+    const plugin = index.plugins.find((entry) => entry.npm === bundle.name)!;
+    return { ...bundle, name: plugin.repo.split('/').pop()! };
+  });
+  const seam = rollbackSeam(rows, bundles);
+  apply(wired.ctx as never, { enabled: true }, baseDeps({ seam }));
+
+  const result = await wired.command('market')({ rawInput: 'uninstall archive-chain' });
+  assert.equal(result.kind, 'success', result.text);
+  assert.deepEqual(seam.calls, [
+    'dsh-plugin-transcript-search',
+    'dsh-plugin-obsidian-push',
+    'dsh-plugin-transcript',
+  ]);
+});
+
+test('uninstall removes a disabled GitHub bundle even when no live plugin rows exist', async () => {
+  const wired = makeCtx();
+  const index = snapshotIndex();
+  const bundles = installedBundlesFor(index, 'archive-chain').map((bundle) => {
+    const plugin = index.plugins.find((entry) => entry.npm === bundle.name)!;
+    return { ...bundle, name: plugin.repo.split('/').pop()!, enabled: false, rows: [] };
+  });
+  const seam = rollbackSeam([], bundles);
+  apply(wired.ctx as never, { enabled: true }, baseDeps({ seam }));
+
+  const result = await wired.command('market')({ rawInput: 'uninstall archive-chain' });
+  assert.equal(result.kind, 'success', result.text);
+  assert.deepEqual(seam.calls, [
+    'dsh-plugin-transcript-search',
+    'dsh-plugin-obsidian-push',
+    'dsh-plugin-transcript',
+  ]);
+  assert.equal(bundles.length, 0);
+});
+
 test('--without with a typo blocks before installing any member', async () => {
   const wired = makeCtx();
   const seam = seamFixture();
@@ -333,16 +373,20 @@ test('--without with a typo blocks before installing any member', async () => {
   assert.match(result.text, /精确 id/);
 });
 
-test('uninstall fails closed when no unique removable npm bundle matches the plugin id', async () => {
-  for (const mode of ['missing', 'ambiguous'] as const) {
+test('uninstall fails closed when no unique removable bundle matches the plugin aliases', async () => {
+  for (const mode of ['missing', 'ambiguous', 'alias-ambiguous'] as const) {
     const wired = makeCtx();
     const index = snapshotIndex();
     const rows = installedRowsFor(index, 'archive-chain');
     const bundles = installedBundlesFor(index, 'archive-chain');
     const transcriptNpm = index.plugins.find((plugin) => plugin.id === 'dsh-plugin-transcript')!.npm!;
+    const transcriptBundle = bundles.find((bundle) => bundle.name === transcriptNpm)!;
     const inventory = mode === 'missing'
       ? bundles.filter((bundle) => bundle.name !== transcriptNpm)
-      : [...bundles, { ...bundles.find((bundle) => bundle.name === transcriptNpm)! }];
+      : [...bundles, {
+        ...transcriptBundle,
+        name: mode === 'alias-ambiguous' ? 'dsh-plugin-transcript' : transcriptNpm,
+      }];
     const seam = rollbackSeam(rows, inventory);
     apply(wired.ctx as never, { enabled: true }, baseDeps({ seam }));
 
