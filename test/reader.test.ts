@@ -30,7 +30,7 @@ test('tier 1: remote index.json wins and carries 6 groups', async () => {
   const read = await readMarket(makeDeps());
   assert.equal(read.meta.layer, 'remote');
   assert.equal(read.index.groups.length, 6);
-  assert.equal(read.index.plugins.length, 25);
+  assert.equal(read.index.plugins.length, snapshotIndex().plugins.length);
   assert.equal(read.meta.stale, false);
   assert.ok(read.meta.generatedAt);
 });

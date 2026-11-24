@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-24T14:38:18.388Z",
+  "generatedAt": "2026-11-24T15:30:04.159Z",
   "source": "dsh-market-data",
   "plugins": [
     {
@@ -664,6 +664,83 @@
               "detail": "开局三件套 · members[1]"
             }
           ]
+        },
+        {
+          "key": "fused",
+          "label": "被融合",
+          "weight": 4,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
+        },
+        {
+          "key": "validVotes",
+          "label": "有效票",
+          "weight": 1,
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
+          "excluded": {
+            "duplicates": 0,
+            "underAge": 0,
+            "invalid": 0
+          },
+          "recordedVotes": 0,
+          "rawReactions": null
+        }
+      ]
+    },
+    {
+      "id": "dsh-plugin-market",
+      "repo": "121212165/dsh-plugin-market",
+      "name": "插件市集",
+      "oneLiner": "浏览 DSH 插件组，预检冲突后一键安装、验证和卸载，并支持投票与融合任务书。",
+      "category": "扫描与研究",
+      "entries": [
+        "/market",
+        "market_list",
+        "market_install",
+        "market_uninstall",
+        "market_verify",
+        "market_vote",
+        "market_fuse",
+        "market_doctor"
+      ],
+      "requires": [],
+      "dshRange": ">=0.1.2-rc.1 <0.2.0",
+      "license": "MIT",
+      "author": "121212165",
+      "borrowedFrom": [
+        "121212165/dsh-plugin-family — DSH 插件生态目录、manifest 数据契约与插件组织规范 — MIT"
+      ],
+      "verifiedAt": "2026-11-24",
+      "npm": "@deepseek-ai/dsh-plugin-market",
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 503452,
+      "lastSeenAt": "2026-11-24",
+      "score": 5,
+      "scoreBreakdown": [
+        {
+          "key": "included",
+          "label": "收录",
+          "weight": 5,
+          "count": 1,
+          "subtotal": 5,
+          "sources": [
+            {
+              "id": "dsh-plugin-market",
+              "detail": "data/plugins/dsh-plugin-market.json"
+            }
+          ]
+        },
+        {
+          "key": "grouped",
+          "label": "被组合",
+          "weight": 3,
+          "count": 0,
+          "subtotal": 0,
+          "sources": []
         },
         {
           "key": "fused",

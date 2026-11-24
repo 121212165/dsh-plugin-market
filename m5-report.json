@@ -3,7 +3,7 @@
   "evidenceType": "static",
   "gateSource": "121212165/dsh-family-tools@0915c5e099bc212f259ea7e791c10ef9d241ce5e",
   "gateImplementation": "local-equivalent; official vendored gate is run separately and is not this report's raw output",
-  "generatedAt": "2026-11-24T14:50:29.307824+00:00",
+  "generatedAt": "2026-11-24T15:40:33.946300+00:00",
   "criteria": {
     "verify_plugin_gates_all_green": true,
     "lib_artifacts_present": true,
@@ -116,7 +116,7 @@
         "entry": "/find"
       }
     ],
-    "generatedAt": "2026-11-24T14:49:58.681Z"
+    "generatedAt": "2026-11-24T15:38:50.488Z"
   },
   "steps": {
     "build_all": {
