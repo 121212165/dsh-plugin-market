@@ -129,6 +129,13 @@ gate('G0-10', '三层测试存在性', (problems) => {
 
 const report = {
   milestone: 'M5 — 可发布门禁（本地等价实现）',
+  evidenceType: 'static',
+  gateSource: (() => {
+    const vendorHeader = read('scripts/vendor/verify-plugin.mjs').split(/\r?\n/).slice(0, 3).join(' ');
+    const sha = vendorHeader.match(/@\s*([0-9a-f]{40})/i)?.[1];
+    return sha ? `121212165/dsh-family-tools@${sha}` : 'unknown';
+  })(),
+  gateImplementation: 'local-equivalent; not the vendored gate raw output',
   generatedAt: new Date().toISOString(),
   note: '家族工具 dsh-family-tools/tools/verify-plugin.mjs 不在工作区；本结果按 DSH-MARKET-PLAN.md 记录的门禁语义给出等价断言。',
   gates,

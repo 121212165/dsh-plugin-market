@@ -8,6 +8,8 @@ export interface InstallInput {
     excluded?: string[] | undefined;
     reinstall?: boolean | undefined;
     registeredCommands?: string[] | undefined;
+    /** Optional host slot inventory; production host context currently cannot provide it. */
+    registeredSlots?: string[] | undefined;
     now?: (() => number) | undefined;
     onProgress?: (line: string) => void;
     /** F5: hooks for the automatic post-install live loop. */
@@ -20,6 +22,7 @@ export interface VerifyInput {
     index: MarketIndex;
     seam: InstallSeam | null;
     applicationByMember?: Record<string, ApplicationState>;
+    memberIds?: string[] | undefined;
     registeredCommands?: string[] | undefined;
     profile?: string;
     now?: (() => number) | undefined;
@@ -33,6 +36,7 @@ export interface LiveLoopInput {
     seam: InstallSeam | null;
     /** `application` from each member's ChangeResult during install. */
     applicationByMember: Record<string, ApplicationState>;
+    memberIds?: string[] | undefined;
     profile?: string;
     registeredCommands?: string[] | undefined;
     /** Raw dump-config text (or a provider); defaults to dumpConfigView(seam). */

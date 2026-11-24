@@ -1,5 +1,5 @@
 {
-  "evidenceType": "static",
+  "evidenceType": "headless",
   "artifact": "lib/plugin.js",
   "profile": "fresh-profile (empty inventory)",
   "group": "archive-chain",
@@ -38,5 +38,5 @@
       "entry": "/find"
     }
   ],
-  "generatedAt": "2026-11-21T12:09:30.623Z"
+  "generatedAt": "2026-11-23T16:16:51.684Z"
 }

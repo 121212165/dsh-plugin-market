@@ -8,6 +8,7 @@ import type {
   InstalledRow,
   PlannedStep,
 } from './install-types.ts';
+import { quoteShellArgument } from './seam.ts';
 import type { GroupEntry, MarketIndex, PluginEntry } from './types.ts';
 
 export interface PrecheckInput {
@@ -16,7 +17,7 @@ export interface PrecheckInput {
   inventory?: { plugins?: InstalledRow[]; bundles?: InstalledBundle[] };
   /** Command names already registered in the host, e.g. from ctx.commands. */
   registeredCommands?: string[] | undefined;
-  /** F6: host slots already occupied, e.g. from ctx.slots. */
+  /** Only when the caller can read the registry; server runtime cannot access browser ctx.slots. */
   registeredSlots?: string[] | undefined;
   /** Group member ids the user chose to drop with `--without`. */
   excluded?: string[] | undefined;
@@ -55,6 +56,15 @@ export function planGroupInstall(input: PrecheckInput): InstallPlan {
   const byId = new Map(index.plugins.map((plugin) => [plugin.id, plugin]));
   const conflicts: Conflict[] = [];
   const members = group.members.filter((id) => !excluded.has(id));
+
+  for (const id of excluded) {
+    if (group.members.includes(id)) continue;
+    conflicts.push({
+      kind: 'invalid-exclusion', key: id, members: [id], severity: 'blocking',
+      detail: `--without 指定的 ${id} 不是组 ${group.id} 的成员；为避免误装完整组，已阻止安装`,
+      fix: `检查组 ${group.id} 的成员 id：${group.members.join(', ')}；仅排除其中的精确 id 后重试`,
+    });
+  }
 
   // 1. Every member must exist in the catalog, or the group is a marketing pile.
   for (const id of members) {
@@ -117,7 +127,7 @@ export function planGroupInstall(input: PrecheckInput): InstallPlan {
       conflicts.push({
         kind: 'slot', key: slot, members: [owner], severity: 'blocking',
         detail: `${owner} 要注入的 slot ${slot} 已被当前 profile 中其他插件占用`,
-        fix: `/market seams 看当前层；dsh plugin --profile ${profile} list 找到旧插件后移除，或 /market install ${group.id} --without ${owner}`,
+        fix: `/market seams 看当前层；dsh plugin --profile ${quoteShellArgument(profile)} list 找到旧插件后移除，或 /market install ${group.id} --without ${owner}`,
       });
     }
   }
@@ -137,7 +147,7 @@ export function planGroupInstall(input: PrecheckInput): InstallPlan {
       conflicts.push({
         kind: 'command', key: entry, members: [plugin.id], severity: 'blocking',
         detail: `${plugin.id} 的 ${entry} 已被当前 profile 中其他插件占用`,
-        fix: `先查占用者：/market seams 看当前层；然后运行 /market install ${group.id} --without ${plugin.id}，或 dsh plugin --profile ${profile} list 找到旧插件后移除`,
+        fix: `先查占用者：/market seams 看当前层；然后运行 /market install ${group.id} --without ${plugin.id}，或 dsh plugin --profile ${quoteShellArgument(profile)} list 找到旧插件后移除`,
       });
     }
   }
@@ -162,7 +172,7 @@ export function planGroupInstall(input: PrecheckInput): InstallPlan {
       conflicts.push({
         kind: 'already-installed', key, members: [plugin.id], severity: 'warn',
         detail: `${plugin.id}（${key}）已安装在当前 profile：${live.fiberPhase ?? 'active'}`,
-        fix: `保持现状即可；如需重装先 dsh plugin --profile ${profile} remove ${key}，再 /market install ${group.id} --reinstall`,
+        fix: `保持现状即可；如需重装先 dsh plugin --profile ${quoteShellArgument(profile)} remove ${quoteShellArgument(key)}，再 /market install ${group.id} --reinstall`,
       });
     }
   }
@@ -173,7 +183,7 @@ export function planGroupInstall(input: PrecheckInput): InstallPlan {
       conflicts.push({
         kind: 'package', key, members: [pluginId], severity: 'warn',
         detail: `${key} 已作为 bundle 安装（enabled=${bundle.enabled}），安装器会复用该层`,
-        fix: `无需重复安装；运行 /market verify ${group.id} 确认生效，或 dsh plugin --profile ${profile} list 查看`,
+        fix: `无需重复安装；运行 /market verify ${group.id} 确认生效，或 dsh plugin --profile ${quoteShellArgument(profile)} list 查看`,
       });
     }
   }
@@ -221,7 +231,7 @@ export function specFor(plugin: PluginEntry | undefined): string {
 
 /** Human-readable pre-check block, reused by the command and the tool. */
 export function renderConflicts(plan: InstallPlan): string {
-  if (!plan.conflicts.length) return '  冲突预检：通过（未发现命令/工具/slot/包名撞车）';
+  if (!plan.conflicts.length) return '  冲突预检：通过（未发现组内命令/工具/slot/包名撞车）';
   const lines = ['  冲突预检：'];
   for (const conflict of plan.conflicts) {
     const tag = conflict.severity === 'blocking' ? '阻断' : '提示';

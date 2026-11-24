@@ -13,8 +13,9 @@ export declare function probeSeam(ctx: unknown): SeamProbe;
 /** Adapt a probed host service to InstallSeam. Wraps every call so a seam
  * signature change becomes a readable failure instead of a thrown error. */
 export declare function adaptSeam(probe: SeamProbe, ctx: unknown): InstallSeam | null;
+export declare function quoteShellArgument(value: string, shell?: 'powershell' | 'posix'): string;
 /** Manual fallback text. Shown in degraded mode and in every failure's nextSteps. */
-export declare function manualInstallCommands(spec: string, profile: string, groupId: string): string[];
+export declare function manualInstallCommands(spec: string, profile: string, groupId: string, shell?: 'powershell' | 'posix'): string[];
 /** F5: in-process equivalent of `dsh --dump-config`. The authoritative CLI
  * output is captured on the real machine; inside a session the only safe read
  * of "what is actually mounted" is the host seam's own inventory. We render

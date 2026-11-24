@@ -48,7 +48,7 @@ test('a live host command collision suggests finding and removing the old plugin
   const conflict = plan.conflicts.find((item) => item.kind === 'command' && item.members.length === 1);
   assert.ok(conflict, JSON.stringify(plan.conflicts));
   assert.equal(conflict.severity, 'blocking');
-  assert.match(conflict.fix, /dsh plugin --profile web list/);
+  assert.match(conflict.fix, /dsh plugin --profile 'web' list/);
   assert.match(conflict.fix, /--without/);
 });
 
@@ -62,7 +62,7 @@ test('an already-active member is a warning and is skipped, not reinstalled', ()
   const warn = plan.conflicts.find((item) => item.kind === 'already-installed');
   assert.ok(warn);
   assert.equal(warn.severity, 'warn');
-  assert.match(warn.fix, /dsh plugin --profile web remove/);
+  assert.match(warn.fix, /dsh plugin --profile 'web' remove/);
   assert.equal(plan.steps.find((step) => step.member === 'dsh-plugin-transcript')?.action, 'skip-installed');
 });
 
@@ -88,6 +88,18 @@ test('--without removes the excluded member from the plan', () => {
   ]);
   assert.equal(plan.steps[1]!.action, 'skip-excluded');
   assert.equal(plan.blocked, false);
+});
+
+test('--without with an unknown id blocks instead of silently installing the full group', () => {
+  const plan = planGroupInstall({
+    group: group('archive-chain'), index,
+    excluded: ['dsh-plugin-transcript', 'dsh-plugin-typo'],
+  });
+  assert.equal(plan.blocked, true);
+  assert.equal(plan.conflicts.some((item) => item.kind === 'invalid-exclusion' && item.key === 'dsh-plugin-typo'), true);
+  assert.deepEqual(plan.steps.filter((step) => step.action === 'install').map((step) => step.member), [
+    'dsh-plugin-obsidian-push', 'dsh-plugin-transcript-search',
+  ]);
 });
 
 test('F6: two members both declaring /health block before install with a fix', () => {
@@ -146,5 +158,5 @@ test('F6: a host-occupied slot blocks with guidance to remove the old layer', ()
   const conflict = plan.conflicts.find((item) => item.kind === 'slot' && item.members.length === 1);
   assert.ok(conflict, JSON.stringify(plan.conflicts));
   assert.equal(conflict.severity, 'blocking');
-  assert.match(conflict.fix, /dsh plugin --profile web list/);
+  assert.match(conflict.fix, /dsh plugin --profile 'web' list/);
 });

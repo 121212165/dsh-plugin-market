@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { apply, type RuntimeDeps } from '../src/plugin.ts';
-import type { ChangeResultLike, InstallSeam, InstalledRow, MarketIndex } from '../src/core/index.ts';
+import { quoteShellArgument } from '../src/core/index.ts';
+import type { ChangeResultLike, InstallSeam, InstalledBundle, InstalledRow, MarketIndex } from '../src/core/index.ts';
 import { freshIndex, SNAPSHOT_TEXT, snapshotIndex } from './helpers.ts';
 
 interface CtxHarness {
@@ -70,6 +71,7 @@ test('/market install <id> installs the group and reports the four states', asyn
   assert.match(result.text, /安装报告 · archive-chain/);
   assert.match(result.text, /已挂载、enabled、active/);
   assert.match(result.text, /验收通过/);
+  assert.match(result.text, /宿主 slot 检测：无法检测/);
   assert.match(result.text, /下一步/);
 });
 
@@ -90,7 +92,7 @@ test('/market seams shows the probed seam and fallback commands', async () => {
   const offline = await wired.command('market')({ rawInput: 'seams' });
   assert.equal(offline.kind, 'success');
   assert.match(offline.text, /不可用/);
-  assert.match(offline.text, /dsh plugin --profile web add/);
+  assert.match(offline.text, /dsh plugin --profile 'web' add/);
 
   const online = makeCtx();
   const seam = seamFixture();
@@ -123,9 +125,25 @@ test('--without drops the colliding member and proceeds with the rest', async ()
     registeredCommands: () => ['/archive'],
   }));
   const result = await wired.command('market')({ rawInput: 'install archive-chain --without dsh-plugin-obsidian-push' });
-  assert.equal(result.kind, 'error'); // transcript-search command isn't registered in this harness
+  assert.equal(result.kind, 'success', result.text);
   assert.equal(seam.calls.length, 2);
-  assert.match(result.text, /dsh-plugin-transcript-search/);
+  assert.match(result.text, /已安装 2\/3 个组成员（部分安装）/);
+  assert.match(result.text, /验收通过：2\/3 个纳入校验的成员/);
+  assert.match(result.text, /按要求跳过 dsh-plugin-obsidian-push/);
+  assert.doesNotMatch(result.text, /dsh-plugin-obsidian-push：/);
+});
+
+test('excluding every member fails safely without calling installBundle', async () => {
+  const wired = makeCtx();
+  const seam = seamFixture();
+  apply(wired.ctx as never, { enabled: true }, baseDeps({ seam }));
+  const result = await wired.command('market')({ rawInput: 'install archive-chain --without dsh-plugin-transcript,dsh-plugin-obsidian-push,dsh-plugin-transcript-search' });
+  assert.equal(result.kind, 'error', result.text);
+  assert.equal(seam.calls.length, 0);
+  assert.match(result.text, /已安装 0\/3 个成员/);
+  assert.match(result.text, /全部被排除/);
+  assert.match(result.text, /不是完整安装/);
+  assert.match(result.text, /至少保留一个成员/);
 });
 
 test('degraded mode: install returns manual commands and does not pretend success', async () => {
@@ -135,7 +153,7 @@ test('degraded mode: install returns manual commands and does not pretend succes
   assert.equal(result.kind, 'error');
   assert.match(result.text, /降级模式/);
   assert.match(result.text, /未执行任何安装/);
-  assert.match(result.text, /dsh plugin --profile web add/);
+  assert.match(result.text, /dsh plugin --profile 'web' add/);
   assert.match(result.text, /\/market verify archive-chain/);
 });
 
@@ -172,14 +190,24 @@ function installedRowsFor(index: MarketIndex, groupId: string): InstalledRow[] {
   const group = index.groups.find((candidate) => candidate.id === groupId)!;
   return group.members.map((id) => {
     const plugin = index.plugins.find((candidate) => candidate.id === id)!;
-    const spec = plugin.npm ?? id;
-    return { id: spec, moduleName: spec, enabled: true, fiberPhase: 'active' as const };
+    const npm = plugin.npm ?? id;
+    return { id: npm, moduleName: npm, enabled: true, fiberPhase: 'active' as const };
   });
+}
+
+function installedBundlesFor(index: MarketIndex, groupId: string): InstalledBundle[] {
+  const group = index.groups.find((candidate) => candidate.id === groupId)!;
+  return group.members.map((id) => ({
+    name: index.plugins.find((plugin) => plugin.id === id)!.npm!,
+    enabled: true, installed: true, removable: true,
+    rows: [{ rowId: id, moduleName: index.plugins.find((plugin) => plugin.id === id)!.npm! }],
+  }));
 }
 
 function rollbackSeam(
   rows: InstalledRow[],
-  options: { failOn?: string; onRemoved?: (spec: string) => void } = {},
+  bundles: InstalledBundle[],
+  options: { failOn?: string; diagnostic?: string; onRemoved?: (spec: string) => void } = {},
 ): InstallSeam & { calls: string[] } {
   const calls: string[] = [];
   return {
@@ -192,18 +220,20 @@ function rollbackSeam(
       if (options.failOn && spec.includes(options.failOn)) {
         return {
           changed: false, application: 'failed', stage: 'remove', target: spec,
-          error: { code: 'remove-failed', diagnostic: 'host refused removal' },
+          error: { code: 'remove-failed', diagnostic: options.diagnostic ?? 'host refused removal' },
         };
       }
       const packageName = spec.split('/').pop()?.toLowerCase() ?? '';
       const at = rows.findIndex((row) => [row.id, row.moduleName ?? '']
         .some((value) => value.toLowerCase().includes(packageName)));
       if (at >= 0) rows.splice(at, 1);
+      const bundleAt = bundles.findIndex((bundle) => bundle.name === spec);
+      if (bundleAt >= 0) bundles.splice(bundleAt, 1);
       options.onRemoved?.(spec);
       return { changed: true, application: 'applied', stage: 'remove', target: spec };
     },
     async listPlugins() { return rows; },
-    async listBundles() { return []; },
+    async listBundles() { return bundles; },
   } as InstallSeam & { calls: string[] };
 }
 
@@ -213,7 +243,10 @@ function manifestFixture() {
   return {
     store: {
       async read() { return { ...files }; },
-      async write(next: { packageJson?: string; pnpmLock?: string }) { files = { ...next }; writes += 1; },
+      async write(next: { packageJson?: string | null; pnpmLock?: string | null }) {
+        files = { packageJson: next.packageJson ?? null, pnpmLock: next.pnpmLock ?? null };
+        writes += 1;
+      },
     },
     mutate(next: { packageJson?: string; pnpmLock?: string }) { files = { ...next }; },
     get files() { return files; },
@@ -225,7 +258,7 @@ test('/market uninstall <id> rolls back in reverse members order and is idempote
   const wired = makeCtx();
   const index = snapshotIndex();
   const rows = installedRowsFor(index, 'archive-chain');
-  const seam = rollbackSeam(rows);
+  const seam = rollbackSeam(rows, installedBundlesFor(index, 'archive-chain'));
   const manifest = manifestFixture();
   apply(wired.ctx as never, { enabled: true }, baseDeps({ seam, manifest: manifest.store }));
 
@@ -234,9 +267,9 @@ test('/market uninstall <id> rolls back in reverse members order and is idempote
   assert.match(first.text, /卸载报告 · archive-chain/);
   assert.match(first.text, /逆序卸载 3 个成员/);
   assert.deepEqual([...seam.calls], [
-    'github:121212165/dsh-plugin-transcript-search',
-    'github:121212165/dsh-plugin-obsidian-push',
-    'github:121212165/dsh-plugin-transcript',
+    '@deepseek-ai/dsh-plugin-transcript-search',
+    '@deepseek-ai/dsh-plugin-obsidian-push',
+    '@deepseek-ai/dsh-plugin-transcript',
   ]);
   assert.equal(rows.length, 0, 'all installed members removed from the manifest');
   assert.equal(manifest.writes, 0, 'successful rollback never rewrites the manifest');
@@ -252,8 +285,8 @@ test('/market uninstall restores the original manifest and gives recovery comman
   const index = snapshotIndex();
   const rows = installedRowsFor(index, 'archive-chain');
   const manifest = manifestFixture();
-  const seam = rollbackSeam(rows, {
-    failOn: 'dsh-plugin-obsidian-push',
+  const seam = rollbackSeam(rows, installedBundlesFor(index, 'archive-chain'), {
+    failOn: '@deepseek-ai/dsh-plugin-obsidian-push',
     onRemoved: () => manifest.mutate({ packageJson: '{"name":"mutated-pkg"}', pnpmLock: 'lock-mutated' }),
   });
   apply(wired.ctx as never, { enabled: true }, baseDeps({ seam, manifest: manifest.store }));
@@ -265,8 +298,8 @@ test('/market uninstall restores the original manifest and gives recovery comman
   assert.deepEqual(manifest.files, { packageJson: '{"name":"original-pkg"}', pnpmLock: 'lock-original' });
   assert.equal(manifest.writes, 1, 'snapshot restored exactly once');
   assert.match(result.text, /恢复命令（可直接复制）/);
-  assert.match(result.text, /dsh plugin --profile web add/);
-  assert.match(result.text, /dsh plugin --profile web remove/);
+  assert.match(result.text, /dsh plugin --profile 'web' add/);
+  assert.match(result.text, /dsh plugin --profile 'web' remove/);
   assert.match(result.text, /\[failed\]/);
   assert.doesNotMatch(result.text, /TypeError|at apply|stack/i);
 });
@@ -275,7 +308,7 @@ test('market_uninstall tool shares the same rollback flow as the command', async
   const wired = makeCtx();
   const index = snapshotIndex();
   const rows = installedRowsFor(index, 'archive-chain');
-  const seam = rollbackSeam(rows);
+  const seam = rollbackSeam(rows, installedBundlesFor(index, 'archive-chain'));
   apply(wired.ctx as never, { enabled: true }, baseDeps({
     seam, manifest: manifestFixture().store, fetchText: async () => JSON.stringify(index),
   }));
@@ -283,10 +316,119 @@ test('market_uninstall tool shares the same rollback flow as the command', async
   assert.match(report, /卸载报告 · archive-chain/);
   assert.match(report, /逆序卸载 3 个成员/);
   assert.deepEqual([...seam.calls], [
-    'github:121212165/dsh-plugin-transcript-search',
-    'github:121212165/dsh-plugin-obsidian-push',
-    'github:121212165/dsh-plugin-transcript',
+    '@deepseek-ai/dsh-plugin-transcript-search',
+    '@deepseek-ai/dsh-plugin-obsidian-push',
+    '@deepseek-ai/dsh-plugin-transcript',
   ]);
+});
+
+test('--without with a typo blocks before installing any member', async () => {
+  const wired = makeCtx();
+  const seam = seamFixture();
+  apply(wired.ctx as never, { enabled: true }, baseDeps({ seam }));
+  const result = await wired.command('market')({ rawInput: 'install archive-chain --without dsh-plugin-obisidian-push' });
+  assert.equal(result.kind, 'error', result.text);
+  assert.equal(seam.calls.length, 0);
+  assert.match(result.text, /不是组 archive-chain 的成员/);
+  assert.match(result.text, /精确 id/);
+});
+
+test('uninstall fails closed when no unique removable npm bundle matches the plugin id', async () => {
+  for (const mode of ['missing', 'ambiguous'] as const) {
+    const wired = makeCtx();
+    const index = snapshotIndex();
+    const rows = installedRowsFor(index, 'archive-chain');
+    const bundles = installedBundlesFor(index, 'archive-chain');
+    const transcriptNpm = index.plugins.find((plugin) => plugin.id === 'dsh-plugin-transcript')!.npm!;
+    const inventory = mode === 'missing'
+      ? bundles.filter((bundle) => bundle.name !== transcriptNpm)
+      : [...bundles, { ...bundles.find((bundle) => bundle.name === transcriptNpm)! }];
+    const seam = rollbackSeam(rows, inventory);
+    apply(wired.ctx as never, { enabled: true }, baseDeps({ seam }));
+
+    const result = await wired.command('market')({ rawInput: 'uninstall archive-chain' });
+    assert.equal(result.kind, 'error', result.text);
+    assert.equal(seam.calls.length, 0, `${mode} inventory must not trigger speculative removal`);
+    assert.match(result.text, /无法唯一映射|匹配到 0 个|匹配到 2 个/);
+    assert.match(result.text, /未调用宿主 removeBundle/);
+    assert.match(result.text, /核对市集 npm 与 listBundles\(\)\.name/);
+  }
+});
+
+test('uninstall fails closed when manifest snapshot is incomplete', async () => {
+  const wired = makeCtx();
+  const index = snapshotIndex();
+  const rows = installedRowsFor(index, 'archive-chain');
+  const seam = rollbackSeam(rows, installedBundlesFor(index, 'archive-chain'));
+  apply(wired.ctx as never, { enabled: true }, baseDeps({
+    seam,
+    manifest: {
+      async read() { return { packageJson: '{"name":"partial"}' }; },
+      async write() {},
+    },
+  }));
+
+  const result = await wired.command('market')({ rawInput: 'uninstall archive-chain' });
+  assert.equal(result.kind, 'error', result.text);
+  assert.equal(seam.calls.length, 0);
+  assert.match(result.text, /manifest 快照.*未调用任何 removeBundle/);
+});
+
+test('uninstall fails closed if the host cannot enumerate bundle inventory', async () => {
+  const wired = makeCtx();
+  const index = snapshotIndex();
+  const rows = installedRowsFor(index, 'archive-chain');
+  const seam = {
+    kind: 'fake' as const,
+    source: 'host without listBundles',
+    async installBundle(spec: string) { return { changed: false, application: 'failed' as const, stage: 'install' as const, target: spec }; },
+    async listPlugins() { return rows; },
+    async removeBundle() { throw new Error('must not be called without bundle inventory'); },
+  };
+  apply(wired.ctx as never, { enabled: true }, baseDeps({ seam }));
+
+  const result = await wired.command('market')({ rawInput: 'uninstall archive-chain' });
+  assert.equal(result.kind, 'error', result.text);
+  assert.match(result.text, /listBundles 清单能力不可用/);
+  assert.doesNotMatch(result.text, /幂等：没有已安装成员/);
+});
+
+test('uninstall recovery commands shell-quote hostile profile and bundle names', async () => {
+  const wired = makeCtx();
+  const base = snapshotIndex();
+  const profile = "web profile'; echo INJECTED; $(whoami) `whoami`";
+  const npm = "@scope/pkg ' ; echo INJECTED; $(whoami) `whoami`";
+  const index: MarketIndex = {
+    ...base,
+    plugins: base.plugins.map((plugin) => plugin.id === 'dsh-plugin-obsidian-push' ? { ...plugin, npm } : plugin),
+  };
+  const rows = installedRowsFor(index, 'archive-chain');
+  const seam = rollbackSeam(rows, installedBundlesFor(index, 'archive-chain'), { failOn: npm });
+  apply(wired.ctx as never, { enabled: true, profile }, baseDeps({ seam, embedded: JSON.stringify(index) }));
+
+  const result = await wired.command('market')({ rawInput: 'uninstall archive-chain' });
+  assert.equal(result.kind, 'error', result.text);
+  assert.ok(result.text.includes(`--profile ${quoteShellArgument(profile)} remove ${quoteShellArgument(npm)}`), result.text);
+  assert.ok(result.text.includes(`--profile ${quoteShellArgument(profile)} list`), result.text);
+  assert.doesNotMatch(result.text, /--profile web profile'; echo INJECTED/);
+});
+
+test('host diagnostic is not appended to a copyable shell command', async () => {
+  const wired = makeCtx();
+  const index = snapshotIndex();
+  const rows = installedRowsFor(index, 'archive-chain');
+  const bundles = installedBundlesFor(index, 'archive-chain');
+  const failedName = bundles.find((bundle) => bundle.name.includes('obsidian-push'))!.name;
+  const seam = rollbackSeam(rows, bundles, {
+    failOn: failedName,
+    diagnostic: 'refused; echo INJECTED\r\nnext line',
+  });
+  apply(wired.ctx as never, { enabled: true }, baseDeps({ seam, manifest: manifestFixture().store }));
+
+  const result = await wired.command('market')({ rawInput: 'uninstall archive-chain' });
+  assert.equal(result.kind, 'error', result.text);
+  assert.match(result.text, /宿主诊断（仅供参考，非命令）：refused; echo INJECTED\s+next line/);
+  assert.doesNotMatch(result.text, /list; echo INJECTED/);
 });
 
 test('/market install blocks two /health members before calling the seam', async () => {

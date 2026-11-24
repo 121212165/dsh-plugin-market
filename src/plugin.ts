@@ -35,6 +35,7 @@ import {
   probeSeam,
   adaptSeam,
   manualInstallCommands,
+  quoteShellArgument,
   runFuse,
   renderFuseRejection,
   FuseValidationError,
@@ -220,11 +221,11 @@ function parseInstallOptions(rest: string[]): { excluded: string[]; reinstall: b
       continue;
     }
     if (token.startsWith('--without=')) {
-      excluded.push(...token.slice('--without='.length).split(',').filter(Boolean));
+      excluded.push(...token.slice('--without='.length).split(',').map((id) => id.trim()).filter(Boolean));
       continue;
     }
     if (token === '--without' && rest[index + 1]) {
-      excluded.push(...String(rest[++index]).split(',').filter(Boolean));
+      excluded.push(...String(rest[++index]).split(',').map((id) => id.trim()).filter(Boolean));
     }
   }
   return { excluded: [...new Set(excluded)], reinstall };
@@ -425,7 +426,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
         // readable error with next steps, never as an unhandled handler throw.
         return {
           kind: 'error' as const,
-          text: `市集操作失败：${error instanceof Error ? error.message : String(error)}\n下一步：/market seams 检查安装能力；/market group <id> 复核组数据；必要时按 dsh plugin --profile ${config.profile} list 手动处理。`,
+          text: `市集操作失败：${error instanceof Error ? error.message : String(error)}\n下一步：/market seams 检查安装能力；/market group <id> 复核组数据；必要时按 dsh plugin --profile ${quoteShellArgument(config.profile)} list 手动处理。`,
         };
       }
     },
@@ -463,7 +464,7 @@ export function apply(ctx: Context, configInput: Partial<Config> | Config, deps:
   ctx.tools.register(
     defineTool({
       name: 'market_install',
-      description: '按组一键安装 dsh 插件：先做命令名/工具名/包名/slot 冲突预检，再按 members 顺序调用宿主 plugin_manager.installBundle，最后用 application 四态与 listPlugins 校验是否真正生效。冲突时返回可执行修复建议；seam 不可用时只给手动命令，不假装成功。',
+      description: '按组一键安装 dsh 插件：检查组内命令/工具/slot/包名冲突及宿主命令/包冲突，再按 members 顺序调用宿主 plugin_manager.installBundle，并用四态与 listPlugins 校验。当前 server plugin_manager 不暴露浏览器 ctx.slots registry，因此宿主已占用 slot 无法检测；报告会明确说明。--without 报告部分安装；seam 不可用时只给手动命令。',
       parameters: {
         groupId: { type: 'string', required: true, description: '插件组 id，如 archive-chain' },
         without: { type: 'string', description: '可选，逗号分隔的跳过的成员 id' },

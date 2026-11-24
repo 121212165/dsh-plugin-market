@@ -106,8 +106,24 @@ test('cordis proxy without plugin_manager: probe never throws and degrades', asy
   const install = await host.command('market')({ rawInput: 'install archive-chain' });
   assert.equal(install.kind, 'error', install.text);
   assert.equal(host.calls.length, 0, 'installBundle must not be called without a seam');
-  assert.match(install.text, /dsh plugin --profile web add/);
+  assert.match(install.text, /dsh plugin --profile 'web' add/);
   assert.doesNotMatch(install.text, /without inject|TypeError/);
+});
+
+test('plugin_manager without bundle inventory degrades instead of treating unknown inventory as empty', async () => {
+  const host = makeHost();
+  apply(host.ctx as never, { enabled: true }, baseDeps());
+  host.provide('pluginManager', {
+    async installBundle() { throw new Error('must not install without inventory methods'); },
+  });
+
+  const seams = await host.command('market')({ rawInput: 'seams' });
+  assert.match(seams.text, /不可用/);
+  assert.match(seams.text, /listPlugins\/listBundles/);
+  const install = await host.command('market')({ rawInput: 'install archive-chain' });
+  assert.equal(install.kind, 'error');
+  assert.equal(host.calls.length, 0);
+  assert.match(install.text, /未执行任何安装/);
 });
 
 test('plugin_manager provided later through ctx.reflect: the same instance installs', async () => {
@@ -168,7 +184,7 @@ test('service absent everywhere: commands return actionable fallback, never thro
     assert.doesNotMatch(result.text, /without inject|TypeError|is not a function|\n\s+at /);
   }
   assert.equal(install.kind, 'error');
-  assert.match(install.text, /dsh plugin --profile web add/);
+  assert.match(install.text, /dsh plugin --profile 'web' add/);
   assert.match(install.text, /\/market verify archive-chain/);
   assert.match(install.text, /重启或重跑本命令/);
   assert.equal(host.calls.length, 0);

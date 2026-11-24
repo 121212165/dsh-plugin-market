@@ -133,6 +133,7 @@ test('overridden: explicitly says 被更高优先级层覆盖, never a generic f
   const rendered = renderInstallReport({
     groupId: group.id, mode: 'live', startedAt: report.startedAt, finishedAt: report.finishedAt,
     ok: false, summary: report.summary, conflicts: [], steps: [], verification: report.verification,
+    hostSlotDetection: 'unavailable',
     nextSteps: [], liveLoop: report,
   });
   assert.match(rendered, /overridden · 被更高优先级层覆盖/);
@@ -151,6 +152,23 @@ test('failed and cancelled: each state has its own label and recovery step', asy
   assert.match(report.states[0]!.nextStep, /日志/);
   assert.equal(report.states[1]!.label, 'cancelled · 已取消');
   assert.match(report.states[1]!.nextStep, /重新运行/);
+});
+
+test('host failed state stays raw while live inventory reports the member active', async () => {
+  const byMember: Record<string, ApplicationState> = {
+    [group.members[0]!]: 'failed',
+    [group.members[1]!]: 'applied',
+    [group.members[2]!]: 'applied',
+  };
+  const report = await loopFor(byMember, { preinstalled: group.members }).promise;
+  assert.equal(report.ok, false);
+  assert.equal(report.states[0]!.application, 'failed');
+  assert.equal(report.verification.members[0]!.present, true);
+  assert.equal(report.verification.members[0]!.active, true);
+  assert.equal(report.verification.members[0]!.hostResultMismatch, true);
+  assert.match(report.states[0]!.detail, /application=failed.*active；宿主结果与清单不一致/);
+  assert.match(report.summary, /宿主结果与清单不一致/);
+  assert.match(report.states[0]!.nextStep, /查看 pnpm\/宿主日志/);
 });
 
 test('overridden wording is a dedicated guidance entry, not an error-code fallback', () => {

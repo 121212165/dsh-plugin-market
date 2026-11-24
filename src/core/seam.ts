@@ -55,7 +55,7 @@ export function probeSeam(ctx: unknown): SeamProbe {
     const optional = safeRead(() =>
       OPTIONAL.filter((name) => typeof (candidate as UnknownCtx)[name] === 'function'),
     ) ?? [];
-    if (methods.includes('installBundle')) {
+    if (REQUIRED.every((name) => methods.includes(name))) {
       return {
         available: true,
         source,
@@ -72,7 +72,7 @@ export function probeSeam(ctx: unknown): SeamProbe {
     source: '',
     checked,
     methods: [],
-    note: '未发现可用的 plugin_manager seam；安装已降级为“复制命令 + 装完手动校验”，不会假装成功；若刚启用 plugin_manager，重启或重跑本命令',
+    note: `未发现完整的 plugin_manager seam（需要 ${REQUIRED.join('/')}）；安装已降级为“复制命令 + 装完手动校验”，不会假装成功；若刚启用 plugin_manager，重启或重跑本命令`,
   };
 }
 
@@ -113,11 +113,31 @@ export function adaptSeam(probe: SeamProbe, ctx: unknown): InstallSeam | null {
   };
 }
 
+/** Quote one argument for the shell used by the host's copy/paste instructions. */
+const POSIX_SINGLE_QUOTE_ESCAPE = ["'", '"', "'", '"', "'"].join('');
+export function quoteShellArgument(value: string, shell: 'powershell' | 'posix' = process.platform === 'win32' ? 'powershell' : 'posix'): string {
+  if (/[\r\n\0]/.test(value)) throw new Error('shell argument must not contain line breaks or NUL');
+  return shell === 'powershell'
+    ? `'${value.replace(/'/g, "''")}'`
+    : `'${value.replace(/'/g, POSIX_SINGLE_QUOTE_ESCAPE)}'`;
+}
+
 /** Manual fallback text. Shown in degraded mode and in every failure's nextSteps. */
-export function manualInstallCommands(spec: string, profile: string, groupId: string): string[] {
+export function manualInstallCommands(
+  spec: string,
+  profile: string,
+  groupId: string,
+  shell: 'powershell' | 'posix' = process.platform === 'win32' ? 'powershell' : 'posix',
+): string[] {
+  const safeProfile = quoteShellArgument(profile || 'web', shell);
+  const safeSpec = quoteShellArgument(spec, shell);
+  const packageName = quoteShellArgument(spec.replace(/^@[^/]+\//, ''), shell);
+  const lookup = shell === 'powershell'
+    ? `Select-String -SimpleMatch -Pattern ${packageName}`
+    : `grep -F -- ${packageName}`;
   return [
-    `dsh plugin --profile ${profile || 'web'} add "${spec}"`,
-    `dsh --profile ${profile || 'web'} --dump-config | grep ${spec.replace(/^@[^/]+\//, '')}`,
+    `dsh plugin --profile ${safeProfile} add ${safeSpec}`,
+    `dsh --profile ${safeProfile} --dump-config | ${lookup}`,
     `/market verify ${groupId}`,
   ];
 }

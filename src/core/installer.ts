@@ -2,7 +2,7 @@
  * The orchestrator never throws: every failure becomes a visible report with
  * an executable next step. */
 import { planGroupInstall, renderConflicts, specFor } from './conflicts.ts';
-import { callEntryViaContext, dumpConfigView, manualInstallCommands } from './seam.ts';
+import { callEntryViaContext, dumpConfigView, manualInstallCommands, quoteShellArgument } from './seam.ts';
 import type {
   ApplicationState,
   ChangeResultLike,
@@ -12,6 +12,7 @@ import type {
   InstallReport,
   InstallSeam,
   InstallStepResult,
+  InstalledBundle,
   InstalledRow,
   LiveLoopReport,
   VerificationMember,
@@ -27,6 +28,8 @@ export interface InstallInput {
   excluded?: string[] | undefined;
   reinstall?: boolean | undefined;
   registeredCommands?: string[] | undefined;
+  /** Optional host slot inventory; production host context currently cannot provide it. */
+  registeredSlots?: string[] | undefined;
   now?: (() => number) | undefined;
   onProgress?: (line: string) => void;
   /** F5: hooks for the automatic post-install live loop. */
@@ -40,6 +43,7 @@ export interface VerifyInput {
   index: MarketIndex;
   seam: InstallSeam | null;
   applicationByMember?: Record<string, ApplicationState>;
+  memberIds?: string[] | undefined;
   registeredCommands?: string[] | undefined;
   profile?: string;
   now?: (() => number) | undefined;
@@ -54,6 +58,7 @@ export interface LiveLoopInput {
   seam: InstallSeam | null;
   /** `application` from each member's ChangeResult during install. */
   applicationByMember: Record<string, ApplicationState>;
+  memberIds?: string[] | undefined;
   profile?: string;
   registeredCommands?: string[] | undefined;
   /** Raw dump-config text (or a provider); defaults to dumpConfigView(seam). */
@@ -67,6 +72,7 @@ export interface LiveLoopInput {
 
 const stamp = (now?: () => number): string => new Date((now ?? Date.now)()).toISOString();
 const messageOf = (error: unknown): string => error instanceof Error ? error.message : String(error);
+const safeDiagnosticText = (value: string): string => value.replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 160);
 
 /** F5: one wording table for all four application states. `overridden` is
  * deliberately explicit ("被更高优先级层覆盖") so it can never be confused
@@ -124,28 +130,28 @@ function findRow(rows: InstalledRow[], plugin: PluginEntry | undefined, id: stri
 /** Map a host failure code to a step the user can actually take. */
 export function nextStepsFor(result: ChangeResultLike, spec: string, profile: string): string[] {
   const code = result.error?.code ?? result.packageResult?.kind ?? 'operation-error';
-  const diagnostic = result.error?.diagnostic ? `（${result.error.diagnostic.slice(0, 160)}）` : '';
+  const diagnostic = result.error?.diagnostic ? `（${safeDiagnosticText(result.error.diagnostic)}）` : '';
   switch (code) {
     case 'incompatible-version':
       return [`当前 dsh 版本拒绝该插件的 peer 范围${diagnostic}；升级 dsh 或换用兼容版本`, `/market seams 查看当前 host 信息；dsh --version 确认版本`];
     case 'not-found':
     case 'no-matching-version':
     case 'invalid-spec':
-      return [`包名/仓库地址无效${diagnostic}；先 npm view ${spec} version 确认包存在`, `修正市集数据后重试：/market install <id>`];
+      return [`包名/仓库地址无效${diagnostic}；先 npm view ${quoteShellArgument(spec)} version 确认包存在`, `修正市集数据后重试：/market install <id>`];
     case 'network':
     case 'timeout':
       return result.packageResult?.timedOut
         ? [`宿主 pnpm 静默超时（plugin-manager.idleTimeoutMs，默认 600000）${diagnostic}；调高该配置或先手动装好依赖再重试`, `重试 /market install <id>（安装失败不会写坏 profile）`]
         : [`网络或 registry 不可达${diagnostic}；检查代理后重试`, `重试 /market install <id>（安装失败不会写坏 profile）`];
     case 'build-blocked':
-      return [`构建脚本未获批准${diagnostic}；确认可信后再传入 approvedBuilds`, `dsh plugin --profile ${profile} list 查看 pendingBuilds`];
+      return [`构建脚本未获批准${diagnostic}；确认可信后再传入 approvedBuilds`, `dsh plugin --profile ${quoteShellArgument(profile)} list 查看 pendingBuilds`];
     case 'pendingBuilds':
       return [`有待批准构建脚本：${(result.pendingBuilds ?? []).join(', ') || '见输出'}；确认后重试`, `/market seams 查看 seam 是否支持 approvedBuilds`];
     case 'management-required':
     case 'unaddressable':
       return [`该层受管理策略保护${diagnostic}；需管理员或更高权限安装`, `用 /market seams 查看当前 profile 与层，再决定是否切换 profile`];
     case 'overridden':
-      return [`被更高优先级层覆盖${diagnostic}；运行 dsh plugin --profile ${profile} list 检查 patch 顺序`, `确认要保留哪一层后，用 /market install <id> --without <冲突成员> 或移除旧层`];
+      return [`被更高优先级层覆盖${diagnostic}；运行 dsh plugin --profile ${quoteShellArgument(profile)} list 检查 patch 顺序`, `确认要保留哪一层后，用 /market install <id> --without <冲突成员> 或移除旧层`];
     case 'cancelled':
       return ['安装已取消，profile 文件已回滚；确认后重新运行 /market install <id>'];
     default:
@@ -164,7 +170,8 @@ function classify(result: ChangeResultLike, member: string, spec: string, profil
     applied: '已生效', 'restart-required': '需重启后生效', overridden: '被更高优先级层覆盖', failed: '失败', cancelled: '已取消',
   };
   if (application === 'failed' || application === 'cancelled') {
-    const detail = result.error?.diagnostic || result.packageResult?.output?.trim().split('\n').slice(-1)[0] || label[application];
+    const rawDetail = result.error?.diagnostic || result.packageResult?.output?.trim().split('\n').slice(-1)[0] || label[application];
+    const detail = safeDiagnosticText(rawDetail);
     return { ...base, status: 'failed', detail: `${detail}（stage=${result.stage}, target=${result.target}）`, nextSteps: nextStepsFor(result, spec, profile) };
   }
   if (application === 'overridden') {
@@ -199,7 +206,9 @@ export async function verifyGroup(input: VerifyInput): Promise<VerificationRepor
     rows = [];
   }
   const liveCommands = new Set((input.registeredCommands ?? []).map((name) => name.startsWith('/') ? name : `/${name}`));
-  const members: VerificationMember[] = group.members.map((id) => {
+  const requestedIds = new Set(input.memberIds ?? group.members);
+  const checkedIds = group.members.filter((id) => requestedIds.has(id));
+  const members: VerificationMember[] = checkedIds.map((id) => {
     const plugin = pluginOf(input.index, id);
     const row = findRow(rows, plugin, id);
     const application = input.applicationByMember?.[id];
@@ -214,7 +223,7 @@ export async function verifyGroup(input: VerifyInput): Promise<VerificationRepor
     }
     if (!enabled) {
       detail.push('row 处于 disabled');
-      nextSteps.push(`dsh plugin --profile ${input.profile ?? 'web'} set ${id} enabled`);
+      nextSteps.push(`dsh plugin --profile ${quoteShellArgument(input.profile ?? 'web')} set ${quoteShellArgument(id)} enabled`);
     }
     if (present && !active) {
       detail.push(`fiberPhase=${row?.fiberPhase ?? 'unknown'}`);
@@ -222,11 +231,18 @@ export async function verifyGroup(input: VerifyInput): Promise<VerificationRepor
     }
     if (application === 'overridden') {
       detail.push('application=overridden，被更高优先级层覆盖');
-      nextSteps.push(`检查更高优先级 patch：dsh plugin --profile ${input.profile ?? 'web'} list`);
+      nextSteps.push(`检查更高优先级 patch：dsh plugin --profile ${quoteShellArgument(input.profile ?? 'web')} list`);
     }
     if (application === 'restart-required') {
       detail.push('application=restart-required');
       nextSteps.push('重启 web 后开新会话再验证');
+    }
+    const hostResultMismatch = (application === 'failed' || application === 'cancelled')
+      && present && active && enabled;
+    if (hostResultMismatch) {
+      detail.push(`宿主原始 application=${application}，但 listPlugins 显示已挂载、enabled、active；宿主结果与清单不一致`);
+      nextSteps.push('检查宿主 plugin-manager 的 Already up to date / dependency diff 判定；保留原始四态，不要盲目重复安装');
+      nextSteps.push('确认运行状态后向宿主仓报告该矛盾；插件仓不会把 application 改写成 applied');
     }
     const missingCommands = (plugin?.entries ?? []).filter((entry) => entry.startsWith('/') && !liveCommands.has(entry));
     if (liveCommands.size && missingCommands.length && present && active) {
@@ -234,21 +250,26 @@ export async function verifyGroup(input: VerifyInput): Promise<VerificationRepor
       nextSteps.push('在新会话里让模型调用一次该命令；若仍不可见，检查 profile 是否 restart-required');
     }
     if (!detail.length) detail.push('已挂载、enabled、active，声明的命令均可见');
-    return { member: id, present, active, enabled, detail: detail.join('；'), nextSteps };
+    return { member: id, present, active, enabled, hostResultMismatch, detail: detail.join('；'), nextSteps };
   });
   // `overridden` is a failure even when the row is present/enabled/active:
   // a higher-priority layer shadowed it. Check the source state, not the
   // wording of a next step (which previously let this slip through).
-  const ok = members.every((member) =>
+  const ok = members.length > 0 && members.every((member) =>
     member.present && member.active && member.enabled
+    && !member.hostResultMismatch
     && input.applicationByMember?.[member.member] !== 'overridden');
+  const partial = checkedIds.length < group.members.length;
+  const mismatch = members.filter((member) => member.hostResultMismatch);
   return {
     groupId: group.id,
     members,
     ok,
-    summary: ok
-      ? `验收通过：${members.length} 个成员全部挂载且生效（用 /market group ${group.id} 查看业务验收步骤）`
-      : `验收未通过：${members.filter((member) => !member.present || !member.active || !member.enabled).map((member) => member.member).join(', ') || '见各成员详情'}`,
+    summary: mismatch.length
+      ? `宿主结果与清单不一致：${mismatch.map((member) => member.member).join(', ')} 的原始 application 失败，但清单显示 active；操作不视为完全成功`
+      : ok
+        ? `验收通过：${members.length}/${group.members.length} 个纳入校验的成员已挂载且生效${partial ? '（部分安装）' : ''}（用 /market group ${group.id} 查看业务验收步骤）`
+        : `验收未通过：${members.filter((member) => !member.present || !member.active || !member.enabled).map((member) => member.member).join(', ') || (members.length ? '见各成员详情' : '没有纳入校验的成员')}`,
   };
 }
 
@@ -268,6 +289,7 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
     conflicts,
     steps: [],
     verification: null,
+    hostSlotDetection: input.registeredSlots === undefined ? 'unavailable' : 'available',
     nextSteps: input.seam ? [] : (group?.members ?? []).flatMap((id) => manualInstallCommands(specFor(pluginOf(input.index, id)), profile, input.groupId)),
   });
   if (!group) return empty(`找不到组 ${input.groupId || '(空)'}；用 /market 查看可用组`);
@@ -278,7 +300,7 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
   }
 
   let plugins: InstalledRow[] = [];
-  let bundles: { name: string; enabled: boolean }[] = [];
+  let bundles: InstalledBundle[] = [];
   try {
     plugins = (await input.seam.listPlugins?.()) ?? [];
     bundles = (await input.seam.listBundles?.()) ?? [];
@@ -288,7 +310,7 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
 
   const plan = planGroupInstall({
     group, index: input.index, inventory: { plugins, bundles },
-    registeredCommands: input.registeredCommands, excluded: input.excluded,
+    registeredCommands: input.registeredCommands, registeredSlots: input.registeredSlots, excluded: input.excluded,
     profile, reinstall: input.reinstall,
   });
   if (plan.blocked) {
@@ -296,6 +318,25 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
     return {
       ...empty(`安装前预检未通过：${plan.conflicts.filter((c) => c.severity === 'blocking').map((c) => c.detail).join('；')}`, plan.conflicts),
       nextSteps: [...new Set(fixes)],
+    };
+  }
+
+  const includedIds = plan.steps.filter((step) => step.action !== 'skip-excluded').map((step) => step.member);
+  if (includedIds.length === 0) {
+    const steps = plan.steps.map((step) => ({
+      member: step.member, spec: step.spec, status: 'skipped' as const,
+      detail: step.reason ?? '按 --without 跳过', nextSteps: [],
+    }));
+    const verification: VerificationReport = {
+      groupId: group.id, members: [], ok: false,
+      summary: `未校验：全部 ${group.members.length} 个组成员均被排除`,
+    };
+    return {
+      groupId: group.id, mode: 'live', startedAt, finishedAt: stamp(input.now), ok: false,
+      summary: `${group.name}：已安装 0/${group.members.length} 个成员（全部被排除），未调用 installBundle；不是完整安装`,
+      conflicts: plan.conflicts, steps, verification,
+      hostSlotDetection: input.registeredSlots === undefined ? 'unavailable' : 'available',
+      nextSteps: [`移除 --without，或至少保留一个成员后重试 /market install ${group.id}`],
     };
   }
 
@@ -327,18 +368,24 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
 
   const verification = await verifyGroup({
     groupId: group.id, index: input.index, seam: input.seam,
-    applicationByMember, registeredCommands: input.registeredCommands, now: input.now, profile,
+    applicationByMember, memberIds: includedIds, registeredCommands: input.registeredCommands, now: input.now, profile,
   });
   // F5: automatically run the live loop once after install. The four states
   // come from the same ChangeResult.application values used above, so no
   // semantics are re-implemented here.
-  const liveLoop = await runPostInstallLoop({
-    groupId: group.id, index: input.index, seam: input.seam,
-    applicationByMember, registeredCommands: input.registeredCommands,
-    profile, dumpConfig: input.dumpConfig, callEntry: input.callEntry,
-    ctx: input.ctx, now: input.now,
-  });
+  const attemptedIds = steps.filter((step) => step.status !== 'skipped').map((step) => step.member);
+  const liveLoop = attemptedIds.length
+    ? await runPostInstallLoop({
+      groupId: group.id, index: input.index, seam: input.seam,
+      applicationByMember, memberIds: attemptedIds, registeredCommands: input.registeredCommands,
+      profile, dumpConfig: input.dumpConfig, callEntry: input.callEntry,
+      ctx: input.ctx, now: input.now,
+    })
+    : null;
   const failed = steps.filter((step) => step.status === 'failed');
+  const installedCount = verification.members.filter((member) => member.present && member.active && member.enabled).length;
+  const partial = includedIds.length < group.members.length;
+  const excludedMembers = plan.steps.filter((step) => step.action === 'skip-excluded').map((step) => step.member);
   const nextSteps = [...new Set([
     ...steps.flatMap((step) => step.nextSteps),
     ...verification.members.flatMap((member) => member.nextSteps),
@@ -352,11 +399,12 @@ export async function runGroupInstall(input: InstallInput): Promise<InstallRepor
     finishedAt: stamp(input.now),
     ok,
     summary: ok
-      ? `${group.name}：${steps.filter((step) => step.status === 'done').length} 个成员安装成功，${verification.summary}`
-      : `${group.name}：${failed.length} 步失败；${verification.summary}`,
+      ? `${group.name}：已安装 ${installedCount}/${group.members.length} 个组成员${partial ? '（部分安装）' : ''}，${verification.summary}${excludedMembers.length ? `；按要求跳过 ${excludedMembers.join(', ')}` : ''}`
+      : `${group.name}：${failed.length} 步失败；${verification.summary}${excludedMembers.length ? `；已安装 ${installedCount}/${group.members.length} 个组成员（部分安装），按要求跳过 ${excludedMembers.join(', ')}` : ''}`,
     conflicts: plan.conflicts,
     steps,
     verification,
+    hostSlotDetection: input.registeredSlots === undefined ? 'unavailable' : 'available',
     nextSteps,
     liveLoop,
   };
@@ -371,6 +419,9 @@ export function renderInstallReport(report: InstallReport): string {
     '',
   ];
   if (report.conflicts.length) lines.push(renderConflicts({ groupId: report.groupId, steps: [], conflicts: report.conflicts, blocked: !report.ok }), '');
+  if (report.mode === 'live' && report.hostSlotDetection === 'unavailable') {
+    lines.push('宿主 slot 检测：无法检测当前宿主已占用 slot；仅检查组内 slot 冲突（host plugin_manager 不暴露浏览器 ctx.slots registry）。', '');
+  }
   for (const step of report.steps) {
     const mark = step.status === 'done' ? '✓' : step.status === 'failed' ? '✗' : '·';
     lines.push(`${mark} ${step.member}  ${step.spec}`);
@@ -416,6 +467,8 @@ export async function runPostInstallLoop(input: LiveLoopInput): Promise<LiveLoop
   const startedAt = stamp(input.now);
   const group = input.index.groups.find((candidate) => candidate.id === input.groupId);
   const profile = input.profile ?? 'web';
+  const selectedMembers = new Set(input.memberIds ?? group?.members ?? []);
+  const memberIds = (group?.members ?? []).filter((id) => selectedMembers.has(id));
 
   // 1. dump-config (authoritative CLI output when injected, seam view otherwise)
   let dumpConfig: string;
@@ -428,11 +481,11 @@ export async function runPostInstallLoop(input: LiveLoopInput): Promise<LiveLoop
     dumpConfig = `dump-config 读取失败：${messageOf(error)}`;
   }
   const dumpLower = dumpConfig.toLowerCase();
-  const membersInDump = (group?.members ?? []).filter((id) => dumpLower.includes(id.toLowerCase()));
+  const membersInDump = memberIds.filter((id) => dumpLower.includes(id.toLowerCase()));
 
   // 2. one member entry call (only entries the host actually reports as visible)
   const live = new Set((input.registeredCommands ?? []).map((name) => name.startsWith('/') ? name : `/${name}`));
-  const chosenEntry = (group?.members ?? [])
+  const chosenEntry = memberIds
     .flatMap((id) => (pluginOf(input.index, id)?.entries ?? []).filter((entry) => entry.startsWith('/')))
     .find((entry) => live.size === 0 || live.has(entry));
   let entry: EntryProbeResult | null = null;
@@ -451,11 +504,12 @@ export async function runPostInstallLoop(input: LiveLoopInput): Promise<LiveLoop
     index: input.index,
     seam: input.seam,
     applicationByMember: input.applicationByMember,
+    memberIds,
     registeredCommands: input.registeredCommands,
     profile,
     now: input.now,
   });
-  const states: FourStateLine[] = (group?.members ?? []).map((id) => {
+  const states: FourStateLine[] = memberIds.map((id) => {
     const application = input.applicationByMember[id] ?? 'failed';
     const detail = verification.members.find((member) => member.member === id)?.detail;
     return renderFourStateLine(application, id, detail);
@@ -470,7 +524,9 @@ export async function runPostInstallLoop(input: LiveLoopInput): Promise<LiveLoop
     ? `${appliedCount}/${states.length} 成员 applied；${overriddenCount} 个成员被更高优先级层覆盖（overridden，不视为安装成功）`
     : ok
       ? `装后回路通过：${states.length} 个成员生效，dump-config 可见 ${membersInDump.length}/${states.length}，入口 ${entry?.entry ?? '无'} ${entry?.ok ? '调用成功' : '未实际调用'}`
-      : `装后回路未通过：${states.map((state) => `${state.member}=${state.application}`).join('，')}`;
+      : verification.members.some((member) => member.hostResultMismatch)
+        ? `宿主结果与清单不一致：宿主仍返回 failed，但 listPlugins 显示成员 active；操作不视为完全成功，需修复宿主判定`
+        : `装后回路未通过：${states.map((state) => `${state.member}=${state.application}`).join('，')}`;
 
   return {
     groupId: input.groupId,

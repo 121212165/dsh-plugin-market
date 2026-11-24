@@ -110,6 +110,7 @@ test('headless smoke: built lib mounts, fresh-profile install, 4-state verify, e
   // 让「构建产物与提交一致」的 git diff --exit-code 门禁永远为红。需要刷新证据时：
   // DSH_M5_EVIDENCE=1 npm test
   if (process.env.DSH_M5_EVIDENCE === '1') writeFileSync(new URL('../m5-smoke-evidence.json', import.meta.url), JSON.stringify({
+    evidenceType: 'headless',
     artifact: 'lib/plugin.js',
     profile: 'fresh-profile (empty inventory)',
     group: group.id,

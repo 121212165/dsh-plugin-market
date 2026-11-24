@@ -28,6 +28,9 @@ export interface InstalledRow {
 export interface InstalledBundle {
   name: string;
   enabled: boolean;
+  installed?: boolean;
+  removable?: boolean;
+  error?: { code?: string };
   rows?: { rowId: string; moduleName?: string }[];
 }
 
@@ -38,7 +41,7 @@ export interface InstallSeam {
   installBundle(spec: string, options?: { enabled?: boolean }): Promise<ChangeResultLike>;
   /** F6: remove a bundle during group uninstall/rollback. Optional because a
    * host may expose install only; uninstall then degrades to manual commands. */
-  removeBundle?(spec: string): Promise<ChangeResultLike>;
+  removeBundle?(name: string): Promise<ChangeResultLike>;
   listPlugins?(): Promise<InstalledRow[]>;
   listBundles?(): Promise<InstalledBundle[]>;
   inspect?(spec: string): Promise<{ status: string; problem?: string; reason?: string }>;
@@ -59,6 +62,7 @@ export type ConflictKind =
   | 'package'
   | 'already-installed'
   | 'missing-member'
+  | 'invalid-exclusion'
   | 'dsh-range';
 
 export interface Conflict {
@@ -99,6 +103,7 @@ export interface VerificationMember {
   present: boolean;
   active: boolean;
   enabled: boolean;
+  hostResultMismatch?: boolean;
   detail: string;
   nextSteps: string[];
 }
@@ -120,6 +125,8 @@ export interface InstallReport {
   conflicts: Conflict[];
   steps: InstallStepResult[];
   verification: VerificationReport | null;
+  /** The host plugin-manager runs outside the browser slot-registry context. */
+  hostSlotDetection: 'available' | 'unavailable';
   nextSteps: string[];
   /** F5: the post-install live loop (dump-config → one entry call → four-state report). */
   liveLoop?: LiveLoopReport | null;
@@ -177,8 +184,9 @@ export const APPLICATION_LABEL: Record<ApplicationState, string> = {
 /** The profile manifest files a host bundle operation mutates. Kept as raw
  * text so a failed rollback can restore byte-for-byte. */
 export interface ManifestFiles {
-  packageJson?: string;
-  pnpmLock?: string;
+  /** null means the file was confirmed absent in the pre-uninstall snapshot. */
+  packageJson?: string | null;
+  pnpmLock?: string | null;
 }
 
 /** Injectable IO for snapshotting/restoring the manifest. Pure fakes in tests;

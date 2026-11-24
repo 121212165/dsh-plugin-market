@@ -44,20 +44,22 @@ src/snapshot.json                      ← 内置快照，随包发布
 
 F6 组安装冲突矩阵 / 组卸载回滚：
 
-- **三类冲突提前告警**：命令名（`entries` 中 `/` 开头）、slot（`slots` 或 `slot:<name>` / 已知 slot）、npm 包名（`npm`）两两撞车，或与宿主已注册命令/slot、已装 bundle/插件撞车，都在调用安装器之前阻断并给出可复制修复建议。两个成员都声明 `/health` 时同样在预检阶段阻断，而不是等宿主启动时报 `command already registered`。
-- **组卸载**：`/market uninstall <groupId>` 只移除当前确实已安装的成员，严格按 `members` **逆序**调用 `plugin_manager.removeBundle(spec)`，把清单恢复到安装前状态。重复执行是幂等的（没有已安装成员直接返回成功，不调宿主）。模型工具 `market_uninstall` 与命令共用同一套 core 逻辑。
+- **冲突预检范围**：组内命令/工具/slot/npm 包冲突，以及宿主已注册命令、已装 bundle/插件可在调用安装器之前阻断。**当前宿主已占用 slot 无法检测**：slot registry 是浏览器 `ctx.slots`（有 `snapshot()`），而市集安装预检运行在 server plugin_manager 上下文，宿主未向该上下文暴露它。成功/失败报告都会说明这一限制；不会把 pure-function 的手工注入测试说成运行时覆盖。两个组成员都声明 `/health` 时仍会在预检阶段阻断。
+- **组卸载**：`/market uninstall <groupId>` 按 plugin id 查找唯一、已安装且可卸载的 `listBundles().name`，再严格按 `members` **逆序**把这个实际 dependency 名传给 `plugin_manager.removeBundle(name)`；不把 `github:owner/repo` 安装 spec 误传给宿主。无唯一匹配时整组安全停止，不做猜测性卸载。重复执行是幂等的（没有已安装成员直接返回成功，不调宿主）。模型工具 `market_uninstall` 与命令共用同一套 core 逻辑。
+- **部分安装**：`--without` 后仅校验纳入的成员，报告显示已安装数/组成员总数、跳过成员和“部分安装”；全部排除时不调用安装器并返回失败，不会报成完整安装。
+- **降级复制命令**：按本机平台生成 PowerShell（Windows）或 POSIX shell 命令，对 profile/spec 做 shell-safe 引用；不会把 PowerShell quoting 当 POSIX 命令，也不会输出未引用的值。
 - **失败保护**：卸载前快照 profile 的 `package.json` / `pnpm-lock.yaml`；任一步失败就恢复原始清单，并给出逐成员重新 `dsh plugin --profile <p> add ...` 的恢复命令和 `dsh plugin --profile <p> list` 排查步骤。宿主没有 `removeBundle` 时降级为手动命令，绝不假装卸载成功。
 - 卸载报告沿用与安装/F5 装后回路相同的 `application` 四态（`applied` / `restart-required` / `overridden` / `failed`），不改 F5 已定文案。真机验证请用独立 profile（`DSH_HOME` 指向隔离目录），不要碰现有环境。
 
 流程与纪律：
 
 1. **Seam 先探测**：按 `ctx.pluginManager` → `ctx.remotes.pluginManager` → `ctx.remote.pluginManager` → `ctx.services.pluginManager` 顺序核实 `installBundle/listPlugins/listBundles`。不可用就返回降级报告 + `dsh plugin --profile <p> add ...` / `dump-config` / `/market verify` 三步手动命令；绝不假装装成功。
-2. **装前预检**：组内命令名（`entries` 中 `/` 开头）、工具名、slot、npm 包名撞车；与宿主已注册命令、已装 bundle/插件撞车；组成员在数据中缺失。每条冲突自带可复制的修复建议（`--without`、改名命令、移除旧层、同步 index.json）。阻断类冲突会在调用安装器之前停下。
+2. **装前预检**：组内命令名（`entries` 中 `/` 开头）、工具名、slot、npm 包名撞车；与宿主已注册命令、已装 bundle/插件撞车；组成员在数据中缺失。当前宿主占用的 slot 明确标为无法检测（见上方原因）。每条可检测冲突自带可复制修复建议（`--without`、改名命令、移除旧层、同步 index.json）。阻断类冲突会在调用安装器之前停下。
 3. **调用宿主**：`plugin_manager.installBundle(spec, { enabled: true })`，按 `members` 顺序逐个调用；任何异常收敛成可读失败步骤 + 下一步，handler 永不抛栈。
 4. **四态校验**：`applied` 成功；`restart-required` 成功但明确提示"重启 web 后开新会话再 verify"；`overridden` 视为失败并提示更高优先级层；`failed/cancelled` 给出按错误码分类的修复建议（含 logPath）。装完再用 `listPlugins` 逐成员核对 `enabled` / `fiberPhase` 与命令可见性。
 5. **模型工具**：`market_install` / `market_verify` 与命令同一套 core 逻辑，带 generic presentCall/presentResult 卡片。
 
-测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径）、`test/fuse.test.ts`（F3 融合）、`test/vote.test.ts`（F2 投票）、`test/doctor.test.ts`（F4 体检）、`test/live-loop.test.ts`（F5 装后回路），共 86 条全绿（`npm run check`）。
+测试：`test/conflicts.test.ts`（纯预检）、`test/installer.test.ts`（假 seam 状态机 + 干净 profile 归档链 + 冲突修复）、`test/install-wire.test.ts`（真实 apply 装配层，含降级与冲突路径）、`test/fuse.test.ts`（F3 融合）、`test/vote.test.ts`（F2 投票）、`test/doctor.test.ts`（F4 体检）、`test/live-loop.test.ts`（F5 装后回路），本轮复审补强后共 100 条（以当前 `npm test` 实测为准）。
 
 ## F3 — 融合（任务书先行，脚手架两步落盘）
 
@@ -104,13 +106,13 @@ market_fuse { ids, apply }              # 模型工具，present 卡片沿用 in
 - `scripts/vendor/verify-plugin.mjs` — 家族官方门禁原样 vendor（来源与 SHA 见 `m5-gates.json#gateSource`），`npm run verify:plugin` 直接跑它；`scripts/verify-plugin.mjs` 保留为本地等价快速检查（`npm run verify:local`），逐条断言 G0-5/6/7/8/9/10。
 - `src/locales/zh-CN.json` — 本地化资源，经 `package.json#exports["./locales/*"]` 声明并在构建时拷入 `lib/locales/`（G0-6）。
 - `test/headless-smoke.test.mjs` — 第三层测试：直接加载构建产物 `lib/plugin.js`，在无 dsh 运行时/无网络/无缓存的全新 profile 上走真实 seam 探测 → 装「归档链」→ 四态校验 → 调用 3 个成员声明的全部 4 个入口；证据写 `m5-smoke-evidence.json`。
-- `verify-m5.py` — 汇总验收：build → gates → typecheck → 86 条测试 → 三层结构 → 实装实调一致性 → lib 入库，产出 `m5-report.json`；测试数由 `npm test` 输出解析，不再写死。
+- `verify-m5.py` — 汇总验收：build → gates → typecheck → 当前 100 条测试 → 三层结构 → headless 实装实调一致性 → lib 入库，产出 `m5-report.json`；测试数由 `npm test` 输出解析，不再写死。
 
-诚实声明：官方门禁已 vendor 并按 SHA 实跑（0 FAIL / 0 WARN）；真实 dsh 运行时的安装回路证据见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `static`，门禁为 `static`，三者不混用。当前真机进展（attempt 4，2026-11-23；attempt 5 补 F5 装后回路）：**M2 / M3 均已在真实 dsh 0.2.0-rc.2 web 上验证通过**。F4 / F6 / 投票目前只有分支级单测与构建证据，未重跑覆盖全部 F 变更的真机。
+诚实声明：官方 vendored 门禁本地实跑（本仓等价门禁结果不是家族工具原始输出）；历史真实 dsh 运行回路见 `m2-live-evidence.json`（`evidenceType: live`），headless 证据为 `static`，门禁为 `static`，三者不混用。当前真机进展（attempt 4，2026-11-23；attempt 5 补 F5 装后回路）：M2 / M3 有历史真实 dsh 证据，但不是本轮修复 SHA 的新验证。F4 / F6 / 投票目前只有 fixture/fake 与构建证据，未重跑覆盖全部 F 变更的真机。
 
 - M2：`/market`、`/market group`、`/market seams` 命令真实注册并执行；`/market install archive-chain` 后三名成员全部挂载、enabled、active，声明命令可见；`/market verify archive-chain` 报「验收通过」。证据 `m2-live-evidence.json`（`attempt: 4`）；测试 profile 把 `plugin-manager.githubConnectionTimeoutMs` 调到 30000、`idleTimeoutMs` 调到 1800000 以避开本机 GitHub 网络抖动。
 - M3：`dsh-market-groups` 标签真实出现在 `conversation.view`，`[data-market-panel]` 节点数 1，5 张精选卡与「数据 2026-11-21 · 快照」标注正常渲染，零控制台错误。证据 `m3-live-evidence.json`；截图 `.screenshots/m3-live-market-panel.png`。
-- 真机发现并修复的缺陷：client 面板原先直接读 `ctx.market`，cordis 抛 `cannot get property "market" without inject`，导致第一次点标签时面板崩溃；已改为 `reflect.get('market')` + try/catch 并重建 `lib/client.js`（86 条测试全绿）。另有一项宿主侧真实缺陷：重已装成员时 pnpm 的 `Already up to date` 被判定为 `ambiguous-install`，但四态实际为 `applied`，不影响验收结论，留待宿主修复。F5 attempt 5 的真实输出把已挂载 enabled active 的成员报为 `failed`，`overridden` 分支未自然触发而用发布产物注入验证（证据中标注 `evidenceType: built-artifact-code-path`）；两者均如实展示，未掩盖。
+- 已修复的复制命令会按本机 PowerShell 或 POSIX shell 安全引用 profile/spec。历史 attempt 5 的宿主原始安装结果为 `failed`，同时清单显示成员 active；实现保留这两个事实，报告明确标注“宿主结果与清单不一致”，并建议修复宿主 package-manager 的 `Already up to date` / dependency diff 分类，不改写四态。当前 SHA 仍未真机重跑；`overridden` 的测试为 `built-artifact-code-path`，不是自然 live 分支。
 
 ## 安装 / 卸载 / 降级
 
@@ -144,7 +146,7 @@ dsh plugin --profile market-audit remove dsh-plugin-market
 
 ```bash
 npm run typecheck    # tsc --noEmit
-npm test             # node:test：纯函数 + 装配层 + headless 冒烟（86 条）
+npm test             # node:test：纯函数 + 装配层 + headless 冒烟（当前 100 条）
 npm run build        # tsc → lib/ + 拷贝 snapshot.json/icon.svg/locales
 npm run build:client # src/client.tsx → lib/client.js
 npm run build:all    # 全部构建

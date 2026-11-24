@@ -71,7 +71,8 @@ for i in range(0, len(required_layers), 2):
 smoke_path = HERE / "m5-smoke-evidence.json"
 smoke = json.loads(smoke_path.read_text(encoding="utf-8")) if smoke_path.exists() else {}
 smoke_ok = (
-    smoke.get("artifact") == "lib/plugin.js"
+    smoke.get("evidenceType") == "headless"
+    and smoke.get("artifact") == "lib/plugin.js"
     and smoke.get("installOrder") == smoke.get("membersExpected")
     and len(smoke.get("calls", [])) == smoke.get("expectedEntryCount", -1)
     and smoke.get("verifyPassed") is True
@@ -90,7 +91,7 @@ if not lib_ok:
 
 criteria = {
     "verify_plugin_gates_all_green": gate_pass,
-    "lib_committed": lib_ok,
+    "lib_artifacts_present": lib_ok,
     "three_layer_tests_present": layers_ok,
     "typecheck_pass": steps["typecheck"]["ok"],
     "tests_pass": test_ok,
@@ -110,11 +111,12 @@ report = {
     "milestone": "M5 — 可发布",
     "evidenceType": "static",
     "gateSource": gate_source,
+    "gateImplementation": "local-equivalent; official vendored gate is run separately and is not this report's raw output",
     "generatedAt": None,
     "criteria": criteria,
     "gates": gates.get("gates", []),
     "gateNote": gates.get("note", ""),
-    "tests": {"pass": passed, "fail": failed},
+    "tests": {"evidenceType": "local-test", "pass": passed, "fail": failed},
     "layers": layer_evidence,
     "smoke": smoke,
     "steps": {name: {"ok": info["ok"], "returncode": info["returncode"]} for name, info in steps.items()},
