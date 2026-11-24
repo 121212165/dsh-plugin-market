@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-23T09:00:00.000Z",
+  "generatedAt": "2026-11-24T14:38:18.388Z",
   "source": "dsh-market-data",
   "plugins": [
     {
@@ -23,8 +23,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 10,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 168,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -64,24 +67,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            },
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -106,8 +100,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 14,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 130,
+      "lastSeenAt": "2026-11-16",
+      "score": 12,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -152,24 +149,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            },
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
-            "underAge": 1,
+            "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -193,8 +181,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 10,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 135,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -234,24 +225,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            },
-            {
-              "id": "1005",
-              "detail": "erin · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
-            "duplicates": 1,
+            "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -275,8 +257,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 9,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 42,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -316,20 +301,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -355,6 +335,9 @@
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
       "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 148,
+      "lastSeenAt": "2026-11-16",
       "score": 5,
       "scoreBreakdown": [
         {
@@ -395,7 +378,7 @@
           "sources": [],
           "excluded": {
             "duplicates": 0,
-            "underAge": 2,
+            "underAge": 0,
             "invalid": 0
           },
           "recordedVotes": 0,
@@ -423,8 +406,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 4,
-      "score": 12,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 166,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -464,32 +450,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 4,
-          "subtotal": 4,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            },
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            },
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            },
-            {
-              "id": "1005",
-              "detail": "erin · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 4,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -513,8 +482,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 9,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 26,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -554,20 +526,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1007",
-              "detail": "grace · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -591,8 +558,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 6,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 155,
+      "lastSeenAt": "2026-11-16",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -627,20 +597,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1008",
-              "detail": "heidi · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
-            "duplicates": 1,
+            "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -668,8 +633,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 3,
-      "score": 11,
+      "votes": 0,
+      "stars": 2,
+      "weeklyDownloads": 289,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -709,28 +677,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 3,
-          "subtotal": 3,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            },
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            },
-            {
-              "id": "1007",
-              "detail": "grace · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
-            "underAge": 1,
+            "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 3,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -755,8 +710,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 10,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -796,24 +753,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            },
-            {
-              "id": "1005",
-              "detail": "erin · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -839,8 +787,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 9,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -880,20 +830,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -918,8 +863,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 10,
+      "votes": 0,
+      "stars": 0,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -959,24 +906,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1007",
-              "detail": "grace · 👍"
-            },
-            {
-              "id": "1008",
-              "detail": "heidi · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1001,8 +939,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 7,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1037,24 +977,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            },
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1081,6 +1012,8 @@
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
       "votes": 0,
+      "stars": 0,
+      "lastSeenAt": "2026-11-16",
       "score": 8,
       "scoreBreakdown": [
         {
@@ -1126,7 +1059,7 @@
           "sources": [],
           "excluded": {
             "duplicates": 0,
-            "underAge": 1,
+            "underAge": 0,
             "invalid": 0
           },
           "recordedVotes": 0,
@@ -1153,8 +1086,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 6,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1189,20 +1124,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1005",
-              "detail": "erin · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1229,11 +1159,11 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 5,
-      "stars": 145,
+      "votes": 0,
+      "stars": 1,
       "weeklyDownloads": 312,
       "lastSeenAt": "2026-11-16",
-      "score": 17,
+      "score": 12,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1278,36 +1208,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 5,
-          "subtotal": 5,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            },
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            },
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            },
-            {
-              "id": "1007",
-              "detail": "grace · 👍"
-            },
-            {
-              "id": "1008",
-              "detail": "heidi · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
-            "duplicates": 1,
-            "underAge": 1,
+            "duplicates": 0,
+            "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 5,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1333,8 +1242,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 6,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1369,20 +1280,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1008",
-              "detail": "heidi · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1406,8 +1312,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 6,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1442,20 +1350,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1480,8 +1383,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 10,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1521,24 +1426,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            },
-            {
-              "id": "1007",
-              "detail": "grace · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1566,8 +1462,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 13,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 11,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1611,24 +1509,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            },
-            {
-              "id": "1005",
-              "detail": "erin · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
-            "underAge": 1,
+            "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1653,8 +1542,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 6,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1689,20 +1580,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1007",
-              "detail": "grace · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1726,8 +1612,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 6,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1762,20 +1650,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1008",
-              "detail": "heidi · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1799,8 +1682,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 2,
-      "score": 10,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1840,24 +1725,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 2,
-          "subtotal": 2,
-          "sources": [
-            {
-              "id": "1001",
-              "detail": "alice · 👍"
-            },
-            {
-              "id": "1003",
-              "detail": "carol · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 2,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1882,8 +1758,10 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "score": 9,
+      "votes": 0,
+      "stars": 1,
+      "lastSeenAt": "2026-11-16",
+      "score": 8,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1923,20 +1801,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
@@ -1960,11 +1833,12 @@
       "author": "121212165",
       "borrowedFrom": [],
       "verifiedAt": "2026-11-21",
-      "votes": 1,
-      "stars": 12,
+      "votes": 0,
+      "stars": 1,
+      "weeklyDownloads": 23,
       "deadSince": "2026-11-09",
-      "demotionReason": "仓库 404 已持续 7 天（自 2026-11-09）",
-      "score": 6,
+      "demotionReason": "仓库 404 已持续 15 天（自 2026-11-09）",
+      "score": 5,
       "scoreBreakdown": [
         {
           "key": "included",
@@ -1999,20 +1873,15 @@
           "key": "validVotes",
           "label": "有效票",
           "weight": 1,
-          "count": 1,
-          "subtotal": 1,
-          "sources": [
-            {
-              "id": "1002",
-              "detail": "bob · 👍"
-            }
-          ],
+          "count": 0,
+          "subtotal": 0,
+          "sources": [],
           "excluded": {
             "duplicates": 0,
             "underAge": 0,
             "invalid": 0
           },
-          "recordedVotes": 1,
+          "recordedVotes": 0,
           "rawReactions": null
         }
       ]
