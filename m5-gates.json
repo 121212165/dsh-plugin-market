@@ -3,7 +3,7 @@
   "evidenceType": "static",
   "gateSource": "121212165/dsh-family-tools@0915c5e099bc212f259ea7e791c10ef9d241ce5e",
   "gateImplementation": "local-equivalent; not the vendored gate raw output",
-  "generatedAt": "2026-11-24T15:40:26.510Z",
+  "generatedAt": "2026-11-25T00:00:06.268Z",
   "note": "家族工具 dsh-family-tools/tools/verify-plugin.mjs 不在工作区；本结果按 DSH-MARKET-PLAN.md 记录的门禁语义给出等价断言。",
   "gates": [
     {

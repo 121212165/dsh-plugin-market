@@ -92,8 +92,7 @@ function isInstalled(id: string, plugin: PluginEntry | undefined, rows: Installe
   const rowHit = rows.some((row) => [row.id, (row as InstalledRow & { entryId?: string }).entryId ?? '', row.moduleName ?? '', ...String(row.id).split(':')]
     .filter(Boolean).some((value) => keys.has(String(value).toLowerCase())));
   if (rowHit) return true;
-  const npm = plugin?.npm?.toLowerCase();
-  return Boolean(npm && bundles.some((bundle) => bundle.name.toLowerCase() === npm && bundle.installed !== false));
+  return bundles.some((bundle) => keys.has(bundle.name.toLowerCase()) && bundle.installed !== false);
 }
 
 function manualUninstallCommands(bundleName: string, profile: string, groupId: string): string[] {
@@ -198,21 +197,23 @@ export async function uninstallGroup(input: UninstallInput): Promise<UninstallRe
     .filter(({ member, plugin }) => isInstalled(member, plugin, rows, bundles));
 
   const targets = installedMembers.map(({ member, plugin }) => {
-    const matches = plugin?.npm
-      ? bundles.filter((bundle) => bundle.name === plugin.npm)
+    // GitHub installs use the package's actual manifest name; this can differ
+    // from catalog.npm (for example a scoped published name vs repo basename).
+    // Match only exact, catalog-derived aliases and still require one bundle.
+    const aliases = new Set(memberKeys(plugin, member));
+    const matches = plugin
+      ? bundles.filter((bundle) => aliases.has(bundle.name.toLowerCase()))
       : [];
     const bundle = matches.length === 1 ? matches[0] : undefined;
     const problem = !plugin
       ? `市集成员 ${member} 不存在，无法映射到宿主 bundle`
-      : !plugin.npm
-        ? `${member} 缺少 package.json 对应的 npm 包名，无法安全映射宿主 bundle`
-        : matches.length !== 1
-          ? `${member} 按 npm 名 ${plugin.npm} 匹配到 ${matches.length} 个宿主 bundle（必须唯一）`
-          : bundle?.installed !== true
-            ? `宿主 bundle ${bundle?.name} 未确认安装在当前 profile`
-            : bundle?.removable !== true
-              ? `宿主 bundle ${bundle?.name} 标记为不可卸载${bundle?.error?.code ? `（${bundle.error.code}）` : ''}`
-              : '';
+      : matches.length !== 1
+        ? `${member} 按 id/npm/repo 名（${[...aliases].join(', ')}）匹配到 ${matches.length} 个宿主 bundle（必须唯一）`
+        : bundle?.installed !== true
+          ? `宿主 bundle ${bundle?.name} 未确认安装在当前 profile`
+          : bundle?.removable !== true
+            ? `宿主 bundle ${bundle?.name} 标记为不可卸载${bundle?.error?.code ? `（${bundle.error.code}）` : ''}`
+            : '';
     return { member, spec: specFor(plugin), bundleName: bundle?.name, problem };
   });
 
